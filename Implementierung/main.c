@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 
 
 void printMatrix(size_t n, const float* M) {
@@ -13,10 +13,10 @@ void printMatrix(size_t n, const float* M) {
 
 
 //tauscht Zeilen zl1 zl2 in Matrix M
-    void tausche_zeilen(size_t n,float* M,size_t zl1,size_t zl2){
+void tausche_zeilen(size_t n,float* M,size_t zl1,size_t zl2,size_t bis_dieser_spalte){
 
          //kann vektorisiert werden
-         for(int i=0;i<n;i++){
+         for(int i=0;i<bis_dieser_spalte;i++){
              float temp = M[zl1*n+i];
              M[zl1*n+i] = M[zl2*n+i];
              M[zl2*n+i] = temp;
@@ -26,7 +26,7 @@ void printMatrix(size_t n, const float* M) {
 
 
     //tausch Spalten sp1 sp2 in Matrix M
-    void tausche_spalten(size_t n ,float* M,size_t sp1,size_t sp2){
+void tausche_spalten(size_t n ,float* M,size_t sp1,size_t sp2){
 
          //kann vektorisiert werden         
          for(int i=0;i<n;i++ ){
@@ -43,13 +43,16 @@ void printMatrix(size_t n, const float* M) {
 void pivotize(size_t n,float* L,float* U,float* P,size_t zeile_zu_tauschen,size_t zeile_mit_max){
                   size_t bis_dieser_spalte = zeile_zu_tauschen;
                   //tausche die Zeilen in U komplett
-                  tausche_zeilen(n,U,zeile_zu_tauschen,zeile_mit_max);
+                  tausche_zeilen(n,U,zeile_zu_tauschen,zeile_mit_max,n);
 
                   //tausche Zeilen in L nicht komplett sonder nur bis i-te spalte
 
-                  tausche_zeilen(bis_dieser_spalte,L,zeile_zu_tauschen,zeile_mit_max);
+                  tausche_zeilen(n,L,zeile_zu_tauschen,zeile_mit_max,bis_dieser_spalte);
 
-                  tausche_spalten(n,P,zeile_zu_tauschen,zeile_mit_max);
+                  printf("L nach dem Tauchen:  \n ");
+		  printMatrix(n,L);
+		  tausche_spalten(n,P,zeile_zu_tauschen,zeile_mit_max);
+
 }
 
 
@@ -94,7 +97,7 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
 	          float max = U[i+i*n];
 	          size_t zeile_mit_max = i;
 	          for(int k=i+1;k<n;k++){
-	             if(U[i+k*n]>max){
+	             if(abs(U[i+k*n])>max){
 		        max = U[i+k*n];
 			zeile_mit_max = k;
 		     }     
@@ -105,10 +108,10 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
        pivotize(n,L,U,P,i,zeile_mit_max);
        
        
-       printf("Ergebnis in P \n");
-       printMatrix(n,P);
-       printf("Ergebnis in U \n");
-       printMatrix(n, U);
+ //      printf("Ergebnis in P \n");
+      // printMatrix(n,P);
+   //   printf("Ergebnis in U \n");
+    //   printMatrix(n, U);
        printf("Ergebnis in L \n");
        printMatrix(n,L);
 	   
@@ -120,7 +123,13 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
             
 	   //in L schreiben 
 	    L[i+(j+1)*n] = faktor;
-	    
+	    printf("Ergebnis in P \n");
+     //  printMatrix(n,P);
+     //  printf("Ergebnis in U \n");
+    //   printMatrix(n, U);
+       printf("Ergebnis in L \n");
+       printMatrix(n,L);
+
 
 	    //kann vektorisiert werden`
 	    for (int x = 0; x < n; x++) {
