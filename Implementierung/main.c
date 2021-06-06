@@ -59,9 +59,13 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
 	    
 	    float faktor = U[i+((j+1)*n)] / U[i+(i*n)];
             //printf("%f für Zeile %d \n", faktor, (j+1));
+<<<<<<< HEAD
            L[i+(j+1)*n] = faktor;
 	    
 	    
+=======
+            L[i+(j+1)*n] = faktor;
+>>>>>>> c175183e256073c85035022d7dc5657b5e2059eb
 	    for (int x = 0; x < n; x++) {
                 U[((j+1)*n)+x] -= U[(i*n)+x] * faktor;
             }
