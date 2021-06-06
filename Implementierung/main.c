@@ -52,20 +52,18 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
         //für jede Zeile ab führenden eintrag
         for (int j = i; j < n-1; j++) {
 
-    	    //to be implemented
+    	    //noch zu implementieren
 	    if(U[i+((j+1)*n)]==0) 
 		    pivotize(n,L,U,P);
 
 	    
 	    float faktor = U[i+((j+1)*n)] / U[i+(i*n)];
             //printf("%f für Zeile %d \n", faktor, (j+1));
-<<<<<<< HEAD
-           L[i+(j+1)*n] = faktor;
+            
+	   //in L schreiben 
+	    L[i+(j+1)*n] = faktor;
 	    
 	    
-=======
-            L[i+(j+1)*n] = faktor;
->>>>>>> c175183e256073c85035022d7dc5657b5e2059eb
 	    for (int x = 0; x < n; x++) {
                 U[((j+1)*n)+x] -= U[(i*n)+x] * faktor;
             }
