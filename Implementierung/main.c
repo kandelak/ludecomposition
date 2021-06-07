@@ -1,7 +1,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <getopt.h>
+#include <math.h>
 
 
 void printMatrix(size_t n, const float* M) {
@@ -46,7 +47,7 @@ void pivotize(size_t n,float* L,float* U,float* P,size_t zeile_zu_tauschen,size_
     //tausche Zeilen in L nicht komplett sonder nur bis i-te spalte
     tausche_zeilen(n,L,zeile_zu_tauschen,zeile_mit_max,bis_dieser_spalte);
 
-    //printf("L nach dem Tauchen:  \n ");
+		  tausche_spalten(n,P,zeile_zu_tauschen,zeile_mit_max);
     //printMatrix(n,L);
     tausche_spalten(n,P,zeile_zu_tauschen,zeile_mit_max);
 
@@ -122,25 +123,24 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
 
 /*
 int main(int argc, char** argv) {
-    //float A[16] = {1,2,1,1, 
-//	           2,2,3,3, 
-//	           3,5,4,8, 
+	    //float A[16] = {1,2,1,1,
+//	           2,2,3,3,
+//	           3,5,4,8,
 //	           9,12,-3,0};
-  
+
    // float A[16] = {2,4,3,5,
      //              -4,-7,-5,-8,
 //	           6,8,2,9,
-  //                 4,9,-2,14};	
+  //                 4,9,-2,14};
     float A[16] = {6,5,3,-10,
                   3,7,-3,5,
                   12,4,4,4,
-                  0,12,0,-8}; 
-	
-	
+                  0,12,0,-8};
+
+
     float L[16];
     float U[16];
     //luZerlegung(4, A, L, U);
     tests();
-
 }
 */
