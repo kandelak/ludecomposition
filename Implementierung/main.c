@@ -41,14 +41,11 @@ void tausche_spalten(size_t n ,float* M,size_t sp1,size_t sp2){
 
 void pivotize(size_t n,float* L,float* U,float* P,size_t zeile_zu_tauschen,size_t zeile_mit_max){
     size_t bis_dieser_spalte = zeile_zu_tauschen;
-    //tausche die Zeilen in U komplett
+    
     tausche_zeilen(n,U,zeile_zu_tauschen,zeile_mit_max,n);
 
-    //tausche Zeilen in L nicht komplett sonder nur bis i-te spalte
     tausche_zeilen(n,L,zeile_zu_tauschen,zeile_mit_max,bis_dieser_spalte);
 
-		  tausche_spalten(n,P,zeile_zu_tauschen,zeile_mit_max);
-    //printMatrix(n,L);
     tausche_spalten(n,P,zeile_zu_tauschen,zeile_mit_max);
 
 }
@@ -60,8 +57,6 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
     for (int index = 0; index < n*n; index++) {
         U[index] = A[index];
     }
-    //printf("Kopie von A in U\n");
-    //printMatrix(n, U);
 
 
     //Einheitsmatrix in L
@@ -77,10 +72,6 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
 	        }
         }
     }
-    //printf("Einheitsmatrix in L \n");
-    //printMatrix(n, L);
-    //printf("Einheitsmatrix in P \n");
-    //printMatrix(n,P);
 
 
     //Gaus-Eliminierung
@@ -95,8 +86,8 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
                 zeile_mit_max = k;
             }     
         }
-       //printf("grosstes Element in Spalte %d : %f in Zeile %ld\n",i,max,zeile_mit_max);            
-       pivotize(n,L,U,P,i,zeile_mit_max);
+       
+	pivotize(n,L,U,P,i,zeile_mit_max);
        
 	   
 	   //für jede Zeile ab führenden eintrag
@@ -111,36 +102,7 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
         }
     }
     
-    //printf("Ergebnis in P \n");
-    //printMatrix(n,P);
-    //printf("Ergebnis in U \n");
-    //printMatrix(n, U);
-    //printf("Ergebnis in L \n");
-    //printMatrix(n,L);
 }
 
 
 
-/*
-int main(int argc, char** argv) {
-	    //float A[16] = {1,2,1,1,
-//	           2,2,3,3,
-//	           3,5,4,8,
-//	           9,12,-3,0};
-
-   // float A[16] = {2,4,3,5,
-     //              -4,-7,-5,-8,
-//	           6,8,2,9,
-  //                 4,9,-2,14};
-    float A[16] = {6,5,3,-10,
-                  3,7,-3,5,
-                  12,4,4,4,
-                  0,12,0,-8};
-
-
-    float L[16];
-    float U[16];
-    //luZerlegung(4, A, L, U);
-    tests();
-}
-*/
