@@ -1,4 +1,4 @@
-CFLAGS=-g -Wall -Wextra -std=c11 -O3
+CFLAGS=-g -Wall -Wextra -std=c11 -O0 
 
 .PHONY: all
 all: clean main

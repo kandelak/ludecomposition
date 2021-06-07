@@ -150,7 +150,7 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
 void printHelp(){
     printf("Hilfe zu benutzung des LU-Zerlegungs Programms:\n");
     printf("\n Das Programm zerlegt eine quadratische Matrix in 2 Dreiecksmatrizen welche multipliziert wieder die ursprüngliche Matrix ergeben.\n Flags und ihre Bedeutung:\n");
-    printf("-h/ --help: diese NAchicht Anzeigen\n");
+    printf("-h/--help: diese Nachicht Anzeigen\n");
     printf("-m: Eingabematrix bestimmen\n");
     printf("-n: bestimmen der Grösse einer zufällig generierten Matrix bei nicht Spezifizierung oder ungültiger Eingabe wird eine zufällige größe gewählt \n");
     printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein Ergebnis Garantieren\n");
@@ -160,37 +160,28 @@ void printHelp(){
 float* matrixGenerator(size_t n){
     if( n <= 0 ){ n = (3 + rand() % 17);} // wenn n ungültig generate random size
     
-    float A[(int)pow(n,2)];
+    float A[(int)n*n];
 
-    for( int i = 0; i < pow(n,2); i++){
+    for( int i = 0; i < n*n; i++){
 
-         A[i] = ((float)(rand()%100)/(float)(rand()%100));
+         A[i] = (float)(rand()%100) / (float)(rand()%100);
     }
 
 return A;
 
 }
 
-float* readFile(char * path){
+float* readFile(char * path, int size){
   FILE * f = fopen(path,"r");
-  FILE * fcount = fopen(path,"r");
+  
 
-    if(f == NULL || fcount == NULL){fprintf(stderr, "File Konnte nicht geöffnet werden");
+    if(f == NULL){fprintf(stderr, "File Konnte nicht geöffnet werden");
            exit(EXIT_FAILURE);}
 
     char c;
     char number[40];
     int cfill = 0;
     int ffill = 0;
-    int size = 0;
-
-        while((c = fgetc(fcount)) != EOF) {
-
-           if(c == ' '|| c == '\n' ){size++;}
-
-           }
-        fclose(fcount); 
-
     float matrix[size];
 
        while((c = fgetc(f)) != EOF) {
@@ -219,24 +210,48 @@ int main(int argc, char** argv) {
 // pivot deaktivieren: -p
 // Hilfe Drucken: -h / --help
 char opt;
+char c;
 int Pivot = 0;
 float* A;
-int n = -1;
+int n = 0;
+int randomMatrix = 1;
+
+FILE *fcount;
+
+
    while ((opt = getopt(argc, argv, "hpm:n:")) != -1) {
        switch (opt) {
        case 'm':
-            A = readFile(optarg);
+       fcount = fopen(optarg,"r");
+       if(fcount == NULL){fprintf(stderr, "File Konnte nicht geöffnet werden");
+           exit(EXIT_FAILURE);}
+       while((c = fgetc(fcount)) != EOF) {
+           if(c == ' '){n++;continue;}
+           if(c == '\n'){n++;break;}
+           }
+
+        fclose(fcount); 
+
+            A = readFile(optarg,n);
+            randomMatrix = 0;
           break;
 
            case 'n':
-           n = atoll(optarg);
+           if( n == 0){
+                n = atoll(optarg);
+           }
+           
            break;
+
        case 'p':
            Pivot = 1;  // Soll Pivot Fonktion aussschalten
            break;
+
         case 'h':
            printHelp();
+           return 0;
            break;
+
        default: /* '?' oder 'h' */
            fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
            exit(EXIT_FAILURE);
@@ -256,12 +271,15 @@ int n = -1;
      //             3,7,-3,5,
     ///              12,4,4,4,
      //             0,12,0,-8}; 
-	if(A == NULL){A = matrixGenerator(n);}
+
+
+	if(randomMatrix == 1){A = matrixGenerator(n);}
 	
-    float L[16];
-    float U[16];
-    if (Pivot == 0){luZerlegung(4, A, L, U);} 
-    else{//luZerlegungOhnePivot(4, A, L, U);
+    float L[n*n];
+    float U[n*n];
+    if (Pivot == 0){luZerlegung(n, A, L, U);} 
+    else{//luZerlegungOhnePivot(n, A, L, U);
     }
+    return 0;
     
 }
