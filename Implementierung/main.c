@@ -148,29 +148,36 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
 }
 
 void printHelp(){
-printf("Hilfe zu benutzung des LU-Zerlegungs Programms:\n");
-printf("\n Das Programm zerlegt eine quadratische Matrix in 2 Dreiecksmatrizen welche multipliziert wieder die ursprüngliche Matrix ergeben.\n Flags und ihre Bedeutung:\n");
-printf("-h/ --help: diese NAchicht Anzeigen\n");
-printf("-m: Eingabematrix bestimmen\n");
-printf("-n: bestimmen der Grösse einer zufällig generierten Matrix bei nicht Spezifizierung oder ungültiger Eingabe wird eine zufällige größe gewählt \n");
-printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein Ergebnis Garantieren\n");
+    printf("Hilfe zu benutzung des LU-Zerlegungs Programms:\n");
+    printf("\n Das Programm zerlegt eine quadratische Matrix in 2 Dreiecksmatrizen welche multipliziert wieder die ursprüngliche Matrix ergeben.\n Flags und ihre Bedeutung:\n");
+    printf("-h/ --help: diese NAchicht Anzeigen\n");
+    printf("-m: Eingabematrix bestimmen\n");
+    printf("-n: bestimmen der Grösse einer zufällig generierten Matrix bei nicht Spezifizierung oder ungültiger Eingabe wird eine zufällige größe gewählt \n");
+    printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein Ergebnis Garantieren\n");
 }
+
+
 float* matrixGenerator(size_t n){
-    if( n <= 0 ){ n = (3 + rand() % 17);}
+    if( n <= 0 ){ n = (3 + rand() % 17);} // wenn n ungültig generate random size
     
     float A[(int)pow(n,2)];
+
     for( int i = 0; i < pow(n,2); i++){
+
          A[i] = ((float)(rand()%100)/(float)(rand()%100));
     }
+
 return A;
-// wenn n ==  -1 generate random size
+
 }
 
 float* readFile(char * path){
   FILE * f = fopen(path,"r");
   FILE * fcount = fopen(path,"r");
+
     if(f == NULL || fcount == NULL){fprintf(stderr, "File Konnte nicht geöffnet werden");
            exit(EXIT_FAILURE);}
+
     char c;
     char number[40];
     int cfill = 0;
@@ -178,21 +185,25 @@ float* readFile(char * path){
     int size = 0;
 
         while((c = fgetc(fcount)) != EOF) {
+
            if(c == ' '|| c == '\n' ){size++;}
+
            }
-          fclose(fcount); 
-float matrix[size];
+        fclose(fcount); 
+
+    float matrix[size];
 
        while((c = fgetc(f)) != EOF) {
+
            if(c == ' '|| c == '\n' ){       // Achtung wenn file nicht mit Leerzeichen oder Absatz Endet dann wird das letzte wort nicht abgespeichert.(ggf Ändern)
+               
                matrix[ffill] = atof(number);  // ggf Überprüfen ob chars nummern
                char number[40];  
                cfill = 0;
            }     
            else{
-            number[cfill++] = c;
-
-           }
+               number[cfill++] = c;
+            }
     }
     fclose(f);
 
@@ -227,7 +238,7 @@ int n = -1;
            printHelp();
            break;
        default: /* '?' oder 'h' */
-           fprintf(stderr, "Hilfe mit -h oder --help anzeigen",argv[0]);
+           fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
            exit(EXIT_FAILURE);
        }
    }
