@@ -279,123 +279,24 @@ int tests() {
 
 }
 
-void printHelp(){
-    printf("Hilfe zu benutzung des LU-Zerlegungs Programms:\n");
-    printf("\n Das Programm zerlegt eine quadratische Matrix in 2 Dreiecksmatrizen welche multipliziert wieder die ursprüngliche Matrix ergeben.\n Flags und ihre Bedeutung:\n");
-    printf("-h/ --help: diese NAchicht Anzeigen\n");
-    printf("-m: Eingabematrix bestimmen\n");
-    printf("-n: bestimmen der Grösse einer zufällig generierten Matrix bei nicht Spezifizierung oder ungültiger Eingabe wird eine zufällige größe gewählt \n");
-    printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein Ergebnis Garantieren\n");
-}
-
-
-float* matrixGenerator(size_t n){
-    if( n <= 0 ){ n = (3 + rand() % 17);} // wenn n ungültig generate random size
-    
-    float A[(int)pow(n,2)];
-
-    for( int i = 0; i < pow(n,2); i++){
-
-         A[i] = ((float)(rand()%100)/(float)(rand()%100));
-    }
-
-return A;
-
-}
-
-float* readFile(char * path){
-  FILE * f = fopen(path,"r");
-  FILE * fcount = fopen(path,"r");
-
-    if(f == NULL || fcount == NULL){fprintf(stderr, "File Konnte nicht geöffnet werden");
-           exit(EXIT_FAILURE);}
-
-    char c;
-    char number[40];
-    int cfill = 0;
-    int ffill = 0;
-    int size = 0;
-
-        while((c = fgetc(fcount)) != EOF) {
-
-           if(c == ' '|| c == '\n' ){size++;}
-
-           }
-        fclose(fcount); 
-
-    float matrix[size];
-
-       while((c = fgetc(f)) != EOF) {
-
-           if(c == ' '|| c == '\n' ){       // Achtung wenn file nicht mit Leerzeichen oder Absatz Endet dann wird das letzte wort nicht abgespeichert.(ggf Ändern)
-               
-               matrix[ffill] = atof(number);  // ggf Überprüfen ob chars nummern
-               char number[40];  
-               cfill = 0;
-           }     
-           else{
-               number[cfill++] = c;
-            }
-    }
-    fclose(f);
-
-    return matrix;
-
-}
-
 int main(int argc, char** argv) {
-// IO Funktionen
-// Qenerierte Matrix benutzen: wenn kein -m
-// Übergebene Matrix Benutzen: -m matrix 
-// pivot deaktivieren: -p
-// Hilfe Drucken: -h / --help
-char opt;
-int Pivot = 0;
-float* A;
-int n = -1;
-   while ((opt = getopt(argc, argv, "hpm:n:")) != -1) {
-       switch (opt) {
-       case 'm':
-            A = readFile(optarg);
-          break;
-
-           case 'n':
-           n = atoll(optarg);
-           break;
-       case 'p':
-           Pivot = 1;  // Soll Pivot Fonktion aussschalten
-           break;
-        case 'h':
-           printHelp();
-           break;
-       default: /* '?' oder 'h' */
-           fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
-           exit(EXIT_FAILURE);
-       }
-   }
-
-    //float A[16] = {1,2,1,1, 
-//	           2,2,3,3, 
-//	           3,5,4,8, 
+	    //float A[16] = {1,2,1,1,
+//	           2,2,3,3,
+//	           3,5,4,8,
 //	           9,12,-3,0};
-  
+
    // float A[16] = {2,4,3,5,
      //              -4,-7,-5,-8,
 //	           6,8,2,9,
-  //                 4,9,-2,14};	
-   // float A[16] = {6,5,3,-10,
-     //             3,7,-3,5,
-    ///              12,4,4,4,
-     //             0,12,0,-8}; 
-	if(A == NULL){A = matrixGenerator(n);}
-	
+  //                 4,9,-2,14};
+    float A[16] = {6,5,3,-10,
+                  3,7,-3,5,
+                  12,4,4,4,
+                  0,12,0,-8};
+
+
     float L[16];
     float U[16];
-    if (Pivot == 0){luZerlegung(4, A, L, U);} 
-    else{//luZerlegungOhnePivot(4, A, L, U);
-    }
-    
     //luZerlegung(4, A, L, U);
     tests();
-
 }
