@@ -5,7 +5,7 @@
 #include <math.h>
 
 void printMatrix(size_t n, const float* M) {
-    for (int index = 0; index < n*n; index++) {
+    for (size_t index = 0; index < n*n; index++) {
         printf("%f,", M[index]);
         if ((index+1) % n == 0) printf("\n");
     }
@@ -17,7 +17,7 @@ void printMatrix(size_t n, const float* M) {
 void tausche_zeilen(size_t n,float* M,size_t zl1,size_t zl2,size_t bis_dieser_spalte){
 
          //kann vektorisiert werden
-         for(int i=0;i<bis_dieser_spalte;i++){
+         for(size_t i=0;i<bis_dieser_spalte;i++){
              float temp = M[zl1*n+i];
              M[zl1*n+i] = M[zl2*n+i];
              M[zl2*n+i] = temp;
@@ -30,7 +30,7 @@ void tausche_zeilen(size_t n,float* M,size_t zl1,size_t zl2,size_t bis_dieser_sp
 void tausche_spalten(size_t n ,float* M,size_t sp1,size_t sp2){
 
          //kann vektorisiert werden         
-         for(int i=0;i<n;i++ ){
+         for(size_t i=0;i<n;i++ ){
              float temp = M[i*n+sp1];
              M[i*n+sp1] = M[i*n+sp2];
              M[i*n+sp2] = temp;
@@ -42,39 +42,33 @@ void tausche_spalten(size_t n ,float* M,size_t sp1,size_t sp2){
 
 
 void pivotize(size_t n,float* L,float* U,float* P,size_t zeile_zu_tauschen,size_t zeile_mit_max){
-                  size_t bis_dieser_spalte = zeile_zu_tauschen;
-                  //tausche die Zeilen in U komplett
+                  
+	          size_t bis_dieser_spalte = zeile_zu_tauschen;
+
                   tausche_zeilen(n,U,zeile_zu_tauschen,zeile_mit_max,n);
 
-                  //tausche Zeilen in L nicht komplett sonder nur bis i-te spalte
+	          tausche_zeilen(n,L,zeile_zu_tauschen,zeile_mit_max,bis_dieser_spalte);
 
-                  tausche_zeilen(n,L,zeile_zu_tauschen,zeile_mit_max,bis_dieser_spalte);
-
-                  printf("L nach dem Tauschen:  \n ");
-		  printMatrix(n,L);
 		  tausche_spalten(n,P,zeile_zu_tauschen,zeile_mit_max);
 
 }
 
 
-//void ludecomp(size_t n, const float A, float* L, float* U);
 
 
-void luZerlegung(size_t n, const float* A, float* L, float* U) {
+void lu_zerlegung(size_t n, const float* A, float* L, float* U) {
     //kopie von a in U
-    for (int index = 0; index < n*n; index++) {
+    for (size_t index = 0; index < n*n; index++) {
         U[index] = A[index];
     }
-    printf("Kopie von A in U\n");
-    printMatrix(n, U);
 
 
     //for pivotizing
     float P[n*n];
 
     //Einheitsmatrix in L
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = 0; j < n; j++) {
             if (i == j) { 
 	         L[i*n + j] = 1;
 	         P[i*n+j] = 1;  
@@ -85,66 +79,42 @@ void luZerlegung(size_t n, const float* A, float* L, float* U) {
 	    }
         }
     }
-    printf("Einheitsmatrix in L \n");
-    printMatrix(n, L);
-    printf("Einheitsmatrix in P \n");
-    printMatrix(n,P);
 
     //Gaus-Eliminierung
     //für jede Spalte ab führenden eintrag 0...0
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
        
       //finde betragsgroesstes Element in Spalte i
 	          float max = U[i+i*n];
 	          size_t zeile_mit_max = i;
-	          for(int k=i+1;k<n;k++){
+	          for(size_t k=i+1;k<n;k++){
 	             if(abs(U[i+k*n])>max){
 		        max = U[i+k*n];
 			zeile_mit_max = k;
 		     }     
                   }
-       printf("grosstes Element in Spalte %d : %f in Zeile %ld\n",i,max,zeile_mit_max);          
 		  
        
        pivotize(n,L,U,P,i,zeile_mit_max);
        
        
- //      printf("Ergebnis in P \n");
-      // printMatrix(n,P);
-   //   printf("Ergebnis in U \n");
-    //   printMatrix(n, U);
-       printf("Ergebnis in L \n");
-       printMatrix(n,L);
 	   
 	   //für jede Zeile ab führenden eintrag
-        for (int j = i; j < n-1; j++) {
+        for (size_t j = i; j < n-1; j++) {
 
 	   float faktor = U[i+(j+1)*n] / U[i+(i*n)];
-            //printf("%f für Zeile %d \n", faktor, (j+1));
             
 	   //in L schreiben 
 	    L[i+(j+1)*n] = faktor;
-	    printf("Ergebnis in P \n");
-     //  printMatrix(n,P);
-     //  printf("Ergebnis in U \n");
-    //   printMatrix(n, U);
-       printf("Ergebnis in L \n");
-       printMatrix(n,L);
 
 
 	    //kann vektorisiert werden`
-	    for (int x = 0; x < n; x++) {
+	    for (size_t x = 0; x < n; x++) {
                 U[(j+1)*n+x] -= U[(i*n)+x] * faktor;
             }
         }
     }
     
-    printf("Ergebnis in P \n");
-    printMatrix(n,P);
-    printf("Ergebnis in U \n");
-    printMatrix(n, U);
-    printf("Ergebnis in L \n");
-    printMatrix(n,L);
 }
 
 void printHelp(){
@@ -153,16 +123,16 @@ void printHelp(){
     printf("-h/--help: diese Nachicht Anzeigen\n");
     printf("-m: Eingabematrix bestimmen\n");
     printf("-n: bestimmen der Grösse einer zufällig generierten Matrix bei nicht Spezifizierung oder ungültiger Eingabe wird eine zufällige größe gewählt \n");
-    printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein Ergebnis Garantieren\n");
+    printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein richtigen Ergebnis Garantieren\n");
 }
 
 
 float* matrixGenerator(size_t n){
     if( n <= 0 ){ n = (3 + rand() % 17);} // wenn n ungültig generate random size
     
-    float A[(int)n*n];
+    float A[n*n];
 
-    for( int i = 0; i < n*n; i++){
+    for( size_t i = 0; i < n*n; i++){
 
          A[i] = (float)(rand()%100) / (float)(rand()%100);
     }
@@ -171,7 +141,7 @@ return A;
 
 }
 
-float* readFile(char * path, int size){
+float* readFile(char * path, size_t size){
   FILE * f = fopen(path,"r");
   
 
@@ -180,8 +150,8 @@ float* readFile(char * path, int size){
 
     char c;
     char number[40];
-    int cfill = 0;
-    int ffill = 0;
+    size_t cfill = 0;
+    size_t ffill = 0;
     float matrix[size];
 
        while((c = fgetc(f)) != EOF) {
@@ -211,10 +181,10 @@ int main(int argc, char** argv) {
 // Hilfe Drucken: -h / --help
 char opt;
 char c;
-int Pivot = 0;
+size_t Pivot = 0;
 float* A;
-int n = 0;
-int randomMatrix = 1;
+size_t n = 0;
+size_t randomMatrix = 1;
 
 FILE *fcount;
 
@@ -244,7 +214,7 @@ FILE *fcount;
            break;
 
        case 'p':
-           Pivot = 1;  // Soll Pivot Fonktion aussschalten
+           Pivot = 1;  // Soll Pivot Funktion aussschalten
            break;
 
         case 'h':
@@ -277,7 +247,7 @@ FILE *fcount;
 	
     float L[n*n];
     float U[n*n];
-    if (Pivot == 0){luZerlegung(n, A, L, U);} 
+    if (Pivot == 0){lu_zerlegung(n, A, L, U);} 
     else{//luZerlegungOhnePivot(n, A, L, U);
     }
     return 0;
