@@ -6,7 +6,7 @@
 
 
 void printMatrix(size_t n, const float* M) {
-    for (int index = 0; index < n*n; index++) {
+    for (size_t index = 0; index < n*n; index++) {
         printf("%f,", M[index]);
         if ((index+1) % n == 0) printf("\n");
     }
@@ -18,7 +18,7 @@ void printMatrix(size_t n, const float* M) {
 void tausche_zeilen(size_t n,float* M,size_t zl1,size_t zl2,size_t bis_dieser_spalte){
 
          //kann vektorisiert werden
-         for(int i=0;i<bis_dieser_spalte;i++){
+         for(size_t i=0;i<bis_dieser_spalte;i++){
              float temp = M[zl1*n+i];
              M[zl1*n+i] = M[zl2*n+i];
              M[zl2*n+i] = temp;
@@ -30,7 +30,7 @@ void tausche_zeilen(size_t n,float* M,size_t zl1,size_t zl2,size_t bis_dieser_sp
 void tausche_spalten(size_t n ,float* M,size_t sp1,size_t sp2){
 
          //kann vektorisiert werden         
-         for(int i=0;i<n;i++ ){
+         for(size_t i=0;i<n;i++ ){
              float temp = M[i*n+sp1];
              M[i*n+sp1] = M[i*n+sp2];
              M[i*n+sp2] = temp;
@@ -52,9 +52,9 @@ void pivotize(size_t n,float* L,float* U,float* P,size_t zeile_zu_tauschen,size_
 
 
 
-void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
+void ludecomp(size_t n, const float* A, float* L, float* U, float* P) {
     //kopie von a in U
-    for (int index = 0; index < n*n; index++) {
+    for (size_t index = 0; index < n*n; index++) {
         U[index] = A[index];
     }
 
@@ -74,13 +74,18 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
     }
 
 
+    
     //Gaus-Eliminierung
     //für jede Spalte ab führenden eintrag 0...0
+    
     for (size_t i = 0; i < n; i++) {
-        //finde betragsgroesstes Element in Spalte i
+    
+	//finde betragsgroesstes Element in Spalte i
         float max = U[i+i*n];
         size_t zeile_mit_max = i;
         for(size_t k=i+1;k<n;k++){
+	
+
             if(abs(U[i+k*n])>max){
                 max = U[i+k*n];
                 zeile_mit_max = k;
@@ -90,7 +95,7 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
 	pivotize(n,L,U,P,i,zeile_mit_max);
        
 	   
-	   //für jede Zeile ab führenden eintrag
+	//für jede Zeile ab führenden eintrag
         for (size_t j = i; j < n-1; j++) {
             float faktor = U[i+(j+1)*n] / U[i+(i*n)];
             //in L schreiben 
@@ -105,4 +110,5 @@ void luZerlegung(size_t n, const float* A, float* L, float* U, float* P) {
 }
 
 
-
+int main(int argc,char** argv){
+}
