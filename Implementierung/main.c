@@ -17,24 +17,24 @@ void printMatrix(size_t n, const float* M) {
 //tauscht Zeilen zl1 zl2 in Matrix M
 void tausche_zeilen(size_t n,float* M,size_t zl1,size_t zl2,size_t bis_dieser_spalte){
 
-         //kann vektorisiert werden
-         for(size_t i=0;i<bis_dieser_spalte;i++){
-             float temp = M[zl1*n+i];
-             M[zl1*n+i] = M[zl2*n+i];
-             M[zl2*n+i] = temp;
-         }
+        //kann vektorisiert werden
+        for(size_t i=0;i<bis_dieser_spalte;i++){
+            float temp = M[zl1*n+i];
+            M[zl1*n+i] = M[zl2*n+i];
+            M[zl2*n+i] = temp;
+        }
 
     }
 
 //tausch Spalten sp1 sp2 in Matrix M
 void tausche_spalten(size_t n ,float* M,size_t sp1,size_t sp2){
 
-         //kann vektorisiert werden         
-         for(size_t i=0;i<n;i++ ){
-             float temp = M[i*n+sp1];
-             M[i*n+sp1] = M[i*n+sp2];
-             M[i*n+sp2] = temp;
-         }
+        //kann vektorisiert werden         
+        for(size_t i=0;i<n;i++ ){
+            float temp = M[i*n+sp1];
+            M[i*n+sp1] = M[i*n+sp2];
+            M[i*n+sp2] = temp;
+        }
 
     }
 
@@ -107,8 +107,4 @@ void ludecomp(size_t n, const float* A, float* L, float* U, float* P) {
         }
     }
     
-}
-
-
-int main(int argc,char** argv){
 }
