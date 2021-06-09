@@ -1,5 +1,6 @@
 #include "ludecomp.h"
-
+#include <stdio.h>
+#include "test.h"
 int main(int argc,char** argv){
 
 float A[16] = {6,5,3,-10,3,7,-3,5,12,4,4,4,0,12,0,-8};

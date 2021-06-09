@@ -1,9 +1,5 @@
 #include <stddef.h>
-#include "test.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <math.h>
 
 
 
