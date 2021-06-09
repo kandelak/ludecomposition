@@ -4,7 +4,13 @@
 
 
 
-
+void printMatrix(size_t n, const float* M) {
+    for (size_t index = 0; index < n*n; index++) {
+        printf("%f,", M[index]);
+        if ((index+1) % n == 0) printf("\n");
+    }
+    printf("\n");
+}
 
 int testOutput(size_t n, float* orgM, float* M) {
     int res = 0;
@@ -82,7 +88,7 @@ void printResultWithSolution(size_t n, float* orgL, float* L, float* orgU, float
 
 
 
-int tests() {
+int tests(void (*ludecomp)(size_t,float*,float*,float*,float*)) {
     // Muss der rang wirklich immer = n sein????????????????????????????????????????????????????????????
 
     printf("############### Eingabe: 1x1-Matrix (Einheitsmatrix) ###############\n");
@@ -98,7 +104,7 @@ int tests() {
     float orgP[] = {1};
     printf("###### Eingabe:\n");
     printMatrix(n, A);
-    luZerlegung(n,A,L,U,P);
+    ludecomp(n,A,L,U,P);
     printResultWithSolution(n, orgL, L, orgU, U, orgP, P);
 
 
@@ -115,7 +121,7 @@ int tests() {
     float orgP1[] = {1};
     printf("###### Eingabe:\n");
     printMatrix(n, A1);
-    luZerlegung(n,A1,L1,U1, P1);
+    ludecomp(n,A1,L1,U1, P1);
     printResultWithSolution(n, orgL1, L1, orgU1, U1, orgP1, P1);
 
 
@@ -132,7 +138,7 @@ int tests() {
     float orgP2[] = {1};
     printf("###### Eingabe:\n");
     printMatrix(n, A2);
-    luZerlegung(n,A2,L2,U2, P2);
+    ludecomp(n,A2,L2,U2, P2);
     printResultWithSolution(n, orgL2, L2, orgU2, U2, orgP2, P2);
 
 
@@ -149,7 +155,7 @@ int tests() {
     float orgP3[] = {1};
     printf("###### Eingabe:\n");
     printMatrix(n, A3);
-    luZerlegung(n,A3,L3,U3, P3);
+    ludecomp(n,A3,L3,U3, P3);
     printResultWithSolution(n, orgL3, L3, orgU3, U3, orgP3, P3);
 
 
@@ -166,7 +172,7 @@ int tests() {
     float orgP4[] = {1,0,0,1};
     printf("###### Eingabe:\n");
     printMatrix(n, A4);
-    luZerlegung(n,A4,L4,U4, P4);
+    ludecomp(n,A4,L4,U4, P4);
     printResultWithSolution(n, orgL4, L4, orgU4, U4, orgP4, P4);
 
 
@@ -183,7 +189,7 @@ int tests() {
     float orgP5[] = {1,0,0,1};
     printf("###### Eingabe:\n");
     printMatrix(n, A5);
-    luZerlegung(n,A5,L5,U5, P5);
+    ludecomp(n,A5,L5,U5, P5);
     printResultWithSolution(n, orgL5, L5, orgU5, U5, orgP5, P5);
 
 
@@ -227,7 +233,7 @@ printf("############### Eingabe: 6x6-Matrix (Q mit Zahlen mit max 6 Stellen) ###
                     0, 0, 0, 0, 0, 0, 1};
     printf("###### Eingabe:\n");
     printMatrix(n, A6);
-    luZerlegung(n, A6, L6, U6, P6);
+    ludecomp(n, A6, L6, U6, P6);
     printResultWithSolution(n, orgL6, L6, orgU6, U6, orgP6, P6);
 
 
@@ -267,7 +273,7 @@ printf("############### Eingabe: 7x7-Matrix (Q mit Zahlen über 8 Stellen) #####
                     0, 0, 0, 0, 0, 0, 1};
     printf("###### Eingabe:\n");
     printMatrix(n, A7);
-    luZerlegung(n, A7, L7, U7, P7);
+    ludecomp(n, A7, L7, U7, P7);
     printResultWithSolution(n, orgL7, L7, orgU7, U7, orgP7, P7);
 
 }
