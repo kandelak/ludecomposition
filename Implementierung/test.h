@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "main.c"
 
 
 
@@ -381,6 +380,3 @@ https://matrixcalc.org/de/
 //}
 
 
-int main(int argc, char** argv) {
-    tests();
-}
