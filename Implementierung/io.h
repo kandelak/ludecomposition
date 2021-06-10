@@ -16,6 +16,7 @@ void printHelp(){
     printf("-t: Starte Test Protokoll\n");
     printf("-b: Aktiviert Benchmarking \n");
     printf("-o: Spezifizeire Output File \n");
+    printf("-v: Ausählen der Version");
 }
 
 void writeMatrix(FILE * f ,size_t n, const float* M) {
@@ -26,13 +27,10 @@ void writeMatrix(FILE * f ,size_t n, const float* M) {
 }
 
 void matrixGenerator(size_t n, float * A){
-    srandom(time(NULL));
-    
-    
-    for( size_t i = 0; i < n*n; i++){
-       
-         A[i] = (float)(random()* (random()))/ (float)(random()* (random()- random()));
-    }
+    srand((unsigned int)time(NULL));
+    float a = 7867865.34598;                                 // Zufallsgenerator: https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c
+    for (int i=0;i<n*n;i++)
+        A[i] = (((float)rand()/(float)(RAND_MAX))-0.5) * a;
     printf("generatormatrix \n");
     printMatrix(n,A);
 
