@@ -1,9 +1,8 @@
-#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <getopt.h>
-#include <math.h>
-
+#include <stdlib.h>
+#include "test.h"
+#include <sys/random.h>
 
 void printHelp(){
     printf("Hilfe zu benutzung des LU-Zerlegungs Programms:\n");
@@ -12,18 +11,22 @@ void printHelp(){
     printf("-m: Eingabematrix bestimmen\n");
     printf("-n: bestimmen der Grösse einer zufällig generierten Matrix bei nicht Spezifizierung oder ungültiger Eingabe wird eine zufällige größe gewählt \n");
     printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein richtigen Ergebnis Garantieren\n");
+    printf("-t: Starte Test Protokoll\n");
+    printf("-b: Aktiviert Benchmarking \n");
 }
 
 
 float* matrixGenerator(size_t n){
+    srandom(time(NULL));
     if( n <= 0 ){ n = (3 + rand() % 17);} // wenn n ungültig generate random size
     
     float A[n*n];
     for( size_t i = 0; i < n*n; i++){
-
-         A[i] = (float)(rand()%100) / (float)(rand()%100);
+       
+         A[i] = (float)(random()* (random()))/ (float)(random()* (random()- random()));
     }
-
+printf("generatormatrix \n");
+ printMatrix(n,A);
 return A;
 
 }
@@ -39,13 +42,14 @@ float* readFile(char * path, size_t size){
     char number[40];
     size_t cfill = 0;
     size_t ffill = 0;
-    float matrix[size];
+    float matrix[size*size];
 
        while((c = fgetc(f)) != EOF) {
 
            if(c == ' '|| c == '\n' ){       // Achtung wenn file nicht mit Leerzeichen oder Absatz Endet dann wird das letzte wort nicht abgespeichert.(ggf Ändern)
                
                matrix[ffill] = atof(number);  // ggf Überprüfen ob chars nummern
+               printf("%f\n",matrix[ffill]);
                char number[40];  
                cfill = 0;
            }     
@@ -60,7 +64,8 @@ float* readFile(char * path, size_t size){
 }
 
 
-int main(int argc, char** argv) {
+int ioFunction(void (*ludecomp)(size_t,float*,float*,float*,float*),int argc, char** argv) {
+    printf("start\n");
 // IO Funktionen
 // Qenerierte Matrix benutzen: wenn kein -m
 // Übergebene Matrix Benutzen: -m matrix 
@@ -76,20 +81,30 @@ size_t randomMatrix = 1;
 FILE *fcount;
 
 
-   while ((opt = getopt(argc, argv, "hpm:n:")) != -1) {
+static struct option long_options[] =
+{
+    {"help", optional_argument, NULL, 'h'}
+};
+printf("startwhile\n");
+   while ((opt = getopt_long(argc, argv, "tbhpm:n:",long_options,NULL)) != -1) {
+
        switch (opt) {
+
        case 'm':
+       printf("");
        fcount = fopen(optarg,"r");
        if(fcount == NULL){fprintf(stderr, "File Konnte nicht geöffnet werden");
            exit(EXIT_FAILURE);}
+
        while((c = fgetc(fcount)) != EOF) {
            if(c == ' '){n++;continue;}
            if(c == '\n'){n++;break;}
            }
 
         fclose(fcount); 
-
+            
             A = readFile(optarg,n);
+            
             randomMatrix = 0;
           break;
 
@@ -109,17 +124,31 @@ FILE *fcount;
            return 0;
            break;
 
+           case 't':
+            // Soll Tests Ausführen
+           break;
+
+           case 'b':
+             // Soll Benchmarking Aktivieren
+           break;
+
        default: /* '?' oder 'h' */
            fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
            exit(EXIT_FAILURE);
        }
    }
-
-	if(randomMatrix == 1){A = matrixGenerator(n);}
-	
+  
+	if(randomMatrix == 1){
+        A = matrixGenerator(n);}
+    printf("%f\n",A[0]);
+	 for(int i = 0 ; i<n*n ; i++){
+         printf("%f \n", A[i]);
+     }
     float L[n*n];
     float U[n*n];
-    if (Pivot == 0){lu_zerlegung(n, A, L, U);} 
+    float P[n*n];
+    printf("Vor MEthodenaufruf\n");
+    if (Pivot == 0){ludecomp(n, A, L, U, P);} 
     else{//luZerlegungOhnePivot(n, A, L, U);
     }
     return 0;
