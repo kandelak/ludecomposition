@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "test.h"
 #include <sys/random.h>
+#include <string.h>
+
 
 void printHelp(){
     printf("Hilfe zu benutzung des LU-Zerlegungs Programms:\n");
@@ -13,25 +15,30 @@ void printHelp(){
     printf("-p: Wenn gesetzt wird die Pivot Funktion der Berechnung abgeschaltet dies resultiert in einer besseren Performance kann aber kein richtigen Ergebnis Garantieren\n");
     printf("-t: Starte Test Protokoll\n");
     printf("-b: Aktiviert Benchmarking \n");
+    printf("-o: Spezifizeire Output File \n");
 }
 
+void writeMatrix(FILE * f ,size_t n, const float* M) {
+    for (size_t index = 0; index < n*n; index++) {
+        fprintf(f,"%f,", M[index]);
+        if ((index+1) % n == 0) fprintf(f,"\n");
+    }
+}
 
-float* matrixGenerator(size_t n){
+void matrixGenerator(size_t n, float * A){
     srandom(time(NULL));
-    if( n <= 0 ){ n = (3 + rand() % 17);} // wenn n ungültig generate random size
     
-    float A[n*n];
+    
     for( size_t i = 0; i < n*n; i++){
        
          A[i] = (float)(random()* (random()))/ (float)(random()* (random()- random()));
     }
-printf("generatormatrix \n");
- printMatrix(n,A);
-return A;
+    printf("generatormatrix \n");
+    printMatrix(n,A);
 
 }
 
-float* readFile(char * path, size_t size){
+void readFile(char * path, float * matrix){
   FILE * f = fopen(path,"r");
   
 
@@ -42,15 +49,15 @@ float* readFile(char * path, size_t size){
     char number[40];
     size_t cfill = 0;
     size_t ffill = 0;
-    float matrix[size*size];
+    
 
        while((c = fgetc(f)) != EOF) {
 
            if(c == ' '|| c == '\n' ){       // Achtung wenn file nicht mit Leerzeichen oder Absatz Endet dann wird das letzte wort nicht abgespeichert.(ggf Ändern)
                
-               matrix[ffill] = atof(number);  // ggf Überprüfen ob chars nummern
-               printf("%f\n",matrix[ffill]);
-               char number[40];  
+               matrix[ffill++] = atof(number);  // ggf Überprüfen ob chars nummern
+              // printf("%f\n",matrix[ffill-1]);
+               memset(number, 0, sizeof number); 
                cfill = 0;
            }     
            else{
@@ -58,14 +65,13 @@ float* readFile(char * path, size_t size){
             }
     }
     fclose(f);
-
-    return matrix;
+        
 
 }
 
 
 int ioFunction(void (*ludecomp)(size_t,float*,float*,float*,float*),int argc, char** argv) {
-    printf("start\n");
+   
 // IO Funktionen
 // Qenerierte Matrix benutzen: wenn kein -m
 // Übergebene Matrix Benutzen: -m matrix 
@@ -73,84 +79,166 @@ int ioFunction(void (*ludecomp)(size_t,float*,float*,float*,float*),int argc, ch
 // Hilfe Drucken: -h / --help
 char opt;
 char c;
-size_t Pivot = 0;
-float* A;
 size_t n = 0;
+size_t Pivot = 0;
 size_t randomMatrix = 1;
-
+size_t runTests = 0;
+size_t toFile = 0;
 FILE *fcount;
-
+FILE *fwrite;
+char * input;
+char * output = NULL;
 
 static struct option long_options[] =
 {
     {"help", optional_argument, NULL, 'h'}
 };
-printf("startwhile\n");
-   while ((opt = getopt_long(argc, argv, "tbhpm:n:",long_options,NULL)) != -1) {
+
+   while ((opt = getopt_long(argc, argv, "o:tbhpm:n:",long_options,NULL)) != -1) { // o hat gerade verpflichetenden parameter soll noch freiwillig werden
 
        switch (opt) {
 
-       case 'm':
-       printf("");
-       fcount = fopen(optarg,"r");
-       if(fcount == NULL){fprintf(stderr, "File Konnte nicht geöffnet werden");
-           exit(EXIT_FAILURE);}
-
-       while((c = fgetc(fcount)) != EOF) {
-           if(c == ' '){n++;continue;}
-           if(c == '\n'){n++;break;}
-           }
-
-        fclose(fcount); 
-            
-            A = readFile(optarg,n);
-            
+        case 'm':
+            input = optarg;
             randomMatrix = 0;
-          break;
+            break;
 
-           case 'n':
-           if( n == 0){
+        case 'n':
+            if( n == 0){
                 n = atoll(optarg);
-           }
+                }
            
-           break;
+            break;
 
        case 'p':
-           Pivot = 1;  // Soll Pivot Funktion aussschalten
-           break;
+            Pivot = 1;  // Soll Pivot Funktion aussschalten
+            break;
 
         case 'h':
-           printHelp();
-           return 0;
-           break;
+            printHelp();
+            return 0;
+            break;
 
-           case 't':
-            // Soll Tests Ausführen
-           break;
+        case 't':
+            //  Führt tests aus
+            runTests = 1;
+            break;
 
-           case 'b':
+        case 'b':
              // Soll Benchmarking Aktivieren
-           break;
+            break;
+
+        case 'o':
+            // Soll output Spezifizieren
+           // toFile = 1;
+           // if(optarg != NULL){ // funst nicht
+                toFile = 2;
+                output = optarg;
+          //  }
+            break;
 
        default: /* '?' oder 'h' */
-           fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
-           exit(EXIT_FAILURE);
+            fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
+            exit(EXIT_FAILURE);
        }
    }
-  
-	if(randomMatrix == 1){
-        A = matrixGenerator(n);}
-    printf("%f\n",A[0]);
-	 for(int i = 0 ; i<n*n ; i++){
-         printf("%f \n", A[i]);
-     }
+   
+   if(runTests == 1){
+       return tests(ludecomp);
+   }
+
+    if(randomMatrix == 0){
+        fcount = fopen(input,"r");
+
+        if(fcount == NULL) {
+            fprintf(stderr, "File Konnte nicht geöffnet werden");
+            exit(EXIT_FAILURE);}
+
+        while((c = fgetc(fcount)) != EOF) {
+            if(c == ' '){n++;continue;}
+            if(c == '\n'){n++;break;}}
+        fclose(fcount);    //close fehler muss noch abgefangen werden wenn == 0 kein fehler
+
+    }else{
+        srandom(time(NULL));
+        if( n <= 0 ){ n = (3 + rand() % 17);} // wenn n ungültig generate random size
+        }
+
+    float A[n*n];
+
+    if(randomMatrix == 0){
+        readFile(input,A);
+    }else{
+        matrixGenerator(n,A);
+    }
+        //printf("%f\n",A[0]);
+	    //for(int i = 0 ; i<n*n ; i++){
+        //printf("%f \n", A[i]);}
+
+
     float L[n*n];
     float U[n*n];
     float P[n*n];
-    printf("Vor MEthodenaufruf\n");
-    if (Pivot == 0){ludecomp(n, A, L, U, P);} 
-    else{//luZerlegungOhnePivot(n, A, L, U);
+    ludecomp(n, A, L, U, P);
+    //if (Pivot == 0){} 
+    //else{//luZerlegungOhnePivot(n, A, L, U);
+    //}
+    if(toFile == 1){
+        strcat(input, "Result.txt");
+        fwrite = fopen( input , 'w' );
+        if(fwrite == NULL) {
+            fprintf(stderr, "Outputfile konnte nicht erstellt werden");
+            exit(EXIT_FAILURE);}
+        fprintf(fwrite," Matrix A: \n\n");
+        writeMatrix(fwrite,n,A);
+        fprintf(fwrite," ############################################### \n\n");
+        fprintf(fwrite," Matrix L: \n\n");
+        writeMatrix(fwrite,n,L);
+        fprintf(fwrite," ############################################### \n\n");
+        fprintf(fwrite," Matrix U: \n\n");
+        writeMatrix(fwrite,n,U);
+        fprintf(fwrite," ############################################### \n\n");
+        fprintf(fwrite," Matrix P: \n\n");
+        writeMatrix(fwrite,n,P);
+        fprintf(fwrite," ############################################### \n\n");
+        fclose(fwrite);
     }
+    if(toFile == 2){
+       
+        fwrite = fopen( output , 'w' );
+        if(fwrite == NULL) {
+            fprintf(stderr, "Outputfile konnte nicht erstellt werden");
+            exit(EXIT_FAILURE);}
+        fprintf(fwrite," Matrix A: \n\n");
+        writeMatrix(fwrite,n,A);
+        fprintf(fwrite," ############################################### \n\n");
+        fprintf(fwrite," Matrix L: \n\n");
+        writeMatrix(fwrite,n,L);
+        fprintf(fwrite," ############################################### \n\n");
+        fprintf(fwrite," Matrix U: \n\n");
+        writeMatrix(fwrite,n,U);
+        fprintf(fwrite," ############################################### \n\n");
+        fprintf(fwrite," Matrix P: \n\n");
+        writeMatrix(fwrite,n,P);
+        fprintf(fwrite," ############################################### \n\n");
+        fclose(fwrite);
+    }
+   
+    printf(" Matrix A: \n\n");
+    printMatrix(n,A);
+    printf(" ############################################### \n\n");
+    printf(" Matrix L: \n\n");
+    printMatrix(n,L);
+    printf(" ############################################### \n\n");
+    printf(" Matrix U: \n\n");
+    printMatrix(n,U);
+    printf(" ############################################### \n\n");
+    printf(" Matrix P: \n\n");
+    printMatrix(n,P);
+    printf(" ############################################### \n\n");
+    
     return 0;
     
 }
+
+

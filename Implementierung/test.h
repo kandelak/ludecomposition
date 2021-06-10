@@ -236,6 +236,7 @@ int tests(void (*ludecomp)(size_t,float*,float*,float*,float*)) {
     ludecomp(n,A7,L7,U7, P7);
     printResultWithoutSolution(n, A7, L7, U7, P7);
 
+    return 0;
 }
 
 
