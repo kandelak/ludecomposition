@@ -2,3 +2,5 @@
 **/*.data 
 **/*.elf
 **/*.exe
+**/*.clang-format
+
