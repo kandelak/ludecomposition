@@ -3,4 +3,4 @@
 **/*.elf
 **/*.exe
 **/*.clang-format
-
+**/*.txt
