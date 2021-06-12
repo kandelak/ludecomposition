@@ -81,7 +81,7 @@ for (size_t j = i; j < n - 1; j++) {
   double end = curtime();
   return end-start;
 }
-double ludecomp_without_P_double_pointer(size_t n, const float A[n][n], float L[n][n], float U[n][n]) {
+double ludecomp_double_array_withoutP(size_t n, const float A[n][n], float L[n][n], float U[n][n]) {
 
   double start = curtime();
   // Copying A in U
