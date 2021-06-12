@@ -1,8 +1,57 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <stdio.h>
 
-void ludecomp(size_t n, const float *A, float *L, float *U, float *P) {
 
+static inline double curtime(void) {
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec + t.tv_nsec * 1e-9;
+}
+
+
+double ludecomp_without_P(size_t n, const float *A, float *L, float *U) {
+  
+  double start = curtime();
+  // Copying A in U
+  for (size_t index = 0; index < n * n; index++) {
+    U[index] = A[index];
+  }
+
+  // Writing Identity matrices in P and L
+  for (size_t i = 0; i < n; i++) {
+    for (size_t j = 0; j < n; j++) {
+      if (i == j) {
+        L[i * n + j] = 1;
+      } else {
+        L[i * n + j] = 0;
+      }
+    }
+  }
+
+  for (size_t i = 0; i < n; i++) {
+
+      for (size_t j = i; j < n - 1; j++) {
+
+      float faktor = U[i + (j + 1) * n] / U[i + (i * n)];
+
+      // Writing factors in L
+      L[i + (j + 1) * n] = faktor;
+
+      for (size_t x = 0; x < n; x++) {
+        U[(j + 1) * n + x] -= U[(i * n) + x] * faktor;
+      }
+    }
+  }
+  double end = curtime();
+  return end-start;
+}
+
+double ludecomp(size_t n, const float *A, float *L, float *U, float *P) {
+  
+  double start = curtime();
   // Copying A in U
   for (size_t index = 0; index < n * n; index++) {
     U[index] = A[index];
@@ -69,4 +118,6 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P) {
       }
     }
   }
+  double end = curtime();
+  return end-start;
 }

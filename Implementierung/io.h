@@ -1,4 +1,4 @@
-#include "test.h"
+//#include "test.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,8 +39,8 @@ void matrixGenerator(size_t n, float *A) {
                      // https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c
   for (int i = 0; i < n * n; i++)
     A[i] = (((float)rand() / (float)(RAND_MAX)) - 0.5) * a;
-  printf("generatormatrix \n");
-  printMatrix(n, A);
+//  printf("generatormatrix \n");
+//  printMatrix(n, A);
 }
 
 void readFile(char *path, float *matrix) {
@@ -92,7 +92,7 @@ int ioFunction(void (*ludecomp)(size_t, float *, float *, float *, float *),
   FILE *fwrite;
   char *input;
   char *output = NULL;
-
+  size_t iterations = 1;
   static struct option long_options[] = {
       {"help", optional_argument, NULL, 'h'}};
 
@@ -113,7 +113,7 @@ int ioFunction(void (*ludecomp)(size_t, float *, float *, float *, float *),
       }
 
       break;
-
+    case 'i' : iterations = strtoul(optarg,NULL,0);break;
     case 'p':
       Pivot = 1; // Soll Pivot Funktion aussschalten
       break;
@@ -193,7 +193,7 @@ int ioFunction(void (*ludecomp)(size_t, float *, float *, float *, float *),
   float L[n * n];
   float U[n * n];
   float P[n * n];
-  ludecomp(n, A, L, U, P);
+ while(iterations-->0) ludecomp(n, A, L, U, P);
   // if (Pivot == 0){}
   // else{//luZerlegungOhnePivot(n, A, L, U);
   //}

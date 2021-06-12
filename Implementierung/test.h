@@ -264,11 +264,11 @@ int tests(void (*ludecomp)(size_t, float *, float *, float *, float *)) {
   */
   ludecomp(n, A7, L7, U7, P7);
   printResultWithoutSolution(n, A7, L7, U7, P7);
-
+ 
+  //randomisierte Tests
   return 0;
 }
-
-/*
+  /*
 Eingaben für den OnlineRechner
 ############### Eingabe: 7x7-Matrix (Q mit Zahlen über 8 Stellen)
 ############### 2 2 76 1200 -134535 -1543 24 -45.423 8 1 45098 4.9876 768.234 -3
