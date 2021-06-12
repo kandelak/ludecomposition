@@ -37,8 +37,19 @@ void matrixGenerator(size_t n, float *A) {
   float a =
       7867865.34598; // Zufallsgenerator:
                      // https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c
-  for (int i = 0; i < n * n; i++)
+  for (size_t i = 0; i < n * n; i++)
     A[i] = (((float)rand() / (float)(RAND_MAX)) - 0.5) * a;
+//  printf("generatormatrix \n");
+//  printMatrix(n, A);
+}
+
+void matrixGenerator_double_precision(size_t n, double *A) {
+  srand((unsigned int)time(NULL));
+  double a =
+      7867865.34598; // Zufallsgenerator:
+                     // https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c
+  for (size_t i = 0; i < n * n; i++)
+    A[i] = (((double)rand() / (double)(RAND_MAX)) - 0.5) * a;
 //  printf("generatormatrix \n");
 //  printMatrix(n, A);
 }

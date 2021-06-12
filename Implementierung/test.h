@@ -4,7 +4,16 @@
 
 void printMatrix(size_t n, const float *M) {
   for (size_t index = 0; index < n * n; index++) {
-    printf("%f,", M[index]);
+    printf("%f ", M[index]);
+    if ((index + 1) % n == 0)
+      printf("\n");
+  }
+}
+
+
+void printMatrix_double_precision(size_t n, const double *M) {
+  for (size_t index = 0; index < n * n; index++) {
+    printf("%f ", M[index]);
     if ((index + 1) % n == 0)
       printf("\n");
   }
@@ -48,7 +57,7 @@ void printResultWithoutSolution(size_t n, float *A, float *L, float *U,
   float LxU[n * n], PxLxU[n * n];
   matrixMul(n, L, U, LxU);
   matrixMul(n, P, LxU, PxLxU);
-  int fehlerPxLxU = testMatrixEQ(n, A, PxLxU);
+ int fehlerPxLxU = testMatrixEQ(n, A, PxLxU);
   printf("%d Fehler bei L*U*P\n", fehlerPxLxU);
   if (fehlerPxLxU != 0) {
     printf("Fehler in Erbenis von L*U*P:\n");
