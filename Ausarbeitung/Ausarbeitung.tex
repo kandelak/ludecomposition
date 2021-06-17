@@ -18,6 +18,39 @@
 
 \section{Einleitung}
 
+\noindent\hspace*{15mm}%
+Im Folgenden wird im Rahmen der Projektarbeit im Fach Einführung
+in die Rechnerarchitektur an der TU München wird ein in linearer Algebra häufig 
+benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokumentiert.\\
+
+\noindent\hspace*{15mm}%
+Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt, bietet eine Interpretation des Gaußalgorithmus 
+	 und somit eine Möglichkeit mit dem Computer lineare Gleichungssysteme zu 
+	 lösen und Matrixinverse zu bestimmen.\\
+ 
+\noindent\hspace*{15mm}%
+Die LU-Zerlegung liefert mit Hilfe desselben Prinzips für jedes
+   eindeutig lösbare Gleichungssystem, also wenn A regulär ist, zwei Dreiecksmatrizen L und 
+   U und eine Pivot-Matrix P, wobei P*L*U = A ergibt.Hierbei haben die Matrizen besondere 
+   Eigenschaften. L hat in allen Einträgen oberhalb der Diagonalen die Werte 0 und liefert 
+   Auskunft über die Verwendeten Zeilenoperationen. U hingegen hat in allen Einträgen unterhalb
+    der Diagonalen die Werte 0 und bildet somit eine Zeilenstufenform des LGS von der sich die 
+    Lösungsmenge einfach ableiten lässt. Die Matrix P ist im eine Einheitsmatrix mit ggf. 
+    vertauschten Zeilen mit der die Vertauschung von Zeilen nachvollziehbar wird.\\\\
+    
+
+\noindent\hspace*{15mm}%
+Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
+\\\\\\\\\\\\\\\
+\noindent\hspace*{15mm}%
+Welches auch so dargestellt werden kann:  
+\\\\\\\\\\\\\\\
+
+\noindent\hspace*{15mm}%
+Wird nun die LU-Zerlegung hierauf angewendet ergeben sich folgende Matrizen:
+\\\\\\\\\\\\\\
+
+
 
 \section{Lösungsansatz}
 
@@ -38,3 +71,4 @@
 \bibliography{Ausarbeitung}{}
 
 \end{document}
+
