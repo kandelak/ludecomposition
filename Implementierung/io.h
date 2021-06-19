@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 
 void printHelp() {
-    printf("Hilfe zu benutzung des LU-Zerlegungs Programms:\n");
+    printf("Program Usage explanation :\n");
     printf("\"This Program decomposes quadratic Matrices\n"
            "  in 2 Triangular Matrices, which multiplied equal to \n"
            "  The given Matrix. Definitions of flags : ");
@@ -33,49 +33,63 @@ void writeMatrix(FILE *f, size_t n, const float *M) {
     }
 }
 
-void matrixGenerator(size_t n, float *A) {
-    srand((unsigned int) time(NULL));
-    float a =
-            7867865.34598; // Zufallsgenerator:
-    // https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c
-    for (size_t i = 0; i < n * n; i++)
-        A[i] = (((float) rand() / (float) (RAND_MAX)) - 0.5) * a;
-}
 
 /**
- *
  * @param path  : Path to the file , from which numbers will be read
  * @param matrix : Matrix where the numbers will be written
+ * @param n : row/column size of this particular Matrix
+ * @return -1 if no More Matrices in this file. Every @int value besides -1
+ * represents there are one or more matrices still in the file and
+ * @return is the row/column length of the next matrix
  */
-void readFile(char *path, float *matrix) {
-    FILE *fp = fopen(path, "r");
+
+
+void read_matrix_from_file(size_t n, FILE *fp, float *matrix) {
 
     if (fp == NULL) {
         perror("Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-    size_t n;
+
     size_t index = 0;
 
-    while (fscanf(fp, "%f", (matrix + (index++))) == 1);
+    size_t mat_size = n * n;
 
-    if (n * n != index) {
-        printf("ERROR : Wrong number of floats in file for the given size \n"
-               "Usage : \nfirst number is always the size of the Matrix row/column \n"
-               "All of the other numbers are entries for the Matrix");
+    while (mat_size > 0) {
+        if (fscanf(fp, "%f", matrix + (index++)) == -1) {
+            break;
+        }
+        mat_size--;
+    }
+
+    if (mat_size > (index - 1)) {
+        printf("ERROR : Wrong number of entries for the Matrix for the specified size  \n"
+               "Usage : \nfirst number is always the number of Matrices \n "
+               "Then size of the each Matrix row/column \n"
+               "All the other numbers are entries for the Matrices");
         exit(EXIT_FAILURE);
     }
-    fclose(fp);
 }
 
-int ioFunction(void (*ludecomp)(size_t, float *, float *, float *, float *),
-               int argc, char **argv) {
+/**
+ *@param out : pointer to output of the calculations : command line (NULL) / output file
+ */
+void input_from_file(FILE *input, FILE *output, float *matrix) {
+    size_t num_of_matrices;
+    fscanf(input, "%ld", &num_of_matrices);
+    size_t size_of_matrices[num_of_matrices];
+    for (size_t k = 0; k < num_of_matrices; k++) {
+        fscanf(input, "%ld", size_of_matrices + k);
+    }
+    for (int i = 0; i < num_of_matrices; i++) {
+        read_matrix_from_file(size_of_matrices[i], input, matrix);
+        printMatrix(size_of_matrices[i], matrix);
+        printf("\n");
+    }
+}
 
-    // IO Funktionen
-    // Qenerierte Matrix benutzen: wenn kein -m
-    // Übergebene Matrix Benutzen: -m matrix
-    // pivot deaktivieren: -p
-    // Hilfe Drucken: -h / --help
+
+int ioFunction(int argc, char **argv) {
     char opt;
     char c;
     size_t n = 0;
@@ -117,25 +131,15 @@ int ioFunction(void (*ludecomp)(size_t, float *, float *, float *, float *),
 
             case 'h':
                 printHelp();
-                return 0;
-                break;
-
+                exit(EXIT_SUCCESS);
             case 't':
-                //  Führt tests aus
                 runTests = 1;
                 break;
-
             case 'b':
-                // Soll Benchmarking Aktivieren
                 break;
-
             case 'o':
-                // Soll output Spezifizieren
-                // toFile = 1;
-                // if(optarg != NULL){ // funst nicht
                 toFile = 2;
                 output = optarg;
-                //  }
                 break;
 
             default: /* '?' oder 'h' */
@@ -145,7 +149,7 @@ int ioFunction(void (*ludecomp)(size_t, float *, float *, float *, float *),
     }
 
     if (runTests == 1) {
-        return tests(ludecomp);
+        return tests();
     }
 
     if (randomMatrix == 0) {
@@ -179,7 +183,7 @@ int ioFunction(void (*ludecomp)(size_t, float *, float *, float *, float *),
     float A[n * n];
 
     if (randomMatrix == 0) {
-        readFile(input, A);
+        read_matrix_from_file(n, input, A);
     } else {
         matrixGenerator(n, A);
     }

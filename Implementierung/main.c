@@ -71,14 +71,12 @@ void test(size_t n) {
 }
 
 
+
 int main(int argc, char **argv) {
     float A[25];
-    readFile("test.txt", A);
-    float L[25];
-    float U[25];
-    float P[25];
+    FILE *fp = fopen("test.txt", "r");
+    input_from_file(fp, NULL, A);
+    fclose(fp);
 
-    ludecomp_without_P(5, A, L, U);
-    printMatrix(5, L);
-    printMatrix(5, U);
 }
+

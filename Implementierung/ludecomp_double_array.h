@@ -119,34 +119,5 @@ double ludecomp_double_array_withoutP(size_t n, const float A[n][n], float L[n][
     return end - start;
 }
 
-void matrixMul_double_array(size_t n, float A[n][n], float B[n][n], float res[n][n]) {
 
-    for (size_t i = 0; i < n; i++) {
-        for (size_t j = 0; j < n; j++) {
-            for (size_t k = 0; k < n; k++)
-                res[i][j] += A[i][k] * B[k][j];
-        }
-    }
-}
 
-void printMatrix_double_array(size_t n, const float M[n][n]) {
-    for (size_t index = 0; index < n; index++) {
-        for (int j = 0; j < n; j++) {
-            printf("%f ", M[index][j]);
-        }
-        printf("\n");
-    }
-
-    printf("\n\n");
-}
-
-void matrixGenerator_double_array(size_t n, float A[n][n]) {
-    srand((unsigned int) time(NULL));
-    float a =
-            7867865.34598; // Zufallsgenerator:
-    // https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c
-    for (size_t i = 0; i < n; i++)
-        for (int j = 0; j < n; j++) {
-            A[i][j] = (((float) rand() / (float) (RAND_MAX)) - 0.5) * a;
-        }
-} 
