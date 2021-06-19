@@ -1,7 +1,6 @@
 #include "ludecomp.h"
 #include "test.h"
 #include "io.h"
-#include <time.h>
 #include <unistd.h>
 #include "ludecomp_double_array.h"
 #include "ludecomp_intrinsics.h"
@@ -73,17 +72,13 @@ void test(size_t n) {
 
 
 int main(int argc, char **argv) {
-    float A[16] = {6, 5, 3, -10,
-                   3, 7, -3, 5,
-                   12, 4, 4, 4,
-                   0, 12, 0, -8};
-    float L[16];
-    float U[16];
-    float P[16];
-    ludecomp_without_P_intrinsics(4, A, L, U);
-    printMatrix(4, L);
-    printMatrix(4, U);
-    ludecomp_without_P(4, A, L, U);
-    printMatrix(4, L);
-    printMatrix(4, U);
+    float A[25];
+    readFile("test.txt", A);
+    float L[25];
+    float U[25];
+    float P[25];
+
+    ludecomp_without_P(5, A, L, U);
+    printMatrix(5, L);
+    printMatrix(5, U);
 }
