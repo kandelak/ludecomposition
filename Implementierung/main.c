@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "ludecomp_double_array.h"
 #include "ludecomp_intrinsics.h"
+#include "matr_utilities.h"
 
 void test_double_array_withoutP(size_t n) {
     size_t k = 0;
@@ -71,12 +72,12 @@ void test(size_t n) {
 }
 
 
-
 int main(int argc, char **argv) {
-    float A[25];
-    FILE *fp = fopen("test.txt", "r");
-    input_from_file(fp, NULL, A);
-    fclose(fp);
+    float *A = malloc(sizeof(float) * 6 * 6);
+    float *L = malloc(sizeof(float) * 6 * 6);
+    float *U = malloc(sizeof(float) * 6 * 6);
+    float *P = malloc(sizeof(float) * 6 * 6);
 
+    ioFunction(argc, argv);
 }
 

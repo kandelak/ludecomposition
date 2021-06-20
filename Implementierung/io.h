@@ -6,23 +6,25 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+
+/**
+ * TODO!
+ */
 void printHelp() {
-    printf("Program Usage explanation :\n");
-    printf("\"This Program decomposes quadratic Matrices\n"
-           "  in 2 Triangular Matrices, which multiplied equal to \n"
-           "  The given Matrix. Definitions of flags : ");
-    printf("-h/--help: Use to  print this Text\n");
-    printf("-m: Define Input Matrix\n");
-    printf("-n: bestimmen der Grösse einer zufällig generierten Matrix bei nicht "
-           "Spezifizierung oder ungültiger Eingabe wird eine zufällige größe "
-           "gewählt \n");
-    printf("-p: Deactivates pivoting Method. "
+    printf("-h/--help: Display brief summaries of command line Options\n");
+
+    printf("-f: Specify input file\n");
+    printf("-p: Deactivates pivoting Method."
            "No guarantee for correct answer");
-    printf("-t: Activate Testing\n");
     printf("-b: Activate Benchmarking \n");
-    printf("-o: Choose Output file \n");
-    printf("-v: Choose Version of the Implementation");
-    printf("-i : Choose number of iterations");
+    printf("-r: generate random Matrix \n"
+           "Space seperated numbers : 1st Number -> Number of Matrices to be generated \n"
+           "\n Other Numbers define sizes of particular Matrices"
+           "\n Note : These Arguments are optional and their absence will cause randomizing "
+           "\n only one Matrix");
+    printf("-o: Choose Output stream \n");
+    printf("-v: Choose Version of the Implementation\n");
+    printf("-i : Choose number of iterations\n");
 }
 
 void writeMatrix(FILE *f, size_t n, const float *M) {
@@ -35,15 +37,13 @@ void writeMatrix(FILE *f, size_t n, const float *M) {
 
 
 /**
- * @param path  : Path to the file , from which numbers will be read
- * @param matrix : Matrix where the numbers will be written
- * @param n : row/column size of this particular Matrix
- * @return -1 if no More Matrices in this file. Every @int value besides -1
- * represents there are one or more matrices still in the file and
- * @return is the row/column length of the next matrix
+ *
+ * Warning : Exception handling not implemented yet !!!
+ *
+ * @param n : size
+ * @param fp
+ * @param matrix
  */
-
-
 void read_matrix_from_file(size_t n, FILE *fp, float *matrix) {
 
     if (fp == NULL) {
@@ -71,10 +71,19 @@ void read_matrix_from_file(size_t n, FILE *fp, float *matrix) {
     }
 }
 
+
 /**
- *@param out : pointer to output of the calculations : command line (NULL) / output file
+ *
+ * Warning  : Exception Handling & Heap Allocation not yet implemented !!!
+ *
+ *@param out : pointer to output of the calculations : command line  / output file
+ * This function uses @read_matrix_from_file(size_t,FILE,float) function to get multiple Matrices
+ * from the specified @param input stream.
  */
-void input_from_file(FILE *input, FILE *output, float *matrix) {
+
+#define LINE_SEPARATOR " ############################################### \n\n"
+
+void multiple_input_from_file(FILE *input, FILE *output) {
     size_t num_of_matrices;
     fscanf(input, "%ld", &num_of_matrices);
     size_t size_of_matrices[num_of_matrices];
@@ -82,177 +91,121 @@ void input_from_file(FILE *input, FILE *output, float *matrix) {
         fscanf(input, "%ld", size_of_matrices + k);
     }
     for (int i = 0; i < num_of_matrices; i++) {
+        float matrix[size_of_matrices[i] * size_of_matrices[1]];
         read_matrix_from_file(size_of_matrices[i], input, matrix);
-        printMatrix(size_of_matrices[i], matrix);
-        printf("\n");
+        float L[size_of_matrices[i]], U[size_of_matrices[i]], P[size_of_matrices[i]];
+        ludecomp(size_of_matrices[i], matrix, L, U, P);
+        fprintf(output, " Matrix A: \n\n");
+        writeMatrix(output, size_of_matrices[i], matrix);
+        fprintf(output, LINE_SEPARATOR);
+        fprintf(output, " Matrix L: \n\n");
+        writeMatrix(output, size_of_matrices[i], L);
+        fprintf(output, LINE_SEPARATOR);
+        fprintf(output, " Matrix U: \n\n");
+        writeMatrix(output, size_of_matrices[i], U);
+        fprintf(output, LINE_SEPARATOR);
+        fprintf(output, " Matrix P: \n\n");
+        writeMatrix(output, size_of_matrices[i], P);
+        fprintf(output, LINE_SEPARATOR);
     }
 }
 
 
 int ioFunction(int argc, char **argv) {
-    char opt;
+    int opt;
     char c;
-    size_t n = 0;
-    size_t Pivot = 0;
-    size_t randomMatrix = 1;
-    size_t runTests = 0;
-    size_t toFile = 0;
-    FILE *fcount;
-    FILE *fwrite;
-    char *input;
+
+    size_t n;
+    size_t pivot = 1;
+    size_t randomMatrix = 0;
+
+
+    char *input = NULL;
     char *output = NULL;
+    char *random = NULL;
+
     size_t iterations = 1;
     static struct option long_options[] = {
             {"help", optional_argument, NULL, 'h'}};
 
-    while ((opt = getopt_long(argc, argv, "o:tbhpm:n:", long_options, NULL)) !=
-           -1) { // o hat gerade verpflichetenden parameter soll noch freiwillig
-        // werden
+    while ((opt = getopt_long(argc, argv, "o::bhpr::f:", long_options, NULL)) !=
+           -1) {
 
         switch (opt) {
-
-            case 'm':
-                input = optarg;
-                randomMatrix = 0;
-                break;
-
-            case 'n':
-                if (n == 0) {
-                    n = atoll(optarg);
-                }
-
-                break;
             case 'i' :
                 iterations = strtoul(optarg, NULL, 0);
                 break;
-            case 'p':
-                Pivot = 1; // Soll Pivot Funktion aussschalten
+            case 'f':
+                input = optarg;
+                randomMatrix = 0;
                 break;
-
+            case 'r':
+                randomMatrix = 1;
+                if (optarg != 0) {
+                    random = optarg;
+                }
+            case 'p':
+                pivot = 0;
+                break;
             case 'h':
                 printHelp();
                 exit(EXIT_SUCCESS);
-            case 't':
-                runTests = 1;
-                break;
             case 'b':
+                //TODO
                 break;
             case 'o':
-                toFile = 2;
-                output = optarg;
+                if (optarg != 0) {
+                    output = optarg;
+                }
                 break;
-
             default: /* '?' oder 'h' */
                 fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
                 exit(EXIT_FAILURE);
         }
     }
 
-    if (runTests == 1) {
-        return tests();
-    }
 
     if (randomMatrix == 0) {
-        fcount = fopen(input, "r");
-
-        if (fcount == NULL) {
-            fprintf(stderr, "File Konnte nicht geöffnet werden");
-            exit(EXIT_FAILURE);
-        }
-
-        while ((c = fgetc(fcount)) != EOF) {
-            if (c == ' ') {
-                n++;
-                continue;
+        if (input != NULL) {
+            FILE *in = fopen(input, "r");
+            if (output != NULL) {
+                FILE *out = fopen(output, "w");
+                multiple_input_from_file(in, out);
+                fclose(out);
+            } else {
+                multiple_input_from_file(in, stdout);
             }
-            if (c == '\n') {
-                n++;
-                break;
+            fclose(in);
+
+        } else {
+            if (output != NULL) {
+                FILE *out = fopen(output, "w");
+                multiple_input_from_file(stdin, out);
+                fclose(out);
+            } else {
+                multiple_input_from_file(stdin, stdout);
             }
         }
-        fclose(fcount); // close fehler muss noch abgefangen werden wenn == 0 kein
-        // fehler
-
     } else {
+        //TODO
         srandom(time(NULL));
-        if (n <= 0) {
+        if (random == NULL) {
             n = (3 + rand() % 17);
-        } // wenn n ungültig generate random size
-    }
-
-    float A[n * n];
-
-    if (randomMatrix == 0) {
-        read_matrix_from_file(n, input, A);
-    } else {
-        matrixGenerator(n, A);
-    }
-    // printf("%f\n",A[0]);
-    // for(int i = 0 ; i<n*n ; i++){
-    // printf("%f \n", A[i]);}
-
-    float L[n * n];
-    float U[n * n];
-    float P[n * n];
-    while (iterations-- > 0) ludecomp(n, A, L, U, P);
-    // if (Pivot == 0){}
-    // else{//luZerlegungOhnePivot(n, A, L, U);
-    //}
-    if (toFile == 1) {
-        strcat(input, "Result.txt");
-        fwrite = fopen(input, 'w');
-        if (fwrite == NULL) {
-            fprintf(stderr, "Outputfile konnte nicht erstellt werden");
-            exit(EXIT_FAILURE);
+        } else {
+            FILE *in = fopen("random_input.txt", "w");
+            fprintf(in, "%s", random);
         }
-        fprintf(fwrite, " Matrix A: \n\n");
-        writeMatrix(fwrite, n, A);
-        fprintf(fwrite, " ############################################### \n\n");
-        fprintf(fwrite, " Matrix L: \n\n");
-        writeMatrix(fwrite, n, L);
-        fprintf(fwrite, " ############################################### \n\n");
-        fprintf(fwrite, " Matrix U: \n\n");
-        writeMatrix(fwrite, n, U);
-        fprintf(fwrite, " ############################################### \n\n");
-        fprintf(fwrite, " Matrix P: \n\n");
-        writeMatrix(fwrite, n, P);
-        fprintf(fwrite, " ############################################### \n\n");
-        fclose(fwrite);
-    }
-    if (toFile == 2) {
+        if (output != NULL) {
+            FILE *out = fopen(output, "w");
+            float A[n * n];
+            //matrixGenerator(n, A);
+            multiple_input_from_file(stdin, out);
+            fclose(out);
+        } else {
 
-        fwrite = fopen(output, 'w');
-        if (fwrite == NULL) {
-            fprintf(stderr, "Outputfile konnte nicht erstellt werden");
-            exit(EXIT_FAILURE);
         }
-        fprintf(fwrite, " Matrix A: \n\n");
-        writeMatrix(fwrite, n, A);
-        fprintf(fwrite, " ############################################### \n\n");
-        fprintf(fwrite, " Matrix L: \n\n");
-        writeMatrix(fwrite, n, L);
-        fprintf(fwrite, " ############################################### \n\n");
-        fprintf(fwrite, " Matrix U: \n\n");
-        writeMatrix(fwrite, n, U);
-        fprintf(fwrite, " ############################################### \n\n");
-        fprintf(fwrite, " Matrix P: \n\n");
-        writeMatrix(fwrite, n, P);
-        fprintf(fwrite, " ############################################### \n\n");
-        fclose(fwrite);
     }
 
-    printf(" Matrix A: \n\n");
-    printMatrix(n, A);
-    printf(" ############################################### \n\n");
-    printf(" Matrix L: \n\n");
-    printMatrix(n, L);
-    printf(" ############################################### \n\n");
-    printf(" Matrix U: \n\n");
-    printMatrix(n, U);
-    printf(" ############################################### \n\n");
-    printf(" Matrix P: \n\n");
-    printMatrix(n, P);
-    printf(" ############################################### \n\n");
 
     return 0;
 }
