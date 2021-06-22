@@ -6,11 +6,11 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-
 /**
  * TODO!
  */
-void printHelp() {
+void printHelp()
+{
     printf("-h/--help: Display brief summaries of command line Options\n");
 
     printf("-f: Specify input file\n");
@@ -27,14 +27,15 @@ void printHelp() {
     printf("-i : Choose number of iterations\n");
 }
 
-void writeMatrix(FILE *f, size_t n, const float *M) {
-    for (size_t index = 0; index < n * n; index++) {
+void writeMatrix(FILE *f, size_t n, const float *M)
+{
+    for (size_t index = 0; index < n * n; index++)
+    {
         fprintf(f, "%f,", M[index]);
         if ((index + 1) % n == 0)
             fprintf(f, "\n");
     }
 }
-
 
 /**
  *
@@ -44,25 +45,30 @@ void writeMatrix(FILE *f, size_t n, const float *M) {
  * @param fp
  * @param matrix
  */
-void read_matrix_from_file(size_t n, FILE *fp, float *matrix) {
+void read_matrix_from_file(size_t n, FILE *fp, float *matrix)
+{
 
-    if (fp == NULL) {
+    if (fp == NULL)
+    {
         perror("Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-g
+
     size_t index = 0;
 
     size_t mat_size = n * n;
 
-    while (mat_size > 0) {
-        if (fscanf(fp, "%f", matrix + (index++)) == -1) {
+    while (mat_size > 0)
+    {
+        if (fscanf(fp, "%f", matrix + (index++)) == -1)
+        {
             break;
         }
         mat_size--;
     }
 
-    if (mat_size > (index - 1)) {
+    if (mat_size > (index - 1))
+    {
         printf("ERROR : Wrong number of entries for the Matrix for the specified size  \n"
                "Usage : \nfirst number is always the number of Matrices \n "
                "Then size of the each Matrix row/column \n"
@@ -70,7 +76,6 @@ g
         exit(EXIT_FAILURE);
     }
 }
-
 
 /**
  *
@@ -83,14 +88,17 @@ g
 
 #define LINE_SEPARATOR " ############################################### \n\n"
 
-void multiple_input_from_file(FILE *input, FILE *output) {
+void multiple_input_from_file(FILE *input, FILE *output)
+{
     size_t num_of_matrices;
     fscanf(input, "%ld", &num_of_matrices);
     size_t size_of_matrices[num_of_matrices];
-    for (size_t k = 0; k < num_of_matrices; k++) {
+    for (size_t k = 0; k < num_of_matrices; k++)
+    {
         fscanf(input, "%ld", size_of_matrices + k);
     }
-    for (int i = 0; i < num_of_matrices; i++) {
+    for (int i = 0; i < num_of_matrices; i++)
+    {
         float matrix[size_of_matrices[i] * size_of_matrices[1]];
         read_matrix_from_file(size_of_matrices[i], input, matrix);
         float L[size_of_matrices[i]], U[size_of_matrices[i]], P[size_of_matrices[i]];
@@ -110,8 +118,8 @@ void multiple_input_from_file(FILE *input, FILE *output) {
     }
 }
 
-
-int ioFunction(int argc, char **argv) {
+int ioFunction(int argc, char **argv)
+{
     int opt;
     char c;
 
@@ -119,93 +127,110 @@ int ioFunction(int argc, char **argv) {
     size_t pivot = 1;
     size_t randomMatrix = 0;
 
-
     char *input = NULL;
     char *output = NULL;
     char *random = NULL;
 
     size_t iterations = 1;
     static struct option long_options[] = {
-            {"help", optional_argument, NULL, 'h'}};
+        {"help", optional_argument, NULL, 'h'}};
 
     while ((opt = getopt_long(argc, argv, "o::bhpr::f:", long_options, NULL)) !=
-           -1) {
+           -1)
+    {
 
-        switch (opt) {
-            case 'i' :
-                iterations = strtoul(optarg, NULL, 0);
-                break;
-            case 'f':
-                input = optarg;
-                randomMatrix = 0;
-                break;
-            case 'r':
-                randomMatrix = 1;
-                if (optarg != 0) {
-                    random = optarg;
-                }
-            case 'p':
-                pivot = 0;
-                break;
-            case 'h':
-                printHelp();
-                exit(EXIT_SUCCESS);
-            case 'b':
-                //TODO
-                break;
-            case 'o':
-                if (optarg != 0) {
-                    output = optarg;
-                }
-                break;
-            default: /* '?' oder 'h' */
-                fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
-                exit(EXIT_FAILURE);
+        switch (opt)
+        {
+        case 'i':
+            iterations = strtoul(optarg, NULL, 0);
+            break;
+        case 'f':
+            input = optarg;
+            randomMatrix = 0;
+            break;
+        case 'r':
+            randomMatrix = 1;
+            if (optarg != 0)
+            {
+                random = optarg;
+            }
+        case 'p':
+            pivot = 0;
+            break;
+        case 'h':
+            printHelp();
+            exit(EXIT_SUCCESS);
+        case 'b':
+            //TODO
+            break;
+        case 'o':
+            if (optarg != 0)
+            {
+                output = optarg;
+            }
+            break;
+        default: /* '?' oder 'h' */
+            fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
+            exit(EXIT_FAILURE);
         }
     }
 
-
-    if (randomMatrix == 0) {
-        if (input != NULL) {
+    if (randomMatrix == 0)
+    {
+        if (input != NULL)
+        {
             FILE *in = fopen(input, "r");
-            if (output != NULL) {
+            if (output != NULL)
+            {
                 FILE *out = fopen(output, "w");
                 multiple_input_from_file(in, out);
                 fclose(out);
-            } else {
+            }
+            else
+            {
                 multiple_input_from_file(in, stdout);
             }
             fclose(in);
-
-        } else {
-            if (output != NULL) {
+        }
+        else
+        {
+            if (output != NULL)
+            {
                 FILE *out = fopen(output, "w");
                 multiple_input_from_file(stdin, out);
                 fclose(out);
-            } else {
+            }
+            else
+            {
                 multiple_input_from_file(stdin, stdout);
             }
         }
-    } else {
+    }
+    else
+    {
         //TODO
         srandom(time(NULL));
-        if (random == NULL) {
+        if (random == NULL)
+        {
             n = (3 + rand() % 17);
-        } else {
+        }
+        else
+        {
             FILE *in = fopen("random_input.txt", "w");
             fprintf(in, "%s", random);
         }
-        if (output != NULL) {
+        if (output != NULL)
+        {
             FILE *out = fopen(output, "w");
             float A[n * n];
             //matrixGenerator(n, A);
             multiple_input_from_file(stdin, out);
             fclose(out);
-        } else {
-
+        }
+        else
+        {
         }
     }
-
 
     return 0;
 }
