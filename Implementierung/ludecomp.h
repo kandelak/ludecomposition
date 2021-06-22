@@ -14,7 +14,7 @@ void ludecomp_without_P(size_t n, const float *A, float *L, float *U)
         U[index] = A[index];
     }
 
-    // Writing Identity matrices in P and L
+    // Writing Identity matrices in L
     for (size_t i = 0; i < n; i++)
     {
         for (size_t j = 0; j < n; j++)

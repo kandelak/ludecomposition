@@ -1,5 +1,5 @@
 #include <immintrin.h>
-
+#include <math.h>
 
 double ludecomp_without_P_intrinsics(size_t n, const float *A, float *L, float *U) {
 

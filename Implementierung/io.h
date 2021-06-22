@@ -94,11 +94,11 @@ void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
 void run(void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output)
 {
     size_t num_of_matrices;
-    fscanf(input, "%lu", &num_of_matrices);
+    fscanf(input, "%ld", &num_of_matrices);
     size_t size_of_matrices[num_of_matrices];
     for (size_t k = 0; k < num_of_matrices; k++)
     {
-        fscanf(input, "%lu", size_of_matrices + k);
+        fscanf(input, "%ld", size_of_matrices + k);
     }
     for (size_t i = 0; i < num_of_matrices; i++)
     {

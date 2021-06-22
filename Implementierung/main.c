@@ -3,6 +3,7 @@
 #include "io.h"
 #include <unistd.h>
 #include "ludecomp_intrinsics.h"
+#include "ludecomp_2.h"
 
 /**
  * for benchmarking the program
@@ -14,22 +15,7 @@ static inline double curtime(void)
     return t.tv_sec + t.tv_nsec * 1e-9;
 }
 
-/**
- * To Choose the Implementation 
- */
-struct Variant
-{
-    const char *name;
 
-    void (*func)(char *);
-};
-
-typedef struct Variant Variant;
-
-const Variant variants[] = {
-    {"c", ludecomp},
-    {"c_intrinsics", ludecomp_intrinsics},
-};
 
 void single_size_test(size_t n, size_t iterations)
 {
@@ -43,12 +29,26 @@ void single_size_test(size_t n, size_t iterations)
     {
         time = curtime();
         ludecomp(n, genA, L, U, P);
-        time = curtime() - time;
+        time = curtime()-time;
         printf("%f\n", time);
     }
 }
 
-
+void test_without_P(size_t n)
+{
+    size_t cnt = 0;
+    double time = 0;
+    do
+    {
+        float genA[cnt * cnt];
+        matrixGenerator(cnt, genA);
+        float L[cnt * cnt], U[cnt * cnt];
+        time = curtime();
+        ludecomp_without_P(cnt, genA, L, U);
+        time = curtime()-time;
+        printf("%f\n", time);
+    } while (cnt++ < n);
+}
 
 void test(size_t n)
 {
@@ -61,14 +61,13 @@ void test(size_t n)
         float L[cnt * cnt], U[cnt * cnt], P[cnt * cnt];
         time = curtime();
         ludecomp(cnt, genA, L, U, P);
-        time = curtime() - time;
         printf("%f\n", time);
     } while (cnt++ < n);
 }
 
 int main(int argc, char **argv)
 {
-    ioFunction(ludecomp, argc, argv);
+    ioFunction(ludecomp_2, argc, argv);
 
     return 0;
 }
