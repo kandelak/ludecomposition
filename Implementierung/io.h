@@ -50,7 +50,7 @@ void read_matrix_from_file(size_t n, FILE *fp, float *matrix) {
         perror("Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-
+g
     size_t index = 0;
 
     size_t mat_size = n * n;
