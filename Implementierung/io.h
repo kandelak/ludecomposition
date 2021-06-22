@@ -7,21 +7,24 @@
 #include <sys/stat.h>
 
 /**
- * TODO!
+ * TODO! With Examples and better Explanation
  */
 void printHelp()
 {
     printf("-h/--help: Display brief summaries of command line Options\n");
 
-    printf("-f: Specify input file\n");
+    printf("-f: Specify input stream\n");
     printf("-p: Deactivates pivoting Method."
            "No guarantee for correct answer");
-    printf("-b: Activate Benchmarking \n");
+    printf("-b: Activate Benchmarking Mode (Functional Mode is Default)\n");
     printf("-r: generate random Matrix \n"
-           "Space seperated numbers : 1st Number -> Number of Matrices to be generated \n"
-           "\n Other Numbers define sizes of particular Matrices"
-           "\n Note : These Arguments are optional and their absence will cause randomizing "
-           "\n only one Matrix");
+           "Space seperated numbers : \n"
+           "1st Number : Number of Matrices to be generated \n"
+           "Other Numbers define sizes of particular Matrices\n"
+           "Note : These Arguments are optional and their absence will cause randomizing\n"
+           "Only one Matrix\n"
+           "P.S : This Option works only with Benchmarking mode");
+
     printf("-o: Choose Output stream \n");
     printf("-v: Choose Version of the Implementation\n");
     printf("-i : Choose number of iterations\n");
@@ -45,7 +48,7 @@ void writeMatrix(FILE *f, size_t n, const float *M)
  * @param fp
  * @param matrix
  */
-void read_matrix_from_file(size_t n, FILE *fp, float *matrix)
+void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
 {
 
     if (fp == NULL)
@@ -88,21 +91,22 @@ void read_matrix_from_file(size_t n, FILE *fp, float *matrix)
 
 #define LINE_SEPARATOR " ############################################### \n\n"
 
-void multiple_input_from_file(FILE *input, FILE *output)
+void run(void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output)
 {
     size_t num_of_matrices;
-    fscanf(input, "%ld", &num_of_matrices);
+    fscanf(input, "%lu", &num_of_matrices);
     size_t size_of_matrices[num_of_matrices];
     for (size_t k = 0; k < num_of_matrices; k++)
     {
-        fscanf(input, "%ld", size_of_matrices + k);
+        fscanf(input, "%lu", size_of_matrices + k);
     }
-    for (int i = 0; i < num_of_matrices; i++)
+    for (size_t i = 0; i < num_of_matrices; i++)
     {
         float matrix[size_of_matrices[i] * size_of_matrices[1]];
-        read_matrix_from_file(size_of_matrices[i], input, matrix);
+        read_matrix_from_stream(size_of_matrices[i], input, matrix);
         float L[size_of_matrices[i]], U[size_of_matrices[i]], P[size_of_matrices[i]];
-        ludecomp(size_of_matrices[i], matrix, L, U, P);
+        func(size_of_matrices[i], matrix, L, U, P);
+        fprintf(output, "Operation %lu: \n\n", i + 1);
         fprintf(output, " Matrix A: \n\n");
         writeMatrix(output, size_of_matrices[i], matrix);
         fprintf(output, LINE_SEPARATOR);
@@ -118,15 +122,15 @@ void multiple_input_from_file(FILE *input, FILE *output)
     }
 }
 
-int ioFunction(int argc, char **argv)
+int ioFunction(void (*func)(size_t, const float *, float *, float *, float *), int argc, char **argv)
 {
     int opt;
     char c;
 
     size_t n;
-    size_t pivot = 1;
-    size_t randomMatrix = 0;
-
+    int pivoting = 1;
+    int randomizing_Matrix = 0;
+    int benchmarking = 0;
     char *input = NULL;
     char *output = NULL;
     char *random = NULL;
@@ -135,7 +139,7 @@ int ioFunction(int argc, char **argv)
     static struct option long_options[] = {
         {"help", optional_argument, NULL, 'h'}};
 
-    while ((opt = getopt_long(argc, argv, "o::bhpr::f:", long_options, NULL)) !=
+    while ((opt = getopt_long(argc, argv, "o:bhpr::f:", long_options, NULL)) !=
            -1)
     {
 
@@ -146,28 +150,27 @@ int ioFunction(int argc, char **argv)
             break;
         case 'f':
             input = optarg;
-            randomMatrix = 0;
             break;
         case 'r':
-            randomMatrix = 1;
+            randomizing_Matrix = 1;
             if (optarg != 0)
             {
                 random = optarg;
             }
         case 'p':
-            pivot = 0;
+            pivoting = 0;
             break;
         case 'h':
             printHelp();
             exit(EXIT_SUCCESS);
         case 'b':
-            //TODO
+            benchmarking = 1;
             break;
         case 'o':
-            if (optarg != 0)
-            {
-                output = optarg;
-            }
+            //if (optarg != 0)
+            //{
+            output = optarg;
+            // }
             break;
         default: /* '?' oder 'h' */
             fprintf(stderr, "Hilfe mit -h oder --help anzeigen");
@@ -175,62 +178,57 @@ int ioFunction(int argc, char **argv)
         }
     }
 
-    if (randomMatrix == 0)
+    /**
+     * Handles to Input and Output Streams 
+     */
+
+    FILE *in;
+    FILE *out;
+
+    if (input == NULL)
     {
-        if (input != NULL)
-        {
-            FILE *in = fopen(input, "r");
-            if (output != NULL)
-            {
-                FILE *out = fopen(output, "w");
-                multiple_input_from_file(in, out);
-                fclose(out);
-            }
-            else
-            {
-                multiple_input_from_file(in, stdout);
-            }
-            fclose(in);
-        }
-        else
-        {
-            if (output != NULL)
-            {
-                FILE *out = fopen(output, "w");
-                multiple_input_from_file(stdin, out);
-                fclose(out);
-            }
-            else
-            {
-                multiple_input_from_file(stdin, stdout);
-            }
-        }
+        in = stdin;
     }
     else
     {
-        //TODO
-        srandom(time(NULL));
-        if (random == NULL)
+        in = fopen(input, "r");
+    }
+    if (output == NULL)
+    {
+        out = stdout;
+    }
+    else
+    {
+        out = fopen(output, "w+");
+    }
+
+    /**
+     * Functional Mode is on 
+    */
+    if (!benchmarking)
+    {
+        if (randomizing_Matrix)
         {
-            n = (3 + rand() % 17);
+            printf("Randomizing works only with Benchmarking Mode\n"
+                   "Please refer to --help/-h");
+            exit(EXIT_FAILURE);
         }
-        else
-        {
-            FILE *in = fopen("random_input.txt", "w");
-            fprintf(in, "%s", random);
-        }
-        if (output != NULL)
-        {
-            FILE *out = fopen(output, "w");
-            float A[n * n];
-            //matrixGenerator(n, A);
-            multiple_input_from_file(stdin, out);
-            fclose(out);
-        }
-        else
+        // For NULL will come the specified function
+        run(func, in, out);
+    }
+
+    /**
+     * Benchmarking Mode is on
+    */
+    else
+    {
+        if (randomizing_Matrix)
         {
         }
     }
+
+    fclose(in);
+    fclose(out);
 
     return 0;
 }
