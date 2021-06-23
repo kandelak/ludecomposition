@@ -95,29 +95,27 @@ void run(void (*func)(size_t, const float *, float *, float *, float *), FILE *i
 {
     size_t num_of_matrices;
     fscanf(input, "%ld", &num_of_matrices);
-    size_t size_of_matrices[num_of_matrices];
-    for (size_t k = 0; k < num_of_matrices; k++)
-    {
-        fscanf(input, "%ld", size_of_matrices + k);
-    }
+    size_t size_of_current_matr;
+
     for (size_t i = 0; i < num_of_matrices; i++)
     {
-        float matrix[size_of_matrices[i] * size_of_matrices[1]];
-        read_matrix_from_stream(size_of_matrices[i], input, matrix);
-        float L[size_of_matrices[i]], U[size_of_matrices[i]], P[size_of_matrices[i]];
-        func(size_of_matrices[i], matrix, L, U, P);
+        fscanf(input, "%ld", &size_of_current_matr);
+        float matrix[size_of_current_matr];
+        read_matrix_from_stream(size_of_current_matr, input, matrix);
+        float L[size_of_current_matr], U[size_of_current_matr], P[size_of_current_matr];
+        func(size_of_current_matr, matrix, L, U, P);
         fprintf(output, "Operation %lu: \n\n", i + 1);
         fprintf(output, " Matrix A: \n\n");
-        writeMatrix(output, size_of_matrices[i], matrix);
+        writeMatrix(output, size_of_current_matr, matrix);
         fprintf(output, LINE_SEPARATOR);
         fprintf(output, " Matrix L: \n\n");
-        writeMatrix(output, size_of_matrices[i], L);
+        writeMatrix(output, size_of_current_matr, L);
         fprintf(output, LINE_SEPARATOR);
         fprintf(output, " Matrix U: \n\n");
-        writeMatrix(output, size_of_matrices[i], U);
+        writeMatrix(output, size_of_current_matr, U);
         fprintf(output, LINE_SEPARATOR);
         fprintf(output, " Matrix P: \n\n");
-        writeMatrix(output, size_of_matrices[i], P);
+        writeMatrix(output, size_of_current_matr, P);
         fprintf(output, LINE_SEPARATOR);
     }
 }

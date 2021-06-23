@@ -15,7 +15,7 @@ ludecomp_asm:
 
     # ggf fehler erkennung wenn n=0
     test rdi, rdi
-    je .L_end
+    jbe .L_end
     
     mov rax, rdi        # rax = n*n
     imul rax, rax
