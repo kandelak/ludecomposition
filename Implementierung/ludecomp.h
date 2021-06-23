@@ -5,7 +5,11 @@
 #include <stdio.h>
 #include <math.h>
 
-void ludecomp_without_P(size_t n, const float *A, float *L, float *U)
+/**
+ * Last @param (flaot* P) is always NULL whilst operating without Pivoting
+ * Why still there ? : For simplicity of choosing the version of the Implemenetation via @struct Implementation
+ */
+void ludecomp_without_P(size_t n, const float *A, float *L, float *U,float* P)
 {
 
     // Copying A in U
