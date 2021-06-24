@@ -6,10 +6,10 @@
 #include <math.h>
 
 /**
- * Last @param (flaot* P) is always NULL whilst operating without Pivoting
+ * Last @param (flaot* P) is always Identity Matrix whilst operating without Pivoting
  * Why still there ? : For simplicity of choosing the version of the Implemenetation via @struct Implementation
  */
-void ludecomp_without_P(size_t n, const float *A, float *L, float *U,float* P)
+void ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
 {
 
     // Copying A in U
@@ -18,7 +18,7 @@ void ludecomp_without_P(size_t n, const float *A, float *L, float *U,float* P)
         U[index] = A[index];
     }
 
-    // Writing Identity matrices in L
+    // Writing Identity matrices in L and P
     for (size_t i = 0; i < n; i++)
     {
         for (size_t j = 0; j < n; j++)
@@ -26,10 +26,12 @@ void ludecomp_without_P(size_t n, const float *A, float *L, float *U,float* P)
             if (i == j)
             {
                 L[i * n + j] = 1;
+                P[i * n + j] = 1;
             }
             else
             {
                 L[i * n + j] = 0;
+                P[i * n + j] = 0;
             }
         }
     }

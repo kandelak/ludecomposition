@@ -2,7 +2,7 @@
 #include "test.h"
 #include "io.h"
 #include <unistd.h>
-#include "ludecomp_intrinsics.h"
+//#include "ludecomp_intrinsics.h"
 #include "ludecomp_2.h"
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -32,8 +32,8 @@ typedef struct implementation_version implementation_version;
 const implementation_version implementations[] = {
     {"c", ludecomp},
     {"c_no_P", ludecomp_without_P},
-    {"c_intrinsics", ludecomp_intrinsics},
-    {"c_instrinsics_no_P", ludecomp_without_P_intrinsics},
+    //  {"c_intrinsics", ludecomp_intrinsics},
+    // {"c_instrinsics_no_P", ludecomp_without_P_intrinsics},
     {"c_dolittle", ludecomp_2},
 };
 
@@ -64,7 +64,7 @@ void test_without_P(size_t n)
         matrixGenerator(cnt, genA);
         float L[cnt * cnt], U[cnt * cnt];
         time = curtime();
-        ludecomp_without_P(cnt, genA, L, U,NULL);
+        ludecomp_without_P(cnt, genA, L, U, NULL);
         time = curtime() - time;
         printf("%f\n", time);
     } while (cnt++ < n);
@@ -87,5 +87,8 @@ void test(size_t n)
 
 int main(int argc, char **argv)
 {
-    
+    FILE *out = fopen("test_results.txt","w");
+    run_tests(ludecomp, stdout);
+    fclose(out);
+    return 0;
 }

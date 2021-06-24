@@ -100,9 +100,9 @@ void run(void (*func)(size_t, const float *, float *, float *, float *), FILE *i
     for (size_t i = 0; i < num_of_matrices; i++)
     {
         fscanf(input, "%ld", &size_of_current_matr);
-        float matrix[size_of_current_matr];
+        float matrix[size_of_current_matr * size_of_current_matr];
         read_matrix_from_stream(size_of_current_matr, input, matrix);
-        float L[size_of_current_matr], U[size_of_current_matr], P[size_of_current_matr];
+        float L[size_of_current_matr * size_of_current_matr], U[size_of_current_matr * size_of_current_matr], P[size_of_current_matr * size_of_current_matr];
         func(size_of_current_matr, matrix, L, U, P);
         fprintf(output, "Operation %lu: \n\n", i + 1);
         fprintf(output, " Matrix A: \n\n");
