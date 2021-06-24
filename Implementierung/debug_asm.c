@@ -1,5 +1,4 @@
-#include "test.h"
-//#include "ludecomp_asm.h"
+#include "matr_utilities.h"
 
 void ludecomp_asm(size_t n, const float* A, float* L, float* U, float *P);
 
@@ -9,7 +8,7 @@ int main(int argc, char** argv) {
     float L[n * n];
     float U[n * n];
     float P[n * n];
-    float A[] = {1,2,3,4,5,6,7,8,9};
+    float A[] = {1,2,4,2,3,8,-1,-3,-1};
     ludecomp_asm(n,A,L,U,P);
     printf("Matrix A\n");
     printMatrix(n,A);
