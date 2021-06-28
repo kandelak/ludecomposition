@@ -3,7 +3,7 @@ CFLAGS= -std=gnu11 -O0 -Wall -Wextra -Wpedantic -g
 
 .PHONY:  all clean
 all:clean main
-main: main.c ludecomp.h io.h test.h ludecomp_intrinsics.h ludecomp_2.h
+main: main.c ludecomp.h test.h ludecomp_intrinsics.h ludecomp_2.h
 clean:
 	rm -f main
 

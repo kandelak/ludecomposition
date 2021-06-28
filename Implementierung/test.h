@@ -33,7 +33,6 @@ void test_unit(void (*func)(size_t, const float *, float *, float *, float *), F
 }
 
 #define NUM_OF_TEST_CLASSES 5
-
 struct test_classes
 {
         char *name;

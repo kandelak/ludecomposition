@@ -5,6 +5,57 @@
 #include <stdio.h>
 #include <math.h>
 
+void writeMatrix(FILE *f, size_t n, const float *M)
+{
+    for (size_t index = 0; index < n * n - 1; index++)
+    {
+        fprintf(f, "%f,", M[index]);
+        if ((index + 1) % n == 0)
+            fprintf(f, "\n");
+    }
+    fprintf(f, "%f\n\n", M[n * n - 1]);
+}
+
+/**
+ *
+ * Warning : Exception handling not implemented yet !!!
+ *
+ * @param n : size
+ * @param fp
+ * @param matrix
+ */
+void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
+{
+
+    if (fp == NULL)
+    {
+        perror("Couldn't open the file");
+        exit(EXIT_FAILURE);
+    }
+
+    size_t index = 0;
+
+    size_t mat_size = n * n;
+
+    while (mat_size > 0)
+    {
+        if (fscanf(fp, "%f", matrix + (index++)) == -1)
+        {
+            break;
+        }
+        mat_size--;
+    }
+
+    if (mat_size > (index - 1))
+    {
+        printf("ERROR : Wrong number of entries for the Matrix for the specified size  \n"
+               "Usage : \nfirst number is always the number of Matrices \n "
+               "Then size of the each Matrix row/column \n"
+               "All the other numbers are entries for the Matrices");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void matrixMul(size_t n, float *A, float *B, float *Res)
 {
     size_t i, j, k;
@@ -23,16 +74,16 @@ void printErrorMatrix(size_t n, float *orgM, float *M, FILE *output)
 {
     for (size_t i = 0; i < n * n; i++)
     {
-        if (fabsf(orgM[i] - M[i]) >= 1e-2)
+        if (fabsf(orgM[i] - M[i]) >= 1e-1)
         {
             fprintf(output, "\x1B[31m%f (!=%f),", M[i], orgM[i]);
         }
         else
-            fprintf(output, "\x1B[31m%f,", M[i]);
+            fprintf(output, "\x1B[0m%f,", M[i]);
         if ((i + 1) % n == 0)
             fprintf(output, "\n");
     }
-    fprintf(output, "\n");
+    fprintf(output, "\x1B[0m\n");
 }
 
 int testMatrixEQ(size_t n, float *orgM, float *M)
@@ -80,6 +131,7 @@ int printResultWithoutSolution(size_t n, float *A, float *L, float *U,
     if (test_PxLxU != 0)
     {
         fprintf(output, "\033[0;31mWrong Output. Printing Error Matrix...\n\n\n");
+        fprintf(output, "\x1B[0m");
         printErrorMatrix(n, A, PxLxU, output);
         res = 0;
     }
