@@ -9,7 +9,7 @@ void writeMatrix(FILE *f, size_t n, const float *M)
 {
     for (size_t index = 0; index < n * n - 1; index++)
     {
-        fprintf(f, "%f,", M[index]);
+        fprintf(f, "%f ", M[index]);
         if ((index + 1) % n == 0)
             fprintf(f, "\n");
     }
@@ -74,7 +74,7 @@ void printErrorMatrix(size_t n, float *orgM, float *M, FILE *output)
 {
     for (size_t i = 0; i < n * n; i++)
     {
-        if (fabsf(orgM[i] - M[i]) >= 1e-1)
+        if (fabsf(orgM[i] - M[i]) >= 1e-2)
         {
             fprintf(output, "\x1B[31m%f (!=%f),", M[i], orgM[i]);
         }
@@ -91,7 +91,7 @@ int testMatrixEQ(size_t n, float *orgM, float *M)
     int res = 0;
     for (size_t i = 0; i < n * n; i++)
     {
-        if (fabsf(orgM[i] - M[i]) >= 1e-1)
+        if (fabsf(orgM[i] - M[i]) >= 1e-2)
             res++;
     }
     return res;

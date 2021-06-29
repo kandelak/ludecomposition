@@ -5,6 +5,11 @@
 
 # void ludecomp_asm(size_t n, const float *A, float *L, float *U, float *P)
 ludecomp_asm:
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
     # rdi = n      (int)
     # (rax = n*n)  (int)
     # (rbx = n*4)  Offset pro zeile (n*4)
@@ -14,7 +19,7 @@ ludecomp_asm:
     # r8  = P      (pointer)
 
     # ggf fehler erkennung wenn n=0
-    test rdi, rdi
+    cmp rdi, 0
     jbe .L_end
     
     mov rax, rdi        # rax = n*n
@@ -179,11 +184,27 @@ pop r8
 # 
 #         x = 0
 #         for (x < rbx) {
-#             temp = factor * RCX+[(r9*n) + (r11)];
-#             RCX+[(r10*n) + (r11)] -= temp;
-#         } x+=4
-# 
-#     } j+=4
+#          # for (i = 0; i < n; i++)
+#    for (j = i+1; j < n; j++) {
+#       faktor = RCX+[(j*n*4) + (i*4)] / RCX+[(i*n*4) + (i*4)];
+#       RDX+[(i*n*4) + (i*4)] = faktor;
+#       for (x = 0; x < n; x++) {
+#           temp = factor * RCX+[(i*n*4) + (x*4)];
+#           RCX+[(j*n*4) + (x*4)] -= temp;
+#       }
+#    }
+# }
+
+# for (i = 0; i < n; i++)
+#    for (j = i+1; j < n; j++) {
+#       faktor = RCX+[(j*n*4) + (i*4)] / RCX+[(i*n*4) + (i*4)];
+#       RDX+[(i*n*4) + (i*4)] = faktor;
+#       for (x = 0; x < n; x++) {
+#           temp = factor * RCX+[(i*n*4) + (x*4)];
+#           RCX+[(j*n*4) + (x*4)] -= temp;
+#       }
+#    }
+# }
 # 
 # } i+=4
 
@@ -192,6 +213,11 @@ pop r8
 
 
 .L_end:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
     ret
 
 
