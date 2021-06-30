@@ -109,6 +109,8 @@ void printHelp()
 
 void ludecomp_asm2(size_t n, float *, float *, float *, float *);
 
+void ludecomp_asm(size_t n, float *, float *, float *, float *);
+
 /**
  *
  * Warning  : Exception Handling & Heap Allocation not yet implemented !!!
@@ -218,7 +220,8 @@ typedef struct implementation_version implementation_version;
 const implementation_version implementations[] = {
     {"c", ludecomp},
     {"c_intrinsics", ludecomp_intrinsics},
-    {"asm", ludecomp_asm2}};
+    {"asm_simd", ludecomp_asm2},
+    {"asm", ludecomp_asm}};
 
 int main(int argc, char **argv)
 {
