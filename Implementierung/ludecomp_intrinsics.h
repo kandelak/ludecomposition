@@ -1,7 +1,7 @@
 #include <immintrin.h>
 #include <math.h>
 
-double ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
+void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
 {
 
     // Copying A in U

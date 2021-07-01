@@ -1,20 +1,45 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
+#include <alloca.h>
+#include <malloc.h>
+#include <time.h>
 
-void writeMatrix(FILE *f, size_t n, const float *M)
+/**
+ * For Benchmarking the program
+ */
+static inline double curtime(void)
+{
+    struct timespec t;
+    clock_gettime(1, &t);
+    return t.tv_sec + t.tv_nsec * 1e-9;
+}
+
+void writeMatrix(FILE *out, size_t n, const float *M)
 {
     for (size_t index = 0; index < n * n - 1; index++)
     {
-        fprintf(f, "%f ", M[index]);
+        fprintf(out, "%f ", M[index]);
         if ((index + 1) % n == 0)
-            fprintf(f, "\n");
+            fprintf(out, "\n");
     }
-    fprintf(f, "%f\n\n", M[n * n - 1]);
+    fprintf(out, "%f\n\n", M[n * n - 1]);
 }
+#define STACK_LIMIT 700
+/**
+ * Allocates Memory Space for Matrix
+ * If size to large : Heap Allocation
+ * If not : Stack Allocation
+ * Explanation : 
+ * matr_size : Matrix size
+ * matr_size*sizeof()float*4 <=> matr_size*4*4 for number of BYTES allocation needed for 4 Matrices (We need always 4 Matrices for our Calculations)
+ * MAX_STACK_MEM : Maximum number of BYTES one can allocate in the linux operating system
+ * @return Pointer to the Allocated space for the Matrix with of @param matr_size 
+ */
 
 /**
  *
@@ -26,12 +51,6 @@ void writeMatrix(FILE *f, size_t n, const float *M)
  */
 void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
 {
-
-    if (fp == NULL)
-    {
-        perror("Couldn't open the file");
-        exit(EXIT_FAILURE);
-    }
 
     size_t index = 0;
 
@@ -49,14 +68,17 @@ void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
     if (mat_size > (index - 1))
     {
         printf("ERROR : Wrong number of entries for the Matrix for the specified size  \n"
-               "Usage : \nfirst number is always the number of Matrices \n "
-               "Then size of the each Matrix row/column \n"
-               "All the other numbers are entries for the Matrices");
+               "Usage : \nfirst number is always the number of Matrices to be calculated  \n "
+               "Row/Column size of the particular Matrix\n"
+               "Entries of the Matrix\n\n"
+               "Row/Column size of the particular Matrix\n"
+               "Entries of the Matrix..\n");
+        fclose(fp);
         exit(EXIT_FAILURE);
     }
 }
 
-void matrixMul(size_t n, float *A, float *B, float *Res)
+void matrix_mul(size_t n, float *A, float *B, float *Res)
 {
     size_t i, j, k;
     for (i = 0; i < n; i++)
@@ -70,31 +92,62 @@ void matrixMul(size_t n, float *A, float *B, float *Res)
     }
 }
 
-void printErrorMatrix(size_t n, float *orgM, float *M, FILE *output)
+void print_error_matrix(size_t n, float *orgM, float *M, FILE *output, float tolerate)
 {
     for (size_t i = 0; i < n * n; i++)
     {
-        if (fabsf(orgM[i] - M[i]) >= 1e-2)
+        if (fabsf(orgM[i] - M[i]) >= tolerate)
         {
-            fprintf(output, "\x1B[31m%f (!=%f),", M[i], orgM[i]);
+            fprintf(output, "<<%f (!=%f)>> ", M[i], orgM[i]);
         }
         else
-            fprintf(output, "\x1B[0m%f,", M[i]);
+            fprintf(output, "%f ", M[i]);
         if ((i + 1) % n == 0)
             fprintf(output, "\n");
     }
-    fprintf(output, "\x1B[0m\n");
 }
 
-int testMatrixEQ(size_t n, float *orgM, float *M)
+int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 {
     int res = 0;
     for (size_t i = 0; i < n * n; i++)
     {
-        if (fabsf(orgM[i] - M[i]) >= 1e-2)
+        if (fabsf(orgM[i] - M[i]) >= tolerate)
             res++;
     }
     return res;
+}
+#define LINE_SEPARATOR " \n############################################### \n\n"
+
+void run_bench(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row)
+{
+    double start, end;
+    fprintf(output, "%s Implementation on Operation %ld took (in Seconds) : \n", name, i + 1);
+    for (size_t k = 0; k < iterations; k++)
+    {
+        start = curtime();
+        func(size_of_matr_row, A, L, U, P);
+        end = curtime();
+        fprintf(output, "%f\n", end - start);
+    }
+}
+
+void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
+{
+    fprintf(output, "\nOperation %ld: \n\n", i + 1);
+    fprintf(output, " Matrix A: \n\n");
+    writeMatrix(output, size_of_matr_row, A);
+    fprintf(output, " Matrix L: \n\n");
+    writeMatrix(output, size_of_matr_row, L);
+
+    fprintf(output, " Matrix U: \n\n");
+    writeMatrix(output, size_of_matr_row, U);
+
+    fprintf(output, " Matrix P: \n\n");
+    writeMatrix(output, size_of_matr_row, P);
+    fprintf(output, LINE_SEPARATOR);
+
+    //print_result_without_solution(size_of_matr_row, A, L, U, P, output, 1e-3);
 }
 
 void printMatrix(size_t n, const float *M, FILE *output)
@@ -107,60 +160,61 @@ void printMatrix(size_t n, const float *M, FILE *output)
     }
 }
 
-void matrixGenerator(size_t n, float *A)
+void matrix_generator_intervals(size_t n, float *A, float a, float b)
 {
     srand((unsigned int)time(NULL));
-    float a =
-        7867865.34598; // Zufallsgenerator:
-    // https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c
+
     for (size_t i = 0; i < n * n; i++)
-        A[i] = (((float)rand() / (float)(RAND_MAX)) - 0.5) * a;
+        A[i] = ((float)rand() / (float)(RAND_MAX)) * (b - a) + a;
 }
 
 /**
  * Returns 1 if no errors found and 0 if yes. 
  */
-int printResultWithoutSolution(size_t n, float *A, float *L, float *U,
-                               float *P, FILE *output)
+int print_result_without_solution(size_t n, float *A, float *L, float *U,
+                                  float *P, FILE *output, float tolerate)
 {
     int res = 1;
     float LxU[n * n], PxLxU[n * n];
-    matrixMul(n, L, U, LxU);
-    matrixMul(n, P, LxU, PxLxU);
-    int test_PxLxU = testMatrixEQ(n, A, PxLxU);
+    matrix_mul(n, L, U, LxU);
+    matrix_mul(n, P, LxU, PxLxU);
+    int test_PxLxU = test_matrix_eq(n, A, PxLxU, tolerate);
     if (test_PxLxU != 0)
     {
-        fprintf(output, "\033[0;31mWrong Output. Printing Error Matrix...\n\n\n");
-        fprintf(output, "\x1B[0m");
-        printErrorMatrix(n, A, PxLxU, output);
+        fprintf(output, "<<Wrong Output. Printing Error Matrix...>>\n\n\n");
+        print_error_matrix(n, A, PxLxU, output, tolerate);
         res = 0;
+    }
+    else
+    {
+        fprintf(output, "<<No Errors on this Matrix>>\n\n\n");
     }
     return res;
 }
 
-// void printResultWithSolution(size_t n, float *orgL, float *L, float *orgU,
+// void print_result_with_solution(size_t n, float *orgL, float *L, float *orgU,
 //                              float *U, float *orgP, float *P, FILE *output)
 // {
 //     printf("Testing ...\n");
-//     int fehlerL = testMatrixEQ(n, orgL, L);
-//     int fehlerU = testMatrixEQ(n, orgU, U);
-//     int fehlerP = testMatrixEQ(n, orgP, P);
+//     int fehlerL = test_matrix_eq(n, orgL, L);
+//     int fehlerU = test_matrix_eq(n, orgU, U);
+//     int fehlerP = test_matrix_eq(n, orgP, P);
 //     printf("%d Fehler in L;   %d Fehler in U;   %d Fehler in P\n", fehlerL,
 //            fehlerU, fehlerP);
 //     if (fehlerL != 0)
 //     {
 //         printf("Fehler in L:\n");
-//         printErrorMatrix(n, orgL, L, output);
+//         print_error_matrix(n, orgL, L, output);
 //     }
 //     if (fehlerU != 0)
 //     {
 //         printf("Fehler in U:\n");
-//         printErrorMatrix(n, orgU, U, output);
+//         print_error_matrix(n, orgU, U, output);
 
 //         if (fehlerP != 0)
 //         {
 //             printf("Fehler in P:\n");
-//             printErrorMatrix(n, orgP, P, output);
+//             print_error_matrix(n, orgP, P, output);
 //         }
 //         printf("\n\n\n");
 //     }

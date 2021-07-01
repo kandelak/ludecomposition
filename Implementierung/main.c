@@ -1,10 +1,8 @@
-#define _POSIX_C_SOURCE 200809L
 #include <limits.h>
 #include "ludecomp.h"
 #include "test.h"
 #include <unistd.h>
 #include "ludecomp_intrinsics.h"
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -13,18 +11,8 @@
 #include <sys/random.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <float.h>
-#include <alloca.h>
-
-/**
- * For Benchmarking the program
- */
-static inline double curtime(void)
-{
-    struct timespec t;
-    clock_gettime(CLOCK_MONOTONIC, &t);
-    return t.tv_sec + t.tv_nsec * 1e-9;
-}
 
 /**
  * Checks validity of the input
@@ -94,17 +82,11 @@ void printHelp()
     printf("-p: Deactivates pivoting Method."
            "No guarantee for correct answer");
     printf("-b: Activate Benchmarking Mode (Functional Mode is Default)\n");
-    printf("-r: generate random Matrix \n"
-           "Space seperated numbers : \n"
-           "1st Number : Number of Matrices to be generated \n"
-           "Other Numbers define sizes of particular Matrices\n"
-           "Note : These Arguments are optional and their absence will cause randomizing\n"
-           "Only one Matrix\n"
-           "P.S : This Option works only with Benchmarking mode");
-
     printf("--output: Choose Output stream \n (use -o alternatively)");
     printf("-v: Choose Version of the Implementation\n");
     printf("-i : Choose number of iterations\n");
+    printf("-t/--test-all : Test pre-defined input from predefined file\n");
+    printf("-r/--generate : Test randomly matrices with specified max_size\n");
 }
 
 void ludecomp_asm2(size_t n, float *, float *, float *, float *);
@@ -120,89 +102,75 @@ void ludecomp_asm(size_t n, float *, float *, float *, float *);
  * from the specified @param input stream
  */
 
-#define LINE_SEPARATOR " \n############################################### \n\n"
-#define MAX_STACK_MEM 8000000
-int run(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, int iterations)
+void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, int iterations, size_t i, size_t size_of_matr_row)
 {
 
-    size_t num_of_matrices;
-    fscanf(input, "%ld", &num_of_matrices);
-    size_t size_of_matr_line;
-    size_t size_of_matr;
-    for (size_t i = 0; i < num_of_matrices; i++)
+    size_t size_of_matr = size_of_matr_row * size_of_matr_row;
+
+    float A[size_of_matr];
+
+    float L[size_of_matr];
+
+    float U[size_of_matr];
+
+    float P[size_of_matr];
+
+    read_matrix_from_stream(size_of_matr_row, input, A);
+
+    if (benchmarking)
     {
-        fscanf(input, "%ld", &size_of_matr_line);
-        size_of_matr = size_of_matr_line * size_of_matr_line;
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
+    }
+    else
+    {
+        func(size_of_matr_row, A, L, U, P);
+    }
+    
+    if (print)
+    {
+        print_pretty(output, A, L, U, P, size_of_matr_row, i);
+    }
+}
 
-        /**
-         * Handling the Heap Allocation if needed
-         */
-        int allocated = 0;
-        float *A;
-        float *L;
-        float *U;
-        float *P;
-        if (size_of_matr * 4 * 4 >= MAX_STACK_MEM)
-        {
-            allocated = 1;
-            A = malloc(sizeof(float) * size_of_matr);
-            L = malloc(sizeof(float) * size_of_matr);
-            U = malloc(sizeof(float) * size_of_matr);
-            P = malloc(sizeof(float) * size_of_matr);
-            if (!A || !L || !U || !P)
-            {
-                fprintf(stderr, "Could not allocate Memory for the Operation %d : ", i + 1);
-            }
-        }
-        else
-        {
+void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, int iterations, size_t i, size_t size_of_matr_row)
+{
+    size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
-            A = alloca(size_of_matr * sizeof(float));
-            L = alloca(size_of_matr * sizeof(float));
-            U = alloca(size_of_matr * sizeof(float));
-            P = alloca(size_of_matr * sizeof(float));
-        }
+    float *A = malloc(sizeof(float) * size_of_matr);
+    float *L = malloc(sizeof(float) * size_of_matr);
+    float *U = malloc(sizeof(float) * size_of_matr);
+    float *P = malloc(sizeof(float) * size_of_matr);
 
-        read_matrix_from_stream(size_of_matr_line, input, A);
-
-        if (benchmarking)
-        {
-            double start, end;
-            fprintf(output, "%s Implementation on Operation %ld took (in Seconds) : \n", name, i + 1);
-            for (int k = 0; k < iterations; k++)
-            {
-                start = curtime();
-                func(size_of_matr_line, A, L, U, P);
-                end = curtime();
-                fprintf(output, "%f\n", end - start);
-            }
-        }
-        else
-        {
-
-            func(size_of_matr_line, A, L, U, P);
-        }
-
-        if (print)
-        {
-            fprintf(output, "\nOperation %ld: \n\n", i + 1);
-            fprintf(output, " Matrix A: \n\n");
-            writeMatrix(output, size_of_matr_line, A);
-            fprintf(output, " Matrix L: \n\n");
-            writeMatrix(output, size_of_matr_line, L);
-
-            fprintf(output, " Matrix U: \n\n");
-            writeMatrix(output, size_of_matr_line, U);
-
-            fprintf(output, " Matrix P: \n\n");
-            writeMatrix(output, size_of_matr_line, P);
-            fprintf(output, LINE_SEPARATOR);
-
-            printResultWithoutSolution(size_of_matr_line, A, L, U, P, output);
-        }
+    if (!A || !L || !U || !P)
+    {
+        perror("Could not allocate Memory");
+        exit(EXIT_FAILURE);
     }
 
-    return 1;
+    /**
+     *  Read and compute next Matrix
+    */
+
+    read_matrix_from_stream(size_of_matr_row, input, A);
+
+    if (benchmarking)
+    {
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
+    }
+    else
+    {
+        func(size_of_matr_row, A, L, U, P);
+    }
+
+    if (print)
+    {
+        print_pretty(output, A, L, U, P, size_of_matr_row, i);
+    }
+
+    free(A);
+    free(L);
+    free(U);
+    free(P);
 }
 
 struct implementation_version
@@ -233,15 +201,20 @@ int main(int argc, char **argv)
     }
 
     int pivoting = 1;
-    int randomizing_Matrix = 0;
+    int test_predefined = 0;
+    int generate_multiple_input = 0;
+    int generate_single_input = 0;
+    int a = 0;
     int benchmarking = 0;
     int bench_predefined = 0;
     int version = 0; //ludecomp is the default Version
     char *input = NULL;
     char *output = NULL;
     char *random = NULL;
+    size_t max_size_random_tests = 0;
+
     int print = 1;
-    int testing = 0;
+
     size_t iterations = 1;
 
     static struct option long_options[] = {
@@ -249,11 +222,15 @@ int main(int argc, char **argv)
         {"input", required_argument, 0, 'f'},
         {"output", required_argument, 0, 'o'},
         {"bench-all", no_argument, 0, 'a'},
-        {"no-print", no_argument, 0, 'n'}};
+        {"no-print", no_argument, 0, 'n'},
+        {"test-all", no_argument, 0, 't'},
+        {"generate", required_argument, 0, 'r'},
+        {"generate-single-size", required_argument, 0, 's'},
+    };
 
     int opt;
 
-    while ((opt = getopt_long(argc, argv, "o:bhpv:r:f:i:n", long_options, NULL)) !=
+    while ((opt = getopt_long(argc, argv, "o:bhpv:r:f:i:nts:", long_options, NULL)) !=
            -1)
     {
 
@@ -263,7 +240,9 @@ int main(int argc, char **argv)
             iterations = strtol(optarg, NULL, 10);
             break;
         case 'r':
-            randomizing_Matrix = 1;
+            generate_multiple_input = 1;
+            max_size_random_tests = strtol(optarg, NULL, 10);
+            break;
         case 'p':
             pivoting = 0;
             break;
@@ -290,6 +269,13 @@ int main(int argc, char **argv)
         case 'n':
             print = 0;
             break;
+        case 's':
+            max_size_random_tests = strtol(optarg, NULL, 10);
+            generate_single_input = 1;
+            break;
+        case 't':
+            test_predefined = 1;
+            break;
 
         default: /* '?' oder 'h' */
             fprintf(stderr, "Refer to --help/-h\n\n");
@@ -297,8 +283,36 @@ int main(int argc, char **argv)
         }
     }
 
+    /**
+     * If Generating the random Inputs for Testing
+     */
+    if (generate_multiple_input)
+    {
+        if (!output && max_size_random_tests > 20)
+        {
+            fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("Generating randomized Inputs for Testing...\n");
+        generate_random_tests(max_size_random_tests, 0, output);
+        printf("Generating done.\n");
+        exit(EXIT_SUCCESS);
+    }
+    else if (generate_single_input)
+    {
+        printf("Generating randomized Inputs for Testing...\n");
+        generate_random_tests(max_size_random_tests, 1, output);
+        printf("Generating done.\n");
+        exit(EXIT_SUCCESS);
+    }
+
     if (version >= sizeof(implementations) / sizeof(implementation_version) || version < 0)
     {
+        if (!output && max_size_random_tests > 20)
+        {
+            fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
+            exit(EXIT_FAILURE);
+        }
         fprintf(stderr, "%s: Invalid Implementation Specifier %u\n");
         exit(EXIT_FAILURE);
     }
@@ -337,6 +351,7 @@ int main(int argc, char **argv)
     }
     if (output == NULL)
     {
+
         out = stdout;
     }
     else
@@ -355,6 +370,10 @@ int main(int argc, char **argv)
 
     const implementation_version *impl = &implementations[version];
 
+    /**
+     * Calculate and print pre-defined Benches
+     */
+
     if (bench_predefined)
     {
     }
@@ -365,15 +384,32 @@ int main(int argc, char **argv)
             fprintf(stderr, "%s: ignoring extra arguments\n", argv[0]);
     }
 
-    if (randomizing_Matrix && (benchmarking || !testing))
+    /**
+     * Calculating Decompositions
+     */
+    size_t num_of_matrices;
+    fscanf(in, "%ld", &num_of_matrices);
+
+    size_t size_of_matr_row;
+    size_t size_of_matr;
+    for (size_t i = 0; i < num_of_matrices; i++)
     {
-        printf("You are currently in Benchmarking/Functional Mode of the Program\n"
-               "Randomizing works only with Testing\n"
-               "Please refer to --help/-h\n\n");
-        exit(EXIT_FAILURE);
+        fscanf(in, "%ld", &size_of_matr_row);
+
+        size_of_matr = size_of_matr_row * size_of_matr_row;
+
+        if (size_of_matr_row > STACK_LIMIT)
+        {
+            printf("da\n");
+            run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, i, size_of_matr_row);
+        }
+        else
+        {
+            run_on_stack(impl->name, impl->func, in, out, benchmarking, print, iterations, i, size_of_matr_row);
+        }
     }
 
-    run(impl->name, impl->func, in, out, benchmarking, print, iterations);
+    //run(impl->name, impl->func, in, out, benchmarking, print, iterations);
 
     fclose(in);
     fclose(out);
