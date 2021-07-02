@@ -4,3 +4,4 @@
 **/*.exe
 **/*.clang-format
 **/*.idea
+/Ausarbeitung/

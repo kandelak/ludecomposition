@@ -5,7 +5,7 @@
 %% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
 %% mit den richtigen Werten.
 \newcommand{\theGroup}{196} % Beispiel: 42
-\newcommand{\theNumber}{IhreProjektnummer} % Beispiel: A123
+\newcommand{\theNumber}{A328} % Beispiel: A123
 \author{⁨Aleksandre Kandelaki \and Matthias Staritz \and Benjamin Liertz}
 \date{Sommersemester 2020/21} % Beispiel: Wintersemester 2019/20
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,39 +24,130 @@ in die Rechnerarchitektur an der TU München ein in linearer Algebra häufig
 benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokumentiert.\\
 
 \noindent\hspace*{15mm}%
-Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt, bietet eine Interpretation des Gaußalgorithmus 
-	 und somit eine Möglichkeit mit dem Computer lineare Gleichungssysteme zu 
-	 lösen und Matrixinverse zu bestimmen.\\
- 
-\noindent\hspace*{15mm}%
-Die LU-Zerlegung liefert mit Hilfe desselben Prinzips für jedes
-   eindeutig lösbare Gleichungssystem, also wenn A regulär ist, zwei Dreiecksmatrizen L und 
-   U und eine Pivot-Matrix P, wobei P*L*U = A ergibt.Hierbei haben die Matrizen besondere 
+Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt,
+ bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen.
+Dazu liefert die LU-Zerlegung für jedes eindeutig
+ lösbare Gleichungssystem, also wenn A regulär ist,
+  zwei Dreiecksmatrizen L und U und eine Pivot-Matrix P,
+   wobei P*L*U = A ergibt. Hierbei haben die Matrizen besondere 
    Eigenschaften. L hat in allen Einträgen oberhalb der Diagonalen die Werte 0 und liefert 
    Auskunft über die Verwendeten Zeilenoperationen. U hingegen hat in allen Einträgen unterhalb
     der Diagonalen die Werte 0 und bildet somit eine Zeilenstufenform des LGS von der sich die 
     Lösungsmenge einfach ableiten lässt. Die Matrix P ist im eine Einheitsmatrix mit ggf. 
-    vertauschten Zeilen mit der die Vertauschung von Zeilen nachvollziehbar wird.\\\\
+    vertauschten Zeilen mit der die Vertauschung von Zeilen nachvollziehbar wird. \\
     
 
 \noindent\hspace*{15mm}%
 Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
-\\\\\\\\\\\\\\\
-\noindent\hspace*{15mm}%
-Welches auch so dargestellt werden kann:  
-\\\\\\\\\\\\\\\
+\begin{eqnarray}
+0x_1 + 3x_2 + 5x_3 + 7x_4 = 0 \\
+2x_1 + 6x_2 + 10x_3 + 14x_4 = 0\\
+-4x_1 + 12x_2 + 15x_3 + -21x_4 = 0\\
+6x_1 + 9x_2 + -5x_3 + -7x_4 = 0
+\end{eqnarray}
+
+
 
 \noindent\hspace*{15mm}%
-Wird nun die LU-Zerlegung hierauf angewendet ergeben sich folgende Matrizen:
-\\\\\\\\\\\\\\
+Welches auch so dargestellt werden kann:
+\begin{equation}
+A = \begin{bmatrix}
+ 0	& 3	 & 5  & 7 \\
+ 2	& 6	 & 10 & 14 \\
+-4	& 12 & 15 & -21\\
+ 6	& 9  & -5 & -7\\
+ \end{bmatrix}
+\end{equation}
+
+
+\noindent\hspace*{15mm}%
+Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
+ \begin{equation}
+
+ A = \begin{bmatrix}
+ 0	& 3	 & 5  & 7 \\
+ 2	& 6	 & 10 & 14 \\
+-4	& 12 & 15 & -21\\
+ 6	& 9  & -5 & -7\\
+ \end{bmatrix}
+  L =
+ \begin{bmatrix}
+ 1	& 0	 & 0  & 0 \\
+ 0	& 1	 & 0 & 0 \\
+-2	& 8 & 1 & 0\\
+ 3	& -3  & 4 & 1\\
+ \end{bmatrix}
+ U =
+\begin{bmatrix}
+ 2	& 6	 & 10 & 14 \\
+ 0	& 3	 & 5 &  7 \\
+ 0	& 0  & -5 & -49\\
+ 0	& 0  & 0 &  168\\
+ \end{bmatrix}
+ P =
+ \begin{bmatrix}
+ 0	& 1	 & 0 & 0 \\
+ 1	& 0	 & 0 & 0 \\
+ 0	& 0  & 1 & 0\\
+ 0	& 0  & 0 & 1\\
+ \end{bmatrix}
+ \end{equation}
+ 
+ 
 
 
 
 \section{Lösungsansatz}
+\noindent\hspace*{15mm}%
+Zur Durchführung diser Zerlegung haben wir uns entschieden einen Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
+ Das gaußsche Eliminationsverfahren auf einer Matrix verwendet elementare Zeilenoperationen, wie das Tauschen zweier Zeilen oder das Addieren von vielfachen einer Zeile auf eine andere
+ um die Einträge der Matrix zu ändern. Dabei wird das Gleichungssystem A*x = b verändert die Lösung bleibt aber erhalten.\\
+\noindent\hspace*{15mm}%
+Unter Verwendung dieses Verfahrens erstellen wir eine obere Dreieckmatrix bei der alle Einträge unter der 
+diagonalen 0 sind. So erhalten wir unsere U Matrix. Um nun auch unsere L und P Matrizen zu erhalten, müssen
+wir nur alle Schritte die zur Generierung der U matrix beigetragen haben Dokumentieren. Jedes mal wenn wir eine Zeile auf eine andere addieren
+wird dies in der L Matrix festgehalten indem genau die selbe Operation auf dieser L Matrix durchgeführt wird. Jede Zeilenvertauschung Wird auf die selbe Art in P festgehalten(siehe Grafik 6).  
+Um nun sicher eine gültige L Matrix zu erhalten welche oberhalb der Diagonalen nur die 0 als Einträge hat, folgt der Algorithmus strikt der Vorgehensweise des Gauß Algorithmus.\\
+\noindent\hspace*{15mm}%
+ Gehen wir davon aus das wir für jede der Matrizen L, U und P einen Speicherplatz haben.
+Zu beginn müssen die passenden Startwerte In diesen Matrizen abgelegt werden. In L und P sind das einfach Einheitsmatrizen und in L wird die Eingabematrix A geschriben. Nun Werden die Eintäge unterhalb der Diagonalen in U  
+Spaltenweise von Links nach Rechts auf 0 gesetzt indem man immer ein genau passendes vielfaches einer oberen Zeile von allen darunterliegenden 
+Zeilen abzieht.(?? Grafik Einfügen ??) Die Wahl der Zeile hängt davon ab welche Spalte gerade auf 0 gesetzt werden soll. 
+Bei Spalte 1 ist es Zeile 1 bei Spalte 2 Zeile 2 und so weiter. Da man sich hierbei von oben nach unten bwz. von links nach rechts Vorarbeitet generiert man schrittweise
+die gewünschte L und U Matrix. Nun kann es aber vorkommen dass in der Zeile welche von den anderen Zeilen subtrahiert werden soll an dem Index der zu bearbeitenden
+Spalte eine 0 steht. Dies birgt das Problem dass nun kein vielfaches dieser Zeile jehmals die anderen Einträge der Spalte durch subtraktion auf 0 bringen kann
+da $ 0 \times x = 0$. Um dieses Problem zu vermeiden haben wir uns entschieden generell, bevor wir mit der Nullung einer Zeile beginnen immer die Zeile mit dem größsten Eintrag
+am entsprechenden Index nach oben zu Tauschen(Siehe Grafik). Dadurch wird Garantiert dass der Algorithmus bei einer regulären, quadratischen Matrix erfolgreich durchläuft. Im Abschnitt zur Genauigkeit wird noch genau darauf 
+eingegeangen warum wir immer die Zeile mit dem größten Eintrag nach oben tauschen und nicht bloß Irgend eine Zeile mit Eintrag ungleich 0.
+Hierbei sei gesagt dass nicht jede Matrixzerlegung Zeilenvertauschungen benötigt und das der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was potential für 
+optimierungen bietet.\\\\
+ 
+
+ (GRafik für vertauschungen und addierungen mit notierung in P und L mit referenz im text)\\\\
+\noindent\hspace*{15mm}% 
+ Wie man sieht erhält man mit diesem Algorithmus in L eine untere Dreiecksmatrix in U eine obere Dreieckmarix 
+ und gegebenpalls in P eine einheitsmatrix mit zeilenvertauschungen\\\\
+
+\noindent\hspace*{15mm}%
+Von dem verfahren mit Gauß Algorithmus haben wir unterschiedliche versionen Implementiert um verschiede optimierungen zu testen.
+ Wir haben 2 verschiedene einfache C implementierungn dieses Ansatzes erstellt.
+Eine version welche wie im eben beschriebenen verfahren Pivotisiert und eine die dies nicht tut um bei Matrizen die keine Pivotisierung benötigen
+eine bessere Performance bei der Zerlegung zu erreichen.
+Dies birgt natürlich die Gefahr dass die Matrix nicht erfolgreich zerlegt werden kann, sollte doch eine Pivotisierung von nöten sein.\\
+  Unsere letzen beiden Optimierungen ist eine Implementierung unter verwendung von Intel Intrinsics und eine direkte Assembler
+  Implementierung. Beide dieser implementierungen sind Optimiert durch Vektorisierug mit SIMD.\\
+ Hierbei machen wir uns zu nutze dass das Gaußverfahren aussschliesslich aus Zeilenoperationen auf einer matrix besteht wodurch
+ wir mit xmm registern meistens 4 floating point zahlen auf einmal verarbeiten können.
+  
+  
+
+
+
+
 
 
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
-\section{Korrektheit/Genauigkeit}
+\section{Genauigkeit}
 
 
 \section{Performanzanalyse}
