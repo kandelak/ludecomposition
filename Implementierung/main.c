@@ -125,7 +125,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
     {
         func(size_of_matr_row, A, L, U, P);
     }
-    
+
     if (print)
     {
         print_pretty(output, A, L, U, P, size_of_matr_row, i);
@@ -200,11 +200,9 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    int pivoting = 1;
     int test_predefined = 0;
     int generate_multiple_input = 0;
     int generate_single_input = 0;
-    int a = 0;
     int benchmarking = 0;
     int bench_predefined = 0;
     int version = 0; //ludecomp is the default Version
@@ -212,6 +210,7 @@ int main(int argc, char **argv)
     char *output = NULL;
     char *random = NULL;
     size_t max_size_random_tests = 0;
+    int tolerate = 1;
 
     int print = 1;
 
@@ -224,13 +223,13 @@ int main(int argc, char **argv)
         {"bench-all", no_argument, 0, 'a'},
         {"no-print", no_argument, 0, 'n'},
         {"test-all", no_argument, 0, 't'},
-        {"generate", required_argument, 0, 'r'},
-        {"generate-single-size", required_argument, 0, 's'},
+        {"random-multiple-test", required_argument, 0, 'r'},
+        {"random-test", required_argument, 0, 's'},
     };
 
     int opt;
 
-    while ((opt = getopt_long(argc, argv, "o:bhpv:r:f:i:nts:", long_options, NULL)) !=
+    while ((opt = getopt_long(argc, argv, "o:bhv:r:f:i:nts:", long_options, NULL)) !=
            -1)
     {
 
@@ -242,9 +241,6 @@ int main(int argc, char **argv)
         case 'r':
             generate_multiple_input = 1;
             max_size_random_tests = strtol(optarg, NULL, 10);
-            break;
-        case 'p':
-            pivoting = 0;
             break;
         case 'v':
             version = strtol(optarg, NULL, 10);
@@ -284,25 +280,31 @@ int main(int argc, char **argv)
     }
 
     /**
-     * If Generating the random Inputs for Testing
+     * Setting the chosen Implementation
+     */
+
+    const implementation_version *impl = &implementations[version];
+
+    /**
+     * Generating the random Inputs for Testing
      */
     if (generate_multiple_input)
     {
-        if (!output && max_size_random_tests > 20)
-        {
-            fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
-            exit(EXIT_FAILURE);
-        }
         printf("Generating randomized Inputs for Testing...\n");
-        generate_random_tests(max_size_random_tests, 0, output);
+        generate_random_tests(max_size_random_tests, 0, "gen_file.txt");
         printf("Generating done.\n");
         exit(EXIT_SUCCESS);
     }
     else if (generate_single_input)
     {
+
         printf("Generating randomized Inputs for Testing...\n");
-        generate_random_tests(max_size_random_tests, 1, output);
+
+        generate_random_tests(max_size_random_tests, 1, "test_tmp.txt");
         printf("Generating done.\n");
+        printf("Testing..\n");
+        run_tests(impl->func, impl->func, "test_tmp.txt", output, 2e-1);
+        printf("Testing done!\n");
         exit(EXIT_SUCCESS);
     }
 
@@ -365,12 +367,6 @@ int main(int argc, char **argv)
     }
 
     /**
-     * Setting the chosen Implementation
-     */
-
-    const implementation_version *impl = &implementations[version];
-
-    /**
      * Calculate and print pre-defined Benches
      */
 
@@ -400,7 +396,6 @@ int main(int argc, char **argv)
 
         if (size_of_matr_row > STACK_LIMIT)
         {
-            printf("da\n");
             run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, i, size_of_matr_row);
         }
         else
@@ -408,8 +403,6 @@ int main(int argc, char **argv)
             run_on_stack(impl->name, impl->func, in, out, benchmarking, print, iterations, i, size_of_matr_row);
         }
     }
-
-    //run(impl->name, impl->func, in, out, benchmarking, print, iterations);
 
     fclose(in);
     fclose(out);

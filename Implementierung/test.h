@@ -14,12 +14,6 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
 {
 
         FILE *out;
-        if (output == NULL)
-        {
-
-                out = stdout;
-        }
-        else
         {
                 out = fopen(output, "w");
                 if (!out)
@@ -54,7 +48,7 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                 }
                 float a;
                 float b;
-                float intervals[4][4] = {{0, 1}, {0, 10000}, {10000, 200000}, {400000, 400002}};
+                float intervals[4][4] = {{0, 1}, {-789,-2}, {10000, 200000}, {400000, 400002}};
 
                 int i = 0;
                 while (i < 4)
@@ -72,71 +66,100 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
         fclose(out);
 }
 
-void test_unit(void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, float tolerate)
+void run_tests(char *name, void (*func)(size_t, const float *, float *, float *, float *), char *input, char *output, float tolerate)
 {
+
+        FILE *in;
+        {
+                in = fopen(input, "r");
+                if (!in)
+                {
+                        perror("Error occurred while opening file for generating the randomized inputs for Testing");
+                        exit(EXIT_FAILURE);
+                }
+        }
+        FILE *out;
+        if (output == NULL)
+        {
+                out = stdout;
+        }
+        else
+        {
+
+                out = fopen(output, "w");
+                if (!out)
+                {
+                        perror("Error occurred while opening file for generating the randomized inputs for Testing");
+                        exit(EXIT_FAILURE);
+                }
+        }
         size_t num_of_matrices;
-        fscanf(input, "%ld", &num_of_matrices);
+        fscanf(in, "%ld", &num_of_matrices);
         size_t n;
-        size_t size;
 
         int tests_passed = 1;
-
         for (size_t i = 0; i < num_of_matrices; i++)
         {
-                fscanf(input, "%ld", &n);
-                size = n * n;
-                float matrix[size];
-                read_matrix_from_stream(n, input, matrix);
-                float L[size], U[size], P[size];
-                func(n, matrix, L, U, P);
-                if (!print_result_without_solution(n, matrix, L, U, P, output, tolerate))
+                fscanf(in, "%ld", &n);
+                size_t size_of_matr = n * n;
+
+                float *A = NULL;
+                float *L = NULL;
+                float *P = NULL;
+                float *U = NULL;
+
+                A = malloc(sizeof(float) * size_of_matr);
+                if (!A)
+                {
+                        perror("Could not allocate Memory");
+                        exit(EXIT_FAILURE);
+                }
+                L = malloc(sizeof(float) * size_of_matr);
+                if (!L)
+                {
+                        perror("Could not allocate Memory");
+                        free(A);
+                        exit(EXIT_FAILURE);
+                }
+                U = malloc(sizeof(float) * size_of_matr);
+                if (!U)
+                {
+                        perror("Could not allocate Memory");
+                        free(L);
+                        free(A);
+                        exit(EXIT_FAILURE);
+                }
+                P = malloc(sizeof(float) * size_of_matr);
+                if (!P)
+                {
+                        perror("Could not allocate Memory");
+                        free(A);
+                        free(L);
+                        free(U);
+                        exit(EXIT_FAILURE);
+                }
+
+                read_matrix_from_stream(n, in, A);
+                func(n, A, L, U, P);
+                if (!print_result_without_solution(n, A, L, U, P, out, tolerate))
                 {
                         tests_passed = 0;
                 }
+                else
+                {
+                        fprintf(out, "Test %ld Passed.\n", i + 1);
+                }
+                free(A);
+                free(L);
+                free(U);
+                free(P);
         }
+
         if (tests_passed)
         {
-                fprintf(output, "<<All Tests Passsed>>\n\n\n");
+                fprintf(out, "\n<<All Tests Passsed>>\n\n");
         }
-}
 
-#define NUM_OF_TEST_CLASSES 5
-struct test_classes
-{
-        char *name;
-        char *file;
-};
-
-typedef struct test_classes test_classes;
-
-const test_classes tests[] = {
-    {"Boundary Conditions", "testing/boundary_testing.txt"},
-    {"Input/Output Correctness", "testing/io_testing.txt"},
-    {"Memory Handling", "testing/memory_testing.txt"},
-    {"Randomized Inputs", "testing/random_testing.txt"},
-    {"Rounding Errors", "testing/rounding_error_testing.txt"},
-};
-
-void run_tests(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float test)
-{
-        FILE *input;
-        int cnt = NUM_OF_TEST_CLASSES;
-
-        while (cnt-- > 0)
-        {
-                input = fopen(tests[cnt].file, "r");
-                if (!input)
-                {
-                        perror("Could't open text file for testing input");
-                        exit(EXIT_FAILURE);
-                }
-                if (!output)
-                {
-                        perror("Couldn't open text file for writing the testing results");
-                        exit(EXIT_FAILURE);
-                }
-                fprintf(output, "Testing the program for %s...\n\n", tests[cnt].name);
-                test_unit(func, input, output, test);
-                fclose(input);
-        }
+        fclose(in);
+        fclose(out);
 }

@@ -113,10 +113,13 @@ int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
     for (size_t i = 0; i < n * n; i++)
     {
         if (fabsf(orgM[i] - M[i]) >= tolerate)
+        {
             res++;
+        }
     }
     return res;
 }
+
 #define LINE_SEPARATOR " \n############################################### \n\n"
 
 void run_bench(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row)
@@ -175,20 +178,39 @@ int print_result_without_solution(size_t n, float *A, float *L, float *U,
                                   float *P, FILE *output, float tolerate)
 {
     int res = 1;
-    float LxU[n * n], PxLxU[n * n];
+    size_t size_of_matr = n * n;
+    float *LxU = NULL;
+    float *PxLxU = NULL;
+
+    LxU = malloc(sizeof(float) * size_of_matr);
+    if (!LxU)
+    {
+        perror("Could not allocate Memory for Testing\n\n");
+        exit(EXIT_FAILURE);
+    }
+    PxLxU = malloc(sizeof(float) * size_of_matr);
+    if (!PxLxU)
+    {
+        perror("Could not allocate Memory for Testing\n\n");
+        free(LxU);
+        exit(EXIT_FAILURE);
+    }
+
     matrix_mul(n, L, U, LxU);
     matrix_mul(n, P, LxU, PxLxU);
+
     int test_PxLxU = test_matrix_eq(n, A, PxLxU, tolerate);
+
     if (test_PxLxU != 0)
     {
         fprintf(output, "<<Wrong Output. Printing Error Matrix...>>\n\n\n");
+        if(size_of_matr<100)
         print_error_matrix(n, A, PxLxU, output, tolerate);
         res = 0;
     }
-    else
-    {
-        fprintf(output, "<<No Errors on this Matrix>>\n\n\n");
-    }
+
+    free(LxU);
+    free(PxLxU);
     return res;
 }
 
