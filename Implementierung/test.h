@@ -93,6 +93,7 @@ void run_tests(char *name, void (*func)(size_t, const float *, float *, float *,
                         exit(EXIT_FAILURE);
                 }
         }
+        fprintf(out, "Implementation : %s\n", name);
         size_t num_of_matrices;
         fscanf(in, "%ld", &num_of_matrices);
         size_t n;

@@ -195,11 +195,10 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
     {
         print_pretty(output, A, L, U, P, size_of_matr_row, i);
     }
-
+    free(P);
     free(A);
     free(L);
     free(U);
-    free(P);
 }
 
 struct implementation_version
@@ -333,7 +332,7 @@ int main(int argc, char **argv)
         generate_random_tests(max_size_random_tests, 1, "test_tmp.txt");
         printf("Generating done.\n");
         printf("Testing..\n");
-        run_tests(impl->func, impl->func, "test_tmp.txt", output, 2e-1);
+        run_tests(impl->name, impl->func, "test_tmp.txt", output, 2e-1);
         printf("Testing done!\n");
         exit(EXIT_SUCCESS);
     }
@@ -417,14 +416,12 @@ int main(int argc, char **argv)
     fscanf(in, "%ld", &num_of_matrices);
 
     size_t size_of_matr_row;
-    size_t size_of_matr;
+
     for (size_t i = 0; i < num_of_matrices; i++)
     {
         fscanf(in, "%ld", &size_of_matr_row);
 
-        size_of_matr = size_of_matr_row * size_of_matr_row;
-
-        if (size_of_matr_row > STACK_LIMIT)
+         if (size_of_matr_row > STACK_LIMIT)
         {
             run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, i, size_of_matr_row);
         }

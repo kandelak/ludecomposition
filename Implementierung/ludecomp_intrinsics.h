@@ -93,7 +93,7 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
             // Writing factors in L
 
             L[i + (j + 1) * n] = faktor;
-            int k = 0;
+            size_t k = 0;
 
             // n is unsigned -> if n<3 -> n-3 = very big number
             if (n > 3)
