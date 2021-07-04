@@ -23,6 +23,15 @@ void writeMatrix(FILE *out, size_t n, const float *M)
 {
     for (size_t index = 0; index < n * n - 1; index++)
     {
+        fprintf(out, "%f\n", M[index]);
+    }
+    fprintf(out, "%f\n", M[n * n - 1]);
+}
+
+void write_pretty(FILE *out, size_t n, const float *M)
+{
+    for (size_t index = 0; index < n * n - 1; index++)
+    {
         fprintf(out, "%f ", M[index]);
         if ((index + 1) % n == 0)
             fprintf(out, "\n");
@@ -63,18 +72,6 @@ void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
             break;
         }
         mat_size--;
-    }
-
-    if (mat_size > (index - 1))
-    {
-        printf("ERROR : Wrong number of entries for the Matrix for the specified size  \n"
-               "Usage : \nfirst number is always the number of Matrices to be calculated  \n "
-               "Row/Column size of the particular Matrix\n"
-               "Entries of the Matrix\n\n"
-               "Row/Column size of the particular Matrix\n"
-               "Entries of the Matrix..\n");
-        fclose(fp);
-        exit(EXIT_FAILURE);
     }
 }
 
@@ -138,17 +135,18 @@ void run_bench(void (*func)(size_t, const float *, float *, float *, float *), F
 
 void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
 {
-    fprintf(output, "\nOperation %ld: \n\n", i + 1);
+
+    fprintf(output, "\nOperation %ld: \n\n", i);
     fprintf(output, " Matrix A: \n\n");
-    writeMatrix(output, size_of_matr_row, A);
+    write_pretty(output, size_of_matr_row, A);
     fprintf(output, " Matrix L: \n\n");
-    writeMatrix(output, size_of_matr_row, L);
+    write_pretty(output, size_of_matr_row, L);
 
     fprintf(output, " Matrix U: \n\n");
-    writeMatrix(output, size_of_matr_row, U);
+    write_pretty(output, size_of_matr_row, U);
 
     fprintf(output, " Matrix P: \n\n");
-    writeMatrix(output, size_of_matr_row, P);
+    write_pretty(output, size_of_matr_row, P);
     fprintf(output, LINE_SEPARATOR);
 
     //print_result_without_solution(size_of_matr_row, A, L, U, P, output, 1e-3);
@@ -207,7 +205,7 @@ int print_result_without_solution(size_t n, float *A, float *L, float *U,
         if (size_of_matr < 100)
         {
             fprintf(output, "<<Wrong Output. Printing Error Matrix...>>\n\n\n");
-           // print_error_matrix(n, A, PxLxU, output, tolerate);
+            // print_error_matrix(n, A, PxLxU, output, tolerate);
         }
         res = 0;
     }

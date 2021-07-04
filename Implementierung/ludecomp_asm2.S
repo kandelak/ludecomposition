@@ -127,8 +127,8 @@ lea r10,[rdx+4*rdi]
 # Address for all Entries in each Column (Under each Leading Entry)
 # U
 lea r15,[rcx+4*rdi]
-mov r11,rcx
 mov r13,r15
+mov r11,rcx
 
 # P
 mov r14,r8
@@ -149,126 +149,11 @@ dec r9
 cmp r9,0
 jle .L_loop1_end
 
+# Updating Addresses for Matrix U and L
+
 lea rcx,[rcx+4*rdi+4]
 lea rdx,[rdx+4*rdi+4]
-lea r8,[r8+4*rdi+4]
 
-mov r15,rcx
-mov r10,rdx
-mov r14,r8
-
-# Pivoting 
-
-# Swap rows if needed
-
-mov rax,r9
-movss xmm1,dword ptr [rcx]
-mov r13,r15
-mov r11,r10
-mov r12,r14
-
-.L_find_max:
-
-dec rax
-cmp rax,0
-jle .L_find_max_end
-
-lea r15,[r15+4*rdi]
-lea r10,[r10+4*rdi]
-lea r14,[r14+4*rdi]
-
-movss xmm0,dword ptr [r15]
-comiss xmm0,xmm1
-jle .L_find_max
-mov r13,r15
-mov r11,r10
-mov r12,r14
-jmp .L_find_max
-
-.L_find_max_end:
-cmp r13,r15
-je .L_swap_end
-
-mov rax,r9
-mov r15,rcx
-mov r14,r8
-mov r10,rdx
-
-# Vectorized
-.L_swap:
-cmp rax,4
-jle .L_swap_scalar
-
-# Swapping in U
-movups xmm1 , xmmword ptr [r15]
-movups xmm0 , xmmword ptr [r13] 
-movups xmmword ptr [r15] , xmm0
-movups xmmword ptr [r13] , xmm1
-
-# Swapping in L
-movups xmm1 , xmmword ptr [r10]
-movups xmm0 , xmmword ptr [r11] 
-movups xmmword ptr [r10] , xmm0
-movups xmmword ptr [r11] , xmm1
-
-# Swapping in P
-movups xmm1 , xmmword ptr [r14]
-movups xmm0 , xmmword ptr [r12] 
-movups xmmword ptr [r14] , xmm0
-movups xmmword ptr [r12] , xmm1
-
-
-
-sub rax,4
-add r15,16
-add r13,16
-add r15,16
-add r15,16
-add r13,16
-add r13,16
-
-jmp .L_swap
-
-
-# Scalar
-
-.L_swap_scalar:
-cmp rax,0
-jle .L_swap_end
-# Swapping in U
-movss xmm1 , dword ptr [r15]
-movss xmm0 , dword ptr [r13] 
-movss dword ptr [r15] , xmm0
-movss dword ptr [r13] , xmm1
-
-# Sspping in L
-movss xmm1 , dword ptr [r10]
-movss xmm0 , dword ptr [r11] 
-movss dword ptr [r10] , xmm0
-movss dword ptr [r11] , xmm1
-
-# Sspping in P
-movss xmm1 , dword ptr [r14]
-movss xmm0 , dword ptr [r12] 
-movss dword ptr [r14] , xmm0
-movss dword ptr [r12] , xmm1
-
-
-
-dec rax
-
-add r15,4
-add r13,4
-add r15,4
-add r15,4
-add r13,4
-add r13,4
-
-jmp .L_swap_scalar
-
-.L_swap_end:
-
-# Updating Addresses for Matrix U and L
 lea r15,[rcx+4*rdi]
 mov r11,rcx
 
