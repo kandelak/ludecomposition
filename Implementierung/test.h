@@ -26,7 +26,7 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
         if (only_this_size)
         {
                 start = max_size_of_row;
-                fprintf(out, "%ld\n", 4);
+                fprintf(out, "%ld\n", 1);
         }
         else
         {
@@ -48,10 +48,10 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                 }
                 float a;
                 float b;
-                float intervals[4][4] = {{0, 1}, {-789,-2}, {10000, 200000}, {400000, 400002}};
+                float intervals[4][4] = {{0, 1}, {-789, -2}, {10000, 200000}, {400000, 400002}};
 
                 int i = 0;
-                while (i < 4)
+                // while (i < 4)
                 {
                         a = intervals[i][0];
                         b = intervals[i][1];
@@ -143,6 +143,7 @@ void run_tests(char *name, void (*func)(size_t, const float *, float *, float *,
                 func(n, A, L, U, P);
                 if (!print_result_without_solution(n, A, L, U, P, out, tolerate))
                 {
+                        fprintf(out, "Test %ld Failed.\n", i + 1);
                         tests_passed = 0;
                 }
                 else
@@ -157,8 +158,10 @@ void run_tests(char *name, void (*func)(size_t, const float *, float *, float *,
 
         if (tests_passed)
         {
-                fprintf(out, "\n<<All Tests Passsed>>\n\n");
+                fprintf(out, "\n<<All Tests Passsed>>\n");
         }
+
+        fprintf(out, "\n");
 
         fclose(in);
         fclose(out);

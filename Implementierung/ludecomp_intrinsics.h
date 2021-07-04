@@ -95,16 +95,19 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
             L[i + (j + 1) * n] = faktor;
             int k = 0;
 
-            for (k = 0; k < n - 3; k += 4)
+            // n is unsigned -> if n<3 -> n-3 = very big number
+            if (n > 3)
             {
-                __m128 temp = _mm_loadu_ps(faktor_arr);
-                __m128 temp2 = _mm_loadu_ps(&U[(i * n) + k]);
-                temp = _mm_mul_ps(temp, temp2);
-                temp2 = _mm_loadu_ps(&U[(j + 1) * n + k]);
-                temp = _mm_sub_ps(temp2, temp);
-                _mm_storeu_ps(&U[(j + 1) * n + k], temp);
+                for (k = 0; k < n - 3; k += 4)
+                {
+                    __m128 temp = _mm_loadu_ps(faktor_arr);
+                    __m128 temp2 = _mm_loadu_ps(&U[(i * n) + k]);
+                    temp = _mm_mul_ps(temp, temp2);
+                    temp2 = _mm_loadu_ps(&U[(j + 1) * n + k]);
+                    temp = _mm_sub_ps(temp2, temp);
+                    _mm_storeu_ps(&U[(j + 1) * n + k], temp);
+                }
             }
-
             for (size_t x = k; x < n; x++)
             {
                 U[(j + 1) * n + x] -= U[(i * n) + x] * faktor;

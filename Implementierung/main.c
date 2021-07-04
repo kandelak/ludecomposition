@@ -123,7 +123,8 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
     }
     else
     {
-        func(size_of_matr_row, A, L, U, P);
+        for (int k = 0; k < iterations; k++)
+            func(size_of_matr_row, A, L, U, P);
     }
 
     if (print)
@@ -136,14 +137,39 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
 {
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
-    float *A = malloc(sizeof(float) * size_of_matr);
-    float *L = malloc(sizeof(float) * size_of_matr);
-    float *U = malloc(sizeof(float) * size_of_matr);
-    float *P = malloc(sizeof(float) * size_of_matr);
+    float *A = NULL;
+    float *L = NULL;
+    float *P = NULL;
+    float *U = NULL;
 
-    if (!A || !L || !U || !P)
+    A = malloc(sizeof(float) * size_of_matr);
+    if (!A)
     {
         perror("Could not allocate Memory");
+        exit(EXIT_FAILURE);
+    }
+    L = malloc(sizeof(float) * size_of_matr);
+    if (!L)
+    {
+        perror("Could not allocate Memory");
+        free(A);
+        exit(EXIT_FAILURE);
+    }
+    U = malloc(sizeof(float) * size_of_matr);
+    if (!U)
+    {
+        perror("Could not allocate Memory");
+        free(L);
+        free(A);
+        exit(EXIT_FAILURE);
+    }
+    P = malloc(sizeof(float) * size_of_matr);
+    if (!P)
+    {
+        perror("Could not allocate Memory");
+        free(A);
+        free(L);
+        free(U);
         exit(EXIT_FAILURE);
     }
 
@@ -159,7 +185,10 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
     }
     else
     {
-        func(size_of_matr_row, A, L, U, P);
+        for (int k = 0; k < iterations; k++)
+        {
+            func(size_of_matr_row, A, L, U, P);
+        }
     }
 
     if (print)
@@ -196,6 +225,7 @@ int main(int argc, char **argv)
 
     if (argc <= 1)
     {
+
         printf("Invalid size of operands. Please Refer to --help/-h\n\n");
         exit(EXIT_FAILURE);
     }

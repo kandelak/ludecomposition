@@ -109,12 +109,13 @@ void print_error_matrix(size_t n, float *orgM, float *M, FILE *output, float tol
 
 int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 {
-    int res = 0;
+    int res = 1;
     for (size_t i = 0; i < n * n; i++)
     {
         if (fabsf(orgM[i] - M[i]) >= tolerate)
         {
-            res++;
+            printf("<<%f!=%f>> ", M[i], orgM[i]);
+            res = 0;
         }
     }
     return res;
@@ -201,11 +202,13 @@ int print_result_without_solution(size_t n, float *A, float *L, float *U,
 
     int test_PxLxU = test_matrix_eq(n, A, PxLxU, tolerate);
 
-    if (test_PxLxU != 0)
+    if (!test_PxLxU)
     {
-        fprintf(output, "<<Wrong Output. Printing Error Matrix...>>\n\n\n");
-        if(size_of_matr<100)
-        print_error_matrix(n, A, PxLxU, output, tolerate);
+        if (size_of_matr < 100)
+        {
+            fprintf(output, "<<Wrong Output. Printing Error Matrix...>>\n\n\n");
+           // print_error_matrix(n, A, PxLxU, output, tolerate);
+        }
         res = 0;
     }
 
