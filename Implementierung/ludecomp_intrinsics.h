@@ -85,32 +85,38 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
 
         for (size_t j = i; j < n - 1; j++)
         {
+            // Row with Leading entry in Column
+            int offset2 = (j + 1) * n;
+            // Actual Row
+            int offset1 = i * n;
 
-            float faktor = U[i + (j + 1) * n] / U[i + (i * n)];
+            float faktor = U[i + offset2] / U[i + offset1];
 
             float faktor_arr[4] = {faktor, faktor, faktor, faktor};
 
             // Writing factors in L
 
-            L[i + (j + 1) * n] = faktor;
+            L[i + offset2] = faktor;
             size_t k = 0;
+
+            __m128 factors = _mm_loadu_ps(faktor_arr);
 
             // n is unsigned -> if n<3 -> n-3 = very big number
             if (n > 3)
             {
                 for (k = 0; k < n - 3; k += 4)
                 {
-                    __m128 temp = _mm_loadu_ps(faktor_arr);
-                    __m128 temp2 = _mm_loadu_ps(&U[(i * n) + k]);
-                    temp = _mm_mul_ps(temp, temp2);
-                    temp2 = _mm_loadu_ps(&U[(j + 1) * n + k]);
-                    temp = _mm_sub_ps(temp2, temp);
-                    _mm_storeu_ps(&U[(j + 1) * n + k], temp);
+                    __m128 temp2 = _mm_loadu_ps(&U[offset1 + k]);
+                    __m128 temp3 = _mm_mul_ps(factors, temp2);
+                    temp2 = _mm_loadu_ps(&U[offset2 + k]);
+                    temp3 = _mm_sub_ps(temp2, temp3);
+                    _mm_storeu_ps(&U[(j + 1) * n + k], temp3);
                 }
             }
+            // Scalar completion if needed
             for (size_t x = k; x < n; x++)
             {
-                U[(j + 1) * n + x] -= U[(i * n) + x] * faktor;
+                U[offset2 + x] -= U[offset1 + x] * faktor;
             }
         }
     }

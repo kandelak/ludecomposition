@@ -8,6 +8,116 @@
 #include <alloca.h>
 #include <malloc.h>
 #include <time.h>
+#include <errno.h>
+
+/**
+ * Checks validity of the input
+ * 
+ */
+
+int check_validity(FILE *input)
+{
+    char buf[50];
+
+    size_t num_of_matr;
+
+    if (!fgets(buf, 50, input))
+    {
+        perror("Reading Input Failed.\n");
+        return 0;
+    }
+
+    errno = 0;
+
+    char *endptr;
+
+    num_of_matr = strtol(buf, &endptr, 10);
+
+    if (errno == ERANGE)
+    {
+        perror("Integer Number read is too small or too large.\n");
+        return 0;
+    }
+    else if (endptr == buf)
+    {
+        printf("Nothing Read (No input for the number of the matrices)\n");
+        return 0;
+    }
+    else if (*endptr && *endptr != '\n')
+    {
+        printf("Wrong Input Format (Number of matrices). Please refer to --help/-h.\n");
+        return 0;
+    }
+    else if ((int)num_of_matr <= 0)
+    {
+        printf("Number of Matrices can not be less than or equal 0.\n");
+        return 0;
+    }
+
+    for (size_t k = 0; k < num_of_matr; k++)
+    {
+        if (!fgets(buf, 50, input))
+        {
+            perror("Reading Input Failed.\n");
+            return 0;
+        }
+
+        size_t size_of_matr_row = strtol(buf, &endptr, 10);
+
+        if (errno == ERANGE)
+        {
+            perror("Integer number read was too small or too large.\n");
+            return 0;
+        }
+        else if (endptr == buf)
+        {
+            printf("Nothing Read (No input for the Size of the Matrix)\n");
+            return 0;
+        }
+        else if (*endptr && *endptr != '\n')
+        {
+            printf("Wrong Input Format (Size of the matrix row). Please refer to --help/-h.\n");
+            return 0;
+        }
+        else if ((int)size_of_matr_row <= 0)
+        {
+            printf("Size of the Matrix can not be less than or equal zero.\n");
+            return 0;
+        }
+
+        size_t size_of_matr = size_of_matr_row * size_of_matr_row;
+        for (size_t i = 0; i < size_of_matr; i++)
+        {
+            if (!fgets(buf, 50, input))
+            {
+                perror("Reading Input Failed.\n");
+                return 0;
+            }
+
+            float matr_entry = strtod(buf, &endptr);
+
+            if (errno == ERANGE)
+            {
+                perror("Floating-point Number read was too small or too large.\n");
+                return 0;
+            }
+            else if (endptr == buf)
+            {
+                printf("Nothing Read (Not enough entries for specified size of the Matrix)\n");
+                return 0;
+            }
+            else if (*endptr && *endptr != '\n')
+            {
+
+                printf("Wrong Input Format (Matrix Entry). Please refer to --help/-h.\n");
+
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
 
 /**
  * For Benchmarking the program
@@ -58,7 +168,7 @@ void write_pretty(FILE *out, size_t n, const float *M)
  * @param fp
  * @param matrix
  */
-void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
+void read_matrix_from_stream(size_t n, FILE *fp, const float *matrix)
 {
 
     size_t index = 0;
@@ -104,14 +214,20 @@ void print_error_matrix(size_t n, float *orgM, float *M, FILE *output, float tol
     }
 }
 
-int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
+int test_matrix_eq(size_t n, float *orgM, float *M, int print, float tolerate)
 {
     int res = 1;
-    for (size_t i = 0; i < n * n; i++)
+    size_t matr_size = n * n;
+    int print_max = 5;
+    for (size_t i = 0; i < matr_size; i++)
     {
         if (fabsf(orgM[i] - M[i]) >= tolerate)
         {
-            printf("<<%f!=%f>> ", M[i], orgM[i]);
+            if (print && print_max-- > 0)
+            {
+                printf("Matrix entry: %ld,%ld\n", i / matr_size, i % n);
+                printf("Expected: %f, Got: %f\n", orgM[i], M[i]);
+            }
             res = 0;
         }
     }
@@ -124,13 +240,16 @@ void run_bench(void (*func)(size_t, const float *, float *, float *, float *), F
 {
     double start, end;
     fprintf(output, "%s Implementation on Operation %ld took (in Seconds) : \n", name, i + 1);
+    double diff;
     for (size_t k = 0; k < iterations; k++)
     {
         start = curtime();
         func(size_of_matr_row, A, L, U, P);
         end = curtime();
-        fprintf(output, "%f\n", end - start);
+        diff += (end - start);
     }
+    diff /= iterations;
+    fprintf(output, "%f\n", diff);
 }
 
 void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
@@ -148,8 +267,6 @@ void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t s
     fprintf(output, " Matrix P: \n\n");
     write_pretty(output, size_of_matr_row, P);
     fprintf(output, LINE_SEPARATOR);
-
-    //print_result_without_solution(size_of_matr_row, A, L, U, P, output, 1e-3);
 }
 
 void printMatrix(size_t n, const float *M, FILE *output)
@@ -174,7 +291,7 @@ void matrix_generator_intervals(size_t n, float *A, float a, float b)
  * Returns 1 if no errors found and 0 if yes. 
  */
 int print_result_without_solution(size_t n, float *A, float *L, float *U,
-                                  float *P, FILE *output, float tolerate)
+                                  float *P, FILE *output, int print, float tolerate)
 {
     int res = 1;
     size_t size_of_matr = n * n;
@@ -198,15 +315,10 @@ int print_result_without_solution(size_t n, float *A, float *L, float *U,
     matrix_mul(n, L, U, LxU);
     matrix_mul(n, P, LxU, PxLxU);
 
-    int test_PxLxU = test_matrix_eq(n, A, PxLxU, tolerate);
+    int test_PxLxU = test_matrix_eq(n, A, PxLxU, print, tolerate);
 
     if (!test_PxLxU)
     {
-        if (size_of_matr < 100)
-        {
-            fprintf(output, "<<Wrong Output. Printing Error Matrix...>>\n\n\n");
-            // print_error_matrix(n, A, PxLxU, output, tolerate);
-        }
         res = 0;
     }
 

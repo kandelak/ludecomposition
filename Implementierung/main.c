@@ -9,122 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/random.h>
-#include <errno.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <float.h>
-
-/**
- * Checks validity of the input
- * 
- */
-
-int check_validity(FILE *input)
-{
-    char buf[50];
-    size_t is_long = 1;
-
-    size_t cnt = 0;
-    size_t num_of_matr;
-    int success;
-
-    if (!fgets(buf, 50, input))
-    {
-        perror("Reading Input Failed.\n");
-        return 0;
-    }
-
-    errno = 0;
-
-    char *endptr;
-
-    num_of_matr = strtol(buf, &endptr, 10);
-
-    if (errno == ERANGE)
-    {
-        perror("Integer Number read is too small or too large.\n");
-        return 0;
-    }
-    else if (endptr == buf)
-    {
-        printf("Nothing Read (No input for the number of the matrices)\n");
-        return 0;
-    }
-    else if (*endptr && *endptr != '\n' && endptr != ' ')
-    {
-        printf("Wrong Input Format (Number of matrices). Please refer to --help/-h.\n");
-        return 0;
-    }
-    else if ((int)num_of_matr <= 0)
-    {
-        printf("Number of Matrices can not be less than or equal 0.\n");
-        return 0;
-    }
-
-    for (size_t k = 0; k < num_of_matr; k++)
-    {
-        if (!fgets(buf, 50, input))
-        {
-            perror("Reading Input Failed.\n");
-            return 0;
-        }
-
-        size_t size_of_matr_row = strtol(buf, &endptr, 10);
-
-        if (errno == ERANGE)
-        {
-            perror("Integer number read was too small or too large.\n");
-            return 0;
-        }
-        else if (endptr == buf)
-        {
-            printf("Nothing Read (No input for the Size of the Matrix)\n");
-            return 0;
-        }
-        else if (*endptr && *endptr != '\n')
-        {
-            printf("Wrong Input Format (Size of the matrix row). Please refer to --help/-h.\n");
-            return 0;
-        }
-        else if ((int)size_of_matr_row <= 0)
-        {
-            printf("Size of the Matrix can not be less than or equal zero.\n");
-            return 0;
-        }
-
-        size_t size_of_matr = size_of_matr_row * size_of_matr_row;
-        for (size_t i = 0; i < size_of_matr; i++)
-        {
-            if (!fgets(buf, 50, input))
-            {
-                perror("Reading Input Failed.\n");
-                return 0;
-            }
-
-            float matr_entry = strtod(buf, &endptr);
-
-            if (errno == ERANGE)
-            {
-                perror("Floating-point Number read was too small or too large.\n");
-                return 0;
-            }
-            else if (endptr == buf)
-            {
-                printf("Nothing Read (Not enough entries for specified size of the Matrix)\n");
-                return 0;
-            }
-            else if (*endptr && *endptr != '\n')
-            {
-
-                printf("Wrong Input Format (Matrix Entry). Please refer to --help/-h.\n");
-
-                return 0;
-            }
-        }
-    }
-
-    return 1;
-}
 
 /**
  * For choosing Implementation 
@@ -163,73 +50,74 @@ void ludecomp_asm(size_t n, float *, float *, float *, float *);
  * from the specified @param input stream
  */
 
-void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, int iterations, int testing, size_t i, size_t size_of_matr_row_row)
+void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
 
-    size_t size_of_matr_row = size_of_matr_row_row * size_of_matr_row_row;
+    size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
-    float A[size_of_matr_row];
+    float A[size_of_matr];
 
-    float L[size_of_matr_row];
+    float L[size_of_matr];
 
-    float U[size_of_matr_row];
+    float U[size_of_matr];
 
-    float P[size_of_matr_row];
+    float P[size_of_matr];
 
-    read_matrix_from_stream(size_of_matr_row_row, input, A);
+    read_matrix_from_stream(size_of_matr_row, input, A);
 
-    if (benchmarking)
+    if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row_row);
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
     }
     else
     {
         for (int k = 0; k < iterations; k++)
-            func(size_of_matr_row_row, A, L, U, P);
+            func(size_of_matr_row, A, L, U, P);
     }
 
     if (testing)
     {
+
         fprintf(output, "Testing...\n");
-        if (!print_result_without_solution(size_of_matr_row_row, A, L, U, P, output, TOLERATE_ERROR))
+        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, print, TOLERATE_ERROR))
         {
-            fprintf(output, "Test on  Operation %ld failed.\n", i);
+            fprintf(output, "Test on Operation %ld failed.\n", i);
         }
         else
         {
-            fprintf(output, "Test  on Operation %ld succeeded.\n", i);
+            fprintf(output, "Test on Operation %ld succeeded.\n", i);
         }
     }
 
     if (print)
     {
-        print_pretty(output, A, L, U, P, size_of_matr_row_row, i);
+        print_pretty(output, A, L, U, P, size_of_matr_row, i);
     }
 }
 
-void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, int iterations, int testing, size_t i, size_t size_of_matr_row_row)
+void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
-    size_t size_of_matr_row = size_of_matr_row_row * size_of_matr_row_row;
+    size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
     float *A = NULL;
     float *L = NULL;
     float *P = NULL;
     float *U = NULL;
 
-    A = malloc(sizeof(float) * size_of_matr_row);
+    A = malloc(sizeof(float) * size_of_matr);
     if (!A)
     {
         perror("Could not allocate Memory");
         exit(EXIT_FAILURE);
     }
-    L = malloc(sizeof(float) * size_of_matr_row);
+    L = malloc(sizeof(float) * size_of_matr);
     if (!L)
     {
         perror("Could not allocate Memory");
         free(A);
         exit(EXIT_FAILURE);
     }
-    U = malloc(sizeof(float) * size_of_matr_row);
+    U = malloc(sizeof(float) * size_of_matr);
     if (!U)
     {
         perror("Could not allocate Memory");
@@ -237,7 +125,7 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
         free(A);
         exit(EXIT_FAILURE);
     }
-    P = malloc(sizeof(float) * size_of_matr_row);
+    P = malloc(sizeof(float) * size_of_matr);
     if (!P)
     {
         perror("Could not allocate Memory");
@@ -251,15 +139,24 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
      *  Read and compute next Matrix
     */
 
-    read_matrix_from_stream(size_of_matr_row_row, input, A);
+    read_matrix_from_stream(size_of_matr_row, input, A);
 
-    if (benchmarking)
+    if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row_row);
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
     }
-    else if (testing)
+    else
     {
-        if (!print_result_without_solution(size_of_matr_row_row, A, L, U, P, output, TOLERATE_ERROR))
+        for (int k = 0; k < iterations; k++)
+        {
+            func(size_of_matr_row, A, L, U, P);
+        }
+    }
+
+    if (testing)
+    {
+
+        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, print, TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld Failed.\n", i + 1);
         }
@@ -268,17 +165,10 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
             fprintf(output, "Test %ld Passed.\n", i + 1);
         }
     }
-    else
-    {
-        for (int k = 0; k < iterations; k++)
-        {
-            func(size_of_matr_row_row, A, L, U, P);
-        }
-    }
 
     if (print)
     {
-        print_pretty(output, A, L, U, P, size_of_matr_row_row, i);
+        print_pretty(output, A, L, U, P, size_of_matr_row, i);
     }
     free(P);
     free(A);
@@ -337,7 +227,7 @@ int main(int argc, char **argv)
         {"bench-all", no_argument, 0, 'a'},
         {"no-print", no_argument, 0, 'n'},
         {"test-all", no_argument, 0, 't'},
-        {"random-multiple-test", required_argument, 0, 'r'},
+        {"random-tests", required_argument, 0, 'r'},
         {"random-test", required_argument, 0, 's'},
     };
 
@@ -396,6 +286,16 @@ int main(int argc, char **argv)
     /**
      * Setting the chosen Implementation
      */
+    if (version >= sizeof(implementations) / sizeof(implementation_version) || version < 0)
+    {
+        if (!output && max_size_random_tests > 20)
+        {
+            fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
+            exit(EXIT_FAILURE);
+        }
+        fprintf(stderr, "Invalid Implementation Specifier \nExiting..\n");
+        exit(EXIT_FAILURE);
+    }
 
     const implementation_version *impl = &implementations[version];
 
@@ -409,7 +309,7 @@ int main(int argc, char **argv)
         testing = 1;
         printf("Generating randomized Inputs for Testing...\n");
         generate_random_tests(max_size_random_tests, 0, gen_file);
-        printf("Generating done.\n");
+        printf("Generating done. (In file gen_file.txt)\n");
         exit(EXIT_SUCCESS);
     }
     else if (generate_single_input)
@@ -417,19 +317,8 @@ int main(int argc, char **argv)
         testing = 1;
         printf("Generating randomized Inputs for Testing...\n");
         generate_random_tests(max_size_random_tests, 1, gen_file);
-        printf("Generating done.\n");
+        printf("Generating done. (In file gen_file.txt)\n");
         exit(EXIT_SUCCESS);
-    }
-
-    if (version >= sizeof(implementations) / sizeof(implementation_version) || version < 0)
-    {
-        if (!output && max_size_random_tests > 20)
-        {
-            fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
-            exit(EXIT_FAILURE);
-        }
-        fprintf(stderr, "%s: Invalid Implementation Specifier %u\n");
-        exit(EXIT_FAILURE);
     }
 
     /**
@@ -515,19 +404,19 @@ int main(int argc, char **argv)
     size_t num_of_matrices;
     fscanf(in, "%ld", &num_of_matrices);
 
-    size_t size_of_matr_row_row;
+    size_t size_of_matr_row;
 
     for (size_t i = 0; i < num_of_matrices; i++)
     {
-        fscanf(in, "%ld", &size_of_matr_row_row);
+        fscanf(in, "%ld", &size_of_matr_row);
 
-        if (size_of_matr_row_row > STACK_LIMIT)
+        if (size_of_matr_row > STACK_LIMIT)
         {
-            run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, i, testing, size_of_matr_row_row);
+            run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
         }
         else
         {
-            run_on_stack(impl->name, impl->func, in, out, benchmarking, print, iterations, i, testing, size_of_matr_row_row);
+            run_on_stack(impl->name, impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
         }
     }
 

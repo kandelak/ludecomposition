@@ -31,7 +31,7 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
         }
         else
         {
-                fprintf(out, "%ld\n", max_size_of_row * 4);
+                fprintf(out, "%ld\n", max_size_of_row);
         }
 
         for (size_t k = start; k <= max_size_of_row; k++)
