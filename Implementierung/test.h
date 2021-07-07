@@ -27,7 +27,7 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
         if (only_this_size)
         {
                 start = max_size_of_row;
-                fprintf(out, "%ld\n", 1);
+                fprintf(out, "%ld\n",1);
         }
         else
         {
@@ -47,18 +47,14 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                         perror("Could not allocate Memory");
                         exit(EXIT_FAILURE);
                 }
-                float a;
-                float b;
-                float intervals[4][4] = {{0, 1}, {-789, -2}, {10000, 200000}, {400000, 400002}};
-
                 int i = 0;
-                // while (i < 4)
+                float exp = 100;
+                while (i++ < 1)
                 {
-                        a = intervals[i][0];
-                        b = intervals[i][1];
-                        i++;
+                       
                         fprintf(out, "%ld\n", k);
-                        matrix_generator_intervals(k, A, a, b);
+                        matrix_generator_intervals(k, A, exp);
+                        exp *= 10;
                         writeMatrix(out, k, A);
                 }
 

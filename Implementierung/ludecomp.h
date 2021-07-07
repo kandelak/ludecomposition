@@ -96,7 +96,7 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
 
-        // Pivotizing
+        // Pivoting
 
         // Swapping rows i and row_with_max in U and L
         for (size_t k = 0; k < n; k++)

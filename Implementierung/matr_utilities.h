@@ -236,11 +236,22 @@ int test_matrix_eq(size_t n, float *orgM, float *M, int print, float tolerate)
 
 #define LINE_SEPARATOR " \n############################################### \n\n"
 
-void run_bench(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row)
+void fill_matrix_with(size_t n, float *A, float a)
+{
+    size_t matr_size = n * n;
+    for (size_t k = 0; k < matr_size; k++)
+    {
+        A[k] = a;
+    }
+}
+void run_bench(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row, int print)
 {
     double start, end;
-    fprintf(output, "%s Implementation on Operation %ld took (in Seconds) : \n", name, i + 1);
-    double diff;
+    if (print)
+    {
+        fprintf(output, "Operation %ld took (in Seconds) : \n", name, i + 1);
+    }
+    double diff = 0;
     for (size_t k = 0; k < iterations; k++)
     {
         start = curtime();
@@ -248,6 +259,7 @@ void run_bench(void (*func)(size_t, const float *, float *, float *, float *), F
         end = curtime();
         diff += (end - start);
     }
+    iterations = (double)iterations;
     diff /= iterations;
     fprintf(output, "%f\n", diff);
 }
@@ -279,12 +291,11 @@ void printMatrix(size_t n, const float *M, FILE *output)
     }
 }
 
-void matrix_generator_intervals(size_t n, float *A, float a, float b)
+void matrix_generator_intervals(size_t n, float *A, float exp)
 {
     srand((unsigned int)time(NULL));
-
     for (size_t i = 0; i < n * n; i++)
-        A[i] = ((float)rand() / (float)(RAND_MAX)) * (b - a) + a;
+        A[i] = ((float)rand() / (RAND_MAX)) * exp;
 }
 
 /**

@@ -67,7 +67,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
 
     if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print);
     }
     else
     {
@@ -143,7 +143,7 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
 
     if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print);
     }
     else
     {
@@ -192,7 +192,8 @@ const implementation_version implementations[] = {
     {"c", ludecomp},
     {"c_intrinsics", ludecomp_intrinsics},
     {"asm_simd", ludecomp_asm2},
-    {"asm", ludecomp_asm}};
+    {"asm", ludecomp_asm},
+    {"c_no_P", ludecomp_without_P}};
 
 int main(int argc, char **argv)
 {
@@ -401,6 +402,9 @@ int main(int argc, char **argv)
     /**
      * Calculating Decompositions
      */
+
+    printf("Calculating using %s Implementation...\n", impl->name);
+
     size_t num_of_matrices;
     fscanf(in, "%ld", &num_of_matrices);
 
@@ -420,6 +424,7 @@ int main(int argc, char **argv)
         }
     }
 
+    printf("Calculating done.\n");
     fclose(in);
     fclose(out);
 

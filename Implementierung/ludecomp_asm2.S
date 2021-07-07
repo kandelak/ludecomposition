@@ -23,7 +23,7 @@ jbe .L_end
 
 # Copy A in U
 
-# Vectorized
+
 mov rax,rdi
 imul rax,rdi
 
@@ -32,6 +32,7 @@ imul rax,rdi
 mov rbx, rsi
 mov r12, rcx
 
+# Vectorized
 .L_copyA:
         cmp rax,4
         jl .L_copyA_scalar
@@ -110,6 +111,8 @@ jmp .L_write_nulls_scalar
 
 
 .L_ident_end:
+
+
 
 
 # Starting Decomposition
