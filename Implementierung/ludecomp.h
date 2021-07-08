@@ -57,7 +57,6 @@ void ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
 
 void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 {
-
     // Copying A in U
     for (size_t index = 0; index < n * n; index++)
     {
@@ -97,7 +96,7 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
 
-        // Pivotizing
+        // Pivoting
 
         // Swapping rows i and row_with_max in U and L
         for (size_t k = 0; k < n; k++)

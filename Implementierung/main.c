@@ -9,61 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/random.h>
-#include <errno.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <float.h>
-
-/**
- * Checks validity of the input
- * 
- */
-int check_validity(FILE *input)
-{
-    char buf[50];
-    size_t is_long = 1;
-    char *endptr;
-    size_t cnt = 0;
-    long val_long;
-    float val_float;
-    while (fgets(buf, 50, input) != NULL)
-    {
-        int len = strlen(buf);
-        // Max Length of the number representation
-        if (len > 22)
-        {
-            return 0;
-        }
-        //Check if it is a number
-        errno = 0;
-        // If Number Must be Integer
-        if (is_long == 1)
-        {
-            val_long = strtol(buf, &endptr, 10);
-            if ((errno == ERANGE && (val_long == LONG_MAX || val_long == LONG_MIN)) || (errno != 0 && val_long == 0))
-            {
-                return 0;
-            }
-        }
-        //If Number Must be Float
-        else
-        {
-            val_float = strtod(buf, &endptr);
-            if ((errno == ERANGE && (val_float == HUGE_VALF || val_float == HUGE_VALL)) || (errno != 0 && val_long == 0))
-            {
-                return 0;
-            }
-        }
-
-        if (endptr == buf)
-        {
-            fprintf(stderr, "Conversion Error Occurred on %s: ", buf);
-            return 0;
-        }
-    }
-
-    return 1;
-}
 
 /**
  * For choosing Implementation 
@@ -102,7 +50,7 @@ void ludecomp_asm(size_t n, float *, float *, float *, float *);
  * from the specified @param input stream
  */
 
-void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, int iterations, size_t i, size_t size_of_matr_row)
+void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
 
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
@@ -117,14 +65,28 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
 
     read_matrix_from_stream(size_of_matr_row, input, A);
 
-    if (benchmarking)
+    if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print);
     }
     else
     {
         for (int k = 0; k < iterations; k++)
             func(size_of_matr_row, A, L, U, P);
+    }
+
+    if (testing)
+    {
+
+        fprintf(output, "Testing...\n");
+        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, print, TOLERATE_ERROR))
+        {
+            fprintf(output, "Test on Operation %ld failed.\n", i);
+        }
+        else
+        {
+            fprintf(output, "Test on Operation %ld succeeded.\n", i);
+        }
     }
 
     if (print)
@@ -133,7 +95,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
     }
 }
 
-void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, int iterations, size_t i, size_t size_of_matr_row)
+void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
@@ -179,15 +141,28 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
 
     read_matrix_from_stream(size_of_matr_row, input, A);
 
-    if (benchmarking)
+    if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row);
+        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print);
     }
     else
     {
         for (int k = 0; k < iterations; k++)
         {
             func(size_of_matr_row, A, L, U, P);
+        }
+    }
+
+    if (testing)
+    {
+
+        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, print, TOLERATE_ERROR))
+        {
+            fprintf(output, "Test %ld Failed.\n", i + 1);
+        }
+        else
+        {
+            fprintf(output, "Test %ld Passed.\n", i + 1);
         }
     }
 
@@ -217,7 +192,8 @@ const implementation_version implementations[] = {
     {"c", ludecomp},
     {"c_intrinsics", ludecomp_intrinsics},
     {"asm_simd", ludecomp_asm2},
-    {"asm", ludecomp_asm}};
+    {"asm", ludecomp_asm},
+    {"c_no_P", ludecomp_without_P}};
 
 int main(int argc, char **argv)
 {
@@ -239,7 +215,7 @@ int main(int argc, char **argv)
     char *output = NULL;
     char *random = NULL;
     size_t max_size_random_tests = 0;
-    int tolerate = 1;
+    int testing = 0;
 
     int print = 1;
 
@@ -252,7 +228,7 @@ int main(int argc, char **argv)
         {"bench-all", no_argument, 0, 'a'},
         {"no-print", no_argument, 0, 'n'},
         {"test-all", no_argument, 0, 't'},
-        {"random-multiple-test", required_argument, 0, 'r'},
+        {"random-tests", required_argument, 0, 'r'},
         {"random-test", required_argument, 0, 's'},
     };
 
@@ -299,7 +275,7 @@ int main(int argc, char **argv)
             generate_single_input = 1;
             break;
         case 't':
-            test_predefined = 1;
+            testing = 1;
             break;
 
         default: /* '?' oder 'h' */
@@ -311,32 +287,6 @@ int main(int argc, char **argv)
     /**
      * Setting the chosen Implementation
      */
-
-    const implementation_version *impl = &implementations[version];
-
-    /**
-     * Generating the random Inputs for Testing
-     */
-    if (generate_multiple_input)
-    {
-        printf("Generating randomized Inputs for Testing...\n");
-        generate_random_tests(max_size_random_tests, 0, "gen_file.txt");
-        printf("Generating done.\n");
-        exit(EXIT_SUCCESS);
-    }
-    else if (generate_single_input)
-    {
-
-        printf("Generating randomized Inputs for Testing...\n");
-
-        generate_random_tests(max_size_random_tests, 1, "test_tmp.txt");
-        printf("Generating done.\n");
-        printf("Testing..\n");
-        run_tests(impl->name, impl->func, "test_tmp.txt", output, 2e-1);
-        printf("Testing done!\n");
-        exit(EXIT_SUCCESS);
-    }
-
     if (version >= sizeof(implementations) / sizeof(implementation_version) || version < 0)
     {
         if (!output && max_size_random_tests > 20)
@@ -344,8 +294,32 @@ int main(int argc, char **argv)
             fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
             exit(EXIT_FAILURE);
         }
-        fprintf(stderr, "%s: Invalid Implementation Specifier %u\n");
+        fprintf(stderr, "Invalid Implementation Specifier \nExiting..\n");
         exit(EXIT_FAILURE);
+    }
+
+    const implementation_version *impl = &implementations[version];
+
+    const char *gen_file = "gen_file.txt";
+
+    /**
+     * Generating the random Inputs for Testing
+     */
+    if (generate_multiple_input)
+    {
+        testing = 1;
+        printf("Generating randomized Inputs for Testing...\n");
+        generate_random_tests(max_size_random_tests, 0, gen_file);
+        printf("Generating done. (In file gen_file.txt)\n");
+        exit(EXIT_SUCCESS);
+    }
+    else if (generate_single_input)
+    {
+        testing = 1;
+        printf("Generating randomized Inputs for Testing...\n");
+        generate_random_tests(max_size_random_tests, 1, gen_file);
+        printf("Generating done. (In file gen_file.txt)\n");
+        exit(EXIT_SUCCESS);
     }
 
     /**
@@ -357,19 +331,7 @@ int main(int argc, char **argv)
 
     if (input == NULL)
     {
-        if (bench_predefined)
-        {
-            in = fopen("bench.txt", "r");
-            if (!in)
-            {
-                perror("Error opening file for reading");
-                exit(EXIT_FAILURE);
-            }
-        }
-        else
-        {
-            in = stdin;
-        }
+        in = stdin;
     }
     else
     {
@@ -401,6 +363,12 @@ int main(int argc, char **argv)
 
     if (bench_predefined)
     {
+        in = fopen("bench.txt", "r");
+        if (!in)
+        {
+            perror("Error opening file for reading");
+            exit(EXIT_FAILURE);
+        }
     }
 
     if (optind < argc)
@@ -410,8 +378,33 @@ int main(int argc, char **argv)
     }
 
     /**
+     * Checking Validity Of the Input
+     */
+    printf("Checking Validity of the Input...\n");
+    if (!check_validity(in))
+    {
+        printf("Validity Check Failed.\n");
+        fclose(in);
+        fclose(out);
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        printf("Input is Valid.\n");
+        in = freopen(input, "r", in);
+        if (!in)
+        {
+            perror("Error opening file for reading");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /**
      * Calculating Decompositions
      */
+
+    printf("Calculating using %s Implementation...\n", impl->name);
+
     size_t num_of_matrices;
     fscanf(in, "%ld", &num_of_matrices);
 
@@ -421,16 +414,17 @@ int main(int argc, char **argv)
     {
         fscanf(in, "%ld", &size_of_matr_row);
 
-         if (size_of_matr_row > STACK_LIMIT)
+        if (size_of_matr_row > STACK_LIMIT)
         {
-            run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, i, size_of_matr_row);
+            run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
         }
         else
         {
-            run_on_stack(impl->name, impl->func, in, out, benchmarking, print, iterations, i, size_of_matr_row);
+            run_on_stack(impl->name, impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
         }
     }
 
+    printf("Calculating done.\n");
     fclose(in);
     fclose(out);
 

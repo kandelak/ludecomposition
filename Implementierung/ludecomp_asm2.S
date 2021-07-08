@@ -23,7 +23,7 @@ jbe .L_end
 
 # Copy A in U
 
-# Vectorized
+
 mov rax,rdi
 imul rax,rdi
 
@@ -32,6 +32,7 @@ imul rax,rdi
 mov rbx, rsi
 mov r12, rcx
 
+# Vectorized
 .L_copyA:
         cmp rax,4
         jl .L_copyA_scalar
@@ -112,6 +113,8 @@ jmp .L_write_nulls_scalar
 .L_ident_end:
 
 
+
+
 # Starting Decomposition
 
 # For Loops
@@ -127,8 +130,8 @@ lea r10,[rdx+4*rdi]
 # Address for all Entries in each Column (Under each Leading Entry)
 # U
 lea r15,[rcx+4*rdi]
-mov r11,rcx
 mov r13,r15
+mov r11,rcx
 
 # P
 mov r14,r8
@@ -148,35 +151,18 @@ jmp .L_factor_and_subtract
 dec r9
 cmp r9,0
 jle .L_loop1_end
-mov rax,r9
-
-
-
-lea rcx,[rcx+4*rdi+4]
-
 
 # Updating Addresses for Matrix U and L
+
+lea rcx,[rcx+4*rdi+4]
+lea rdx,[rdx+4*rdi+4]
+
 lea r15,[rcx+4*rdi]
 mov r11,rcx
 
-lea rdx,[rdx+4*rdi+4]
 lea r10,[rdx+4*rdi]
 
-
-# Pivoting 
-# Swap with Row addressed with r15 if needed
-mov rbx,r9
-.L_find_max:
-dec rbx
-cmp rbx,0
-jle .L_swap
-movss xmm0,dword ptr [r15]
-
-
-
-.L_swap
-
-
+mov rax,r9
 
 
 .L_factor_and_subtract:
@@ -194,7 +180,6 @@ lea r13,[r15+4*rdi]
 shufps xmm1,xmm1,0x0
 
 # Updating Row of the U
-
 # Counter
 mov rbx,r9
 inc rbx
