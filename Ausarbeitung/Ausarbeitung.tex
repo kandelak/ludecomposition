@@ -18,7 +18,7 @@
 
 \section{Einleitung}
 
-\noindent\hspace*{15mm}%
+
 Im Folgenden wird im Rahmen der Projektarbeit im Fach Einführung
 in die Rechnerarchitektur an der TU München ein in linearer Algebra häufig 
 benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokumentiert.\\
@@ -34,7 +34,7 @@ Dazu liefert die LU-Zerlegung für jedes eindeutig
    Auskunft über die Verwendeten Zeilenoperationen. U hingegen hat in allen Einträgen unterhalb
     der Diagonalen die Werte 0 und bildet somit eine Zeilenstufenform des LGS von der sich die 
     Lösungsmenge einfach ableiten lässt. Die Matrix P ist im eine Einheitsmatrix mit ggf. 
-    vertauschten Zeilen mit der die Vertauschung von Zeilen nachvollziehbar wird. \\
+    vertauschten Zeilen mit der die Vertauschung von Zeilen nachvollziehbar wird.
     
 
 \noindent\hspace*{15mm}%
@@ -98,8 +98,7 @@ Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
 
 
 \section{Lösungsansatz}
-\noindent\hspace*{15mm}%
-Zur Durchführung diser Zerlegung haben wir uns entschieden einen Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
+Zur Durchführung diser Zerlegung haben wir uns entschieden eine Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
  Das gaußsche Eliminationsverfahren auf einer Matrix verwendet elementare Zeilenoperationen, wie das Tauschen zweier Zeilen oder das Addieren von vielfachen einer Zeile auf eine andere
  um die Einträge der Matrix zu ändern. Dabei wird das Gleichungssystem A*x = b verändert die Lösung bleibt aber erhalten.\\
 \noindent\hspace*{15mm}%
@@ -126,35 +125,70 @@ optimierungen bietet.\\\\
  (GRafik für vertauschungen und addierungen mit notierung in P und L mit referenz im text)\\\\
 \noindent\hspace*{15mm}% 
  Wie man sieht erhält man mit diesem Algorithmus in L eine untere Dreiecksmatrix in U eine obere Dreieckmarix 
- und gegebenpalls in P eine einheitsmatrix mit zeilenvertauschungen\\\\
+ und gegebenpalls in P eine Einheitsmatrix mit Zeilenvertauschungen\\\\
 
-\noindent\hspace*{15mm}%
-Von dem verfahren mit Gauß Algorithmus haben wir unterschiedliche versionen Implementiert um verschiede optimierungen zu testen.
- Wir haben 2 verschiedene einfache C implementierungn dieses Ansatzes erstellt.
-Eine version welche wie im eben beschriebenen verfahren Pivotisiert und eine die dies nicht tut um bei Matrizen die keine Pivotisierung benötigen
-eine bessere Performance bei der Zerlegung zu erreichen.
-Dies birgt natürlich die Gefahr dass die Matrix nicht erfolgreich zerlegt werden kann, sollte doch eine Pivotisierung von nöten sein.\\
-  Unsere letzen beiden Optimierungen ist eine Implementierung unter verwendung von Intel Intrinsics und eine direkte Assembler
-  Implementierung. Beide dieser implementierungen sind Optimiert durch Vektorisierug mit SIMD.\\
- Hierbei machen wir uns zu nutze dass das Gaußverfahren aussschliesslich aus Zeilenoperationen auf einer matrix besteht wodurch
- wir mit xmm registern meistens 4 floating point zahlen auf einmal verarbeiten können.
-  
-  
+\subsection{Stack vs. Heap}
+ Bei der Implementierung noch eine Weitere Gegebenheit Bearchtet werden.
+ Undzwar wird bei Linux Betriebssystemen meistens circa 8MB Speicherplatz fuer die Stackallokationen zur verfuegung gestellt. Da wir auf Grund der besseren Zugriffszeiten des Stacks \cite{stack} gegenüber dem Heap den Stack so lange wie möglich verwenden wollen
+  muss in unserem code eine Fallunterscheidung Implementiert werden welche jeh nach größe der Eingabe die Matrizen auf dem Stack oder auf dem Heap Allozieren.
+ Die maximalgröße einer Eingabe welche noch auf dem Stack alloziert werden kann berechnen wir folgender maßen:
+ Die größe unserer Eingabematrix A muss 4 mal alloziert werden da temporär A, L, U und P abgespeichert werdem müssen.
+ Der in der Methode übergebene Parameter n ist die Anzahl Zeilen / Spalten unseren Matrix. Wodurch sich eine Anzahl Einträge pro Matrix von $n * n $ ergibt. 
+ Jeder dieser Einträge ist in unserem Fall ein Floating Point Wert und somit 4 Bytes groß.
+ Daraus ergibt sich die Formel \ref{size} Welche die benötigte Anzahl bytes in Abhängigkeit unserer Eingabegröße n Berechnet.
+ 
+ \begin{equation}
+ \label{size}
+  #bytes = 4*4*n*n
+ \end{equation}
+Daraus folgt dass unser $n$ für eine nutzung des Stacks  $n <= 707$  sein muss.\ref{maxsize}
+ \begin{equation}
+ \label{maxsize}
+  4*4*n*n <= 8*10^6
+ \end{equation}
+ Um etwas Spielraum zu haben haben wir uns entschieden schon ab einem $n >= 700$ auf dem Heap zu allozieren.\\\\\\
 
 
-
-
+\subsection{Verschiedene Implementierungen}
+Wie eben schon erwähnt ist uns aufgefallen dass die LU Zerlegung vieler Matrizen immer noch gelöst werden kann wenn man die Pivotisierung weg lässt. In der Theorie könnte man dadurch einen Performance Gewinn erbringen. 
+Um dies zu überprüfen haben wir eine Vergleichsimplementierung in erstellt welche pivotisierungen nicht berücksichtigt. Abgesehen davon ist diese Implementierung aber Analog zu obigen Ansatz.
+Abgesehen davon haben wir Verschiedene Implementierungen des genannten Ansatzes Erstellt auf die unter Performance noch genauer eingegangen wird.
 
 
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
 \section{Genauigkeit}
-
+- 
 
 \section{Performanzanalyse}
+In unserer Performanceanalyse vergleichen wir folgende Implementierungen:\\
+\begin{itemize}
+\item Lineare C Implementierung ohne Compileroptimierung und mit Pivotisierung vs. Lineare C implementierung ohne Compileroptimierung und ohne Pivotisierung. 
+\item Lineare C Implementierung ohne Compileroptimierung vs. C Implementierung mit Vektorisierung durch Intrinsics. 
+\item Lineare C Implementierung mit Compileroptimierung -O3 vs. Assembler Implementierung mit SIMD Vektorisierung.
+\end{itemize}
+Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln ausgeführt.
+
+\subsection{Pivotisierung vs. keine Pivotisierung}
+Leider ist der Perfomace Gewinn wie man an Grafik* unschwer erkennen Kann wenn überhaut bloß maginal. Dies liegt an\ldots
+\subsection{Linear vs. Parallel durch Intrinsics}
+Mit Hilfe von perf tool haben wir unsere C Implementierung auf die Performanz getestet und festgestellt , dass die Meiste Zeit in einem bestimmten Loop verbracht wird.
+ Wir haben versucht den Abschnitt mit C intrinsics zu vektorisieren, was auch geklappt hat. Das hatte eine positive Auswirkung fuer die Laufzeit der Zerlegung was auch in diesem Graph zu sehen ist.\\\\
+ \begin{figure}[t]
+ \centering
+ \includegraphics[width = 0.8\linewidth]{cvsintrinsics.png}
+ \label{CvsIntrinsics}
+\end{figure}
+
+ \subsection{Compiler optimierter Code vs. ASM mit SIMD}
+
+Wie gut sind wir an der Performanze des Compilers
+
+
 
 
 \section{Zusammenfassung und Ausblick}
-
+Welche Performance war jetzt am besten?\\
+Rückblickend hätte man ohne pivotisierung weglassen können\\
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
 % Referenzieren Sie diese dann mit \cite{}.
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
