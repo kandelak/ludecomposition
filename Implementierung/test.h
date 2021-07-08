@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "matr_utilities.h"
 
 /**
  *  @param max_size_of_row :  Maximum size of the Matrix to be tested
@@ -31,10 +30,10 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
         }
         else
         {
-                fprintf(out, "%ld\n", max_size_of_row);
+                fprintf(out, "%ld\n", max_size_of_row/10);
         }
 
-        for (size_t k = start; k <= max_size_of_row; k++)
+        for (size_t k = start; k <= max_size_of_row; k+=10)
         {
                 float *A;
 
@@ -48,7 +47,7 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                         exit(EXIT_FAILURE);
                 }
                 int i = 0;
-                float exp = 100;
+                float exp = 1.0;
                 while (i++ < 1)
                 {
                        
@@ -57,8 +56,8 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                         exp *= 10;
                         writeMatrix(out, k, A);
                 }
-
                 free(A);
         }
+
         fclose(out);
 }

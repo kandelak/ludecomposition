@@ -136,6 +136,137 @@ mov r11,rcx
 # P
 mov r14,r8
 
+.L_pivotize:
+
+mov rax,r9
+mov r11,rcx
+mov r15,rcx
+mov r14,r8
+mov r10,rdx
+mov rbx,0
+
+.L_find_max: 
+dec rax
+cmp rax,0
+jle .L_handle_addresses
+
+lea r11,[r11+4*rdi]
+
+movss xmm0,dword ptr [r15]
+movss xmm1,dword ptr [r11]
+
+# abs compare
+comiss xmm1,xmm0
+jbe .L_find_max
+
+mov r15,r11
+
+mov rbx,r9
+sub rbx,rax
+
+jmp .L_find_max
+
+.L_handle_addresses:
+
+cmp rbx,0
+jle .L_swap
+lea r14,[r14+4*rdi]
+lea r10,[r10+4*rdi]
+
+jmp .L_handle_addresses
+
+
+.L_swap:
+cmp r15,rcx
+je .L_swap_end
+
+mov r11,rcx
+mov rax,r9
+mov r12,rdx
+
+
+.L_swap_vect:
+cmp rax,4
+jl .L_swap_scalar
+
+# Swapping in U
+movups xmm1 , xmmword ptr [r11]
+movups xmm0 , xmmword ptr [r15] 
+movups xmmword ptr [r11] , xmm0
+movups xmmword ptr [r15] , xmm1
+
+# Swapping in L
+movups xmm1 , xmmword ptr [r12]
+movups xmm0 , xmmword ptr [r10] 
+movups xmmword ptr [r12] , xmm0
+movups xmmword ptr [r10] , xmm1
+
+sub rax,4
+add r11,16
+add r15,16
+add r12,16
+add r10,16
+jmp .L_swap_vect
+
+.L_swap_scalar:
+cmp rax,0
+jle .L_swap_P
+
+# Swapping in U
+movss xmm1 , dword ptr [r11]
+movss xmm0 , dword ptr [r15] 
+movss dword ptr [r11] , xmm0
+movss dword ptr [r15] , xmm1
+
+# Swapping in L
+movss xmm1 , dword ptr [r12]
+movss xmm0 , dword ptr [r10] 
+movss dword ptr [r12] , xmm0
+movss dword ptr [r10] , xmm1
+
+dec rax
+add r11,4
+add r15,4
+add r12,4
+add r10,4
+jmp .L_swap_scalar
+
+.L_swap_P:
+mov rbx,r8
+mov rax,rdi
+
+.L_swap_vect_P:
+cmp rax,4
+jl .L_swap_scalar_P
+
+# Swapping in P
+movups xmm1 , xmmword ptr [rbx]
+movups xmm0 , xmmword ptr [r14] 
+movups xmmword ptr [rbx] , xmm0
+movups xmmword ptr [r14] , xmm1
+
+add rbx,16
+add r14,16
+sub rax,4
+jmp .L_swap_vect_P
+
+
+.L_swap_scalar_P:
+cmp rax,0
+jle .L_swap_end
+
+# Swapping in P
+movss xmm1 , dword ptr [rbx]
+movss xmm0 , dword ptr [r14] 
+movss dword ptr [rbx] , xmm0
+movss dword ptr [r14] , xmm1
+
+add rbx,4
+add r14,4
+dec rax
+
+.L_swap_end:
+jmp .L_end_pivotize
 
 
 .L_loop1:
@@ -152,17 +283,30 @@ dec r9
 cmp r9,0
 jle .L_loop1_end
 
-# Updating Addresses for Matrix U and L
+# Updating Addresses for Matrix U and P and L
 
 lea rcx,[rcx+4*rdi+4]
+
+lea r8,[r8+4*rdi]
+
 lea rdx,[rdx+4*rdi+4]
 
+
+jmp .L_pivotize
+
+
+.L_end_pivotize:
+
+
+
 lea r15,[rcx+4*rdi]
+
 mov r11,rcx
 
 lea r10,[rdx+4*rdi]
 
 mov rax,r9
+
 
 
 .L_factor_and_subtract:

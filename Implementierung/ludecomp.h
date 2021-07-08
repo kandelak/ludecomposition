@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
+#include "matr_utilities.h"
 
 /**
  * Last @param (flaot* P) is always Identity Matrix whilst operating without Pivoting
@@ -11,7 +12,7 @@
  */
 void ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
 {
-
+    
     // Copying A in U
     for (size_t index = 0; index < n * n; index++)
     {
@@ -53,10 +54,12 @@ void ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
     }
+    
 }
 
 void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 {
+
     // Copying A in U
     for (size_t index = 0; index < n * n; index++)
     {
@@ -138,4 +141,5 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
     }
+   
 }
