@@ -23,21 +23,54 @@ Im Folgenden wird im Rahmen der Projektarbeit im Fach Einführung
 in die Rechnerarchitektur an der TU München ein in linearer Algebra häufig 
 benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokumentiert.\\
 
-\noindent\hspace*{15mm}%
+
 Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt,
- bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen. Dies Findet z.b. Anwendung bei der berechnung Von Schaltkreisen\cite{LUAnwendung}
+ bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen. 
+ Dies Findet z.b. Anwendung bei der Berechnung des Stromflusses In Schaltkreisen. Mit der LU-Zerlegung kann man wenn man die Wiederstände einzelner Leitungen gegeben hat den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
 Dazu liefert die LU-Zerlegung für jedes eindeutig
  lösbare Gleichungssystem, also wenn A regulär ist,
   zwei Dreiecksmatrizen L und U und eine Pivot-Matrix P,
    wobei P*L*U = A ergibt. Hierbei haben die Matrizen besondere 
-   Eigenschaften. L hat in allen Einträgen oberhalb der Diagonalen die Werte 0 und liefert 
-   Auskunft über die Verwendeten Zeilenoperationen. U hingegen hat in allen Einträgen unterhalb
-    der Diagonalen die Werte 0 und bildet somit eine Zeilenstufenform des LGS von der sich die 
-    Lösungsmenge einfach ableiten lässt. Die Matrix P ist im eine Einheitsmatrix mit ggf. 
-    vertauschten Zeilen mit der die Vertauschung von Zeilen nachvollziehbar wird.
-    
+   Eigenschaften. L hat in allen Einträgen oberhalb der Diagonalen die Werte 0 (Siehe Matrix \ref{unteremx}). U hingegen hat in allen Einträgen unterhalb
+    der Diagonalen die Werte 0 (Siehe Matrix \ref{oberemx}). Die Matrix P ist eine Einheitsmatrix mit ggf. 
+    vertauschten Zeilen (Siehe Matrix \ref{pivotmx}).
+    \begin{equation}
+\label{unteremx}
+Untere Dreiecksatrix: \begin{bmatrix}
 
-\noindent\hspace*{15mm}%
+ x_{1,1}  & 0      &  0     & 0\\
+ x_{2,1}  & x_{2,2}  &  0	  & 0 \\
+ x_{3,1}	& x_{3,2}  & x_{3,3}  & 0\\
+ x_{4,1}	& x_{4,2}	 & x_{4,3}  & x_{4,4} \\
+
+
+ \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\label{oberemx}
+Obere Dreiecksatrix: \begin{bmatrix}
+ x_{1,1}	& x_{1,2}	 & x_{1,3}  & x_{1,4} \\
+ 0	    & x_{2,2}	 & x_{2,3}  & x_{2,4}\\
+ 0	    & 0      & x_{3,3}  & x_{3,4}\\
+ 0	    & 0      & 0      & x_{4,4}\\
+ \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\label{pivotmx}
+Pivotmatrix: \begin{bmatrix}
+
+ x_{1,1}  & x_{1,2}	 & x_{1,3}  & x_{1,4} \\
+ x_{2,1}  & x_{2,2}	 & x_{2,3}  & x_{2,4} \\
+ x_{3,1}	& x_{3,2}  & x_{3,3}  & x_{3,4}\\
+ x_{4,1}	& x_{4,2}	 & x_{4,3}  & x_{4,4} \\
+
+\end{bmatrix}
+
+\end{equation}
+
+
 Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
 \begin{eqnarray}
 0x_1 + 3x_2 + 5x_3 + 7x_4 = 0 \\
@@ -48,7 +81,6 @@ Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
 
 
 
-\noindent\hspace*{15mm}%
 Welches auch so dargestellt werden kann:
 \begin{equation}
 A = \begin{bmatrix}
@@ -60,7 +92,7 @@ A = \begin{bmatrix}
 \end{equation}
 
 
-\noindent\hspace*{15mm}%
+
 Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
  \begin{equation}
 
@@ -98,42 +130,43 @@ Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
 
 
 \section{Lösungsansatz}
-Zur Durchführung diser Zerlegung haben wir uns entschieden eine Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
- Das gaußsche Eliminationsverfahren auf einer Matrix verwendet elementare Zeilenoperationen, wie das Tauschen zweier Zeilen oder das Addieren von vielfachen einer Zeile auf eine andere
- um die Einträge der Matrix zu ändern. Dabei wird das Gleichungssystem A*x = b verändert die Lösung bleibt aber erhalten.\\
-\noindent\hspace*{15mm}%
-Unter Verwendung dieses Verfahrens erstellen wir eine obere Dreieckmatrix bei der alle Einträge unter der 
-diagonalen 0 sind. So erhalten wir unsere U Matrix. Um nun auch unsere L und P Matrizen zu erhalten, müssen
-wir nur alle Schritte die zur Generierung der U matrix beigetragen haben Dokumentieren. Jedes mal wenn wir eine Zeile auf eine andere addieren
-wird dies in der L Matrix festgehalten indem genau die selbe Operation auf dieser L Matrix durchgeführt wird. Jede Zeilenvertauschung Wird auf die selbe Art in P festgehalten(siehe Grafik 6).  
-Um nun sicher eine gültige L Matrix zu erhalten welche oberhalb der Diagonalen nur die 0 als Einträge hat, folgt der Algorithmus strikt der Vorgehensweise des Gauß Algorithmus.\\
-\noindent\hspace*{15mm}%
- Gehen wir davon aus das wir für jede der Matrizen L, U und P einen Speicherplatz haben.
-Zu beginn müssen die passenden Startwerte In diesen Matrizen abgelegt werden. In L und P sind das einfach Einheitsmatrizen und in L wird die Eingabematrix A geschriben. Nun Werden die Eintäge unterhalb der Diagonalen in U  
+Zur Durchführung diser Zerlegung haben wir uns entschieden ein Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
+Das gaußsche Eliminationsverfahren ändert die Einträge einer Matrix unter Verwendung elementarer Zeilenoperationen.
+Die verwendeten elementaren Zeilenoperationen sind das Tauschen zweier Zeilen und das Addieren von
+vielfachen einer Zeile auf eine Andere.
+ Dabei wird das Gleichungssystem A*x = b verändert die Lösung bleibt aber erhalten.\\
+
+Mit diesem Verfahren erstellen wir eine obere Dreieckmatrix bei der alle Einträge unter der 
+Diagonalen 0 sind. So erhalten wir unsere U Matrix. Um nun auch unsere L und P Matrizen zu erhalten, müssen
+wir nur alle Schritte die zur Generierung der U Matrix beigetragen haben Dokumentieren. Jedes mal wenn wir eine Zeile auf eine Andere addieren
+wird dies in der L Matrix festgehalten indem genau die selbe Operation auf dieser L Matrix durchgeführt wird. Jede Zeilenvertauschung Wird auf die selbe Art in P festgehalten.  
+Um nun sicher eine gültige L Matrix zu erhalten welche oberhalb der Diagonalen nur die 0 als Einträge hat und somit die gesuchte untere Dreiecksmatrix bildet, folgt der Algorithmus strikt der Vorgehensweise des Gauß Algorithmus.\\
+
+Gehen wir davon aus das wir für jede der Matrizen L, U und P einen Speicherplatz haben.
+Zu Beginn müssen die passenden Startwerte in diesen Matrizen abgelegt werden. In L und P sind das einfach Einheitsmatrizen und in U wird die Eingabematrix A geschriben. Nun Werden die Eintäge unterhalb der Diagonalen in U  
 Spaltenweise von Links nach Rechts auf 0 gesetzt indem man immer ein genau passendes vielfaches einer oberen Zeile von allen darunterliegenden 
-Zeilen abzieht.(?? Grafik Einfügen ??) Die Wahl der Zeile hängt davon ab welche Spalte gerade auf 0 gesetzt werden soll. 
+Zeilen abzieht. Die Wahl der Zeile hängt davon ab welche Spalte gerade auf 0 gesetzt werden soll. 
 Bei Spalte 1 ist es Zeile 1 bei Spalte 2 Zeile 2 und so weiter. Da man sich hierbei von oben nach unten bwz. von links nach rechts Vorarbeitet generiert man schrittweise
-die gewünschte L und U Matrix. Nun kann es aber vorkommen dass in der Zeile welche von den anderen Zeilen subtrahiert werden soll an dem Index der zu bearbeitenden
+die gewünschten L und U Matrizen. Nun kann es aber vorkommen dass in der Zeile welche von den anderen Zeilen subtrahiert werden soll an dem Index der zu bearbeitenden
 Spalte eine 0 steht. Dies birgt das Problem dass nun kein vielfaches dieser Zeile jehmals die anderen Einträge der Spalte durch subtraktion auf 0 bringen kann
 da $ 0 \times x = 0$. Um dieses Problem zu vermeiden haben wir uns entschieden generell, bevor wir mit der Nullung einer Zeile beginnen immer die Zeile mit dem größsten Eintrag
 am entsprechenden Index nach oben zu Tauschen(Siehe Grafik). Dadurch wird Garantiert dass der Algorithmus bei einer regulären, quadratischen Matrix erfolgreich durchläuft. Im Abschnitt zur Genauigkeit wird noch genau darauf 
 eingegeangen warum wir immer die Zeile mit dem größten Eintrag nach oben tauschen und nicht bloß Irgend eine Zeile mit Eintrag ungleich 0.
-Hierbei sei gesagt dass nicht jede Matrixzerlegung Zeilenvertauschungen benötigt und das der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was potential für 
-optimierungen bietet.\\\\
+Zusätzlich sei gesagt dass nicht jede Matrixzerlegung den Schritt der Zeilenvertauschung benötigt und das der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was potential für 
+Optimierungen bieten könnte.\\
  
 
- (GRafik für vertauschungen und addierungen mit notierung in P und L mit referenz im text)\\\\
-\noindent\hspace*{15mm}% 
- Wie man sieht erhält man mit diesem Algorithmus in L eine untere Dreiecksmatrix in U eine obere Dreieckmarix 
- und gegebenpalls in P eine Einheitsmatrix mit Zeilenvertauschungen\\\\
+
 
 \subsection{Stack vs. Heap}
- Bei der Implementierung noch eine Weitere Gegebenheit Bearchtet werden.
- Undzwar wird bei Linux Betriebssystemen meistens circa 8MB Speicherplatz fuer die Stackallokationen zur verfuegung gestellt. Da wir auf Grund der besseren Zugriffszeiten des Stacks \cite{stack} gegenüber dem Heap den Stack so lange wie möglich verwenden wollen
-  muss in unserem code eine Fallunterscheidung Implementiert werden welche jeh nach größe der Eingabe die Matrizen auf dem Stack oder auf dem Heap Allozieren.
- Die maximalgröße einer Eingabe welche noch auf dem Stack alloziert werden kann berechnen wir folgender maßen:
+ Bei der Wahl des Speicherortes muss noch eine weitere Gegebenheit beachtet werden.
+ Undzwar haben wir hier die Wahl zwischen dem Heap und dem Stack. Auf Grund der besseren Zugriffszeiten des Stacks würden wir den Stack als Speicherort präferieren\cite{stack}.
+ Aber leider wird bei Linux Betriebssystemen meistens blos circa 8MB Speicherplatz fuer die Stackallokationen zur Verfuegung gestellt.\cite{stackSize} Dies birgt für uns das Problem dass, sofern der Stack als Speicher genutzt wird,
+ es bei zu großen Matrizen zu einem Segmentation Fault kommen kann. Um trozdem die bessere Performance des Stacks nutzen zu können haben wir eine Fallunterscheidung Implementiert welche jeh nach größe der Matrix entscheidet
+ ob eine Matrix noch auf dem Stack zerlegt werden kann oder ob der benötigte Specherplatz auf dem Heap alloziert werden muss.
+ Die Maximalgröße einer Eingabematrix dessen Zerlegung Stack durchgeführt werden kann berechnen wir folgender maßen:
  Die größe unserer Eingabematrix A muss 4 mal alloziert werden da temporär A, L, U und P abgespeichert werdem müssen.
- Der in der Methode übergebene Parameter n ist die Anzahl Zeilen / Spalten unseren Matrix. Wodurch sich eine Anzahl Einträge pro Matrix von $n * n $ ergibt. 
+ Der in der Methode übergebene Parameter n ist die Anzahl Zeilen / Spalten unseren Matrix da unsere Matrizem immer quadratisch sein müssen. Dadurch ergibt sich eine Anzahl Einträge pro Matrix von $n * n $. 
  Jeder dieser Einträge ist in unserem Fall ein Floating Point Wert und somit 4 Bytes groß.
  Daraus ergibt sich die Formel \ref{size} Welche die benötigte Anzahl bytes in Abhängigkeit unserer Eingabegröße n Berechnet.
  
@@ -141,18 +174,20 @@ optimierungen bietet.\\\\
  \label{size}
   bytes = 4*4*n*n
  \end{equation}
-Daraus folgt dass unser $n$ für eine nutzung des Stacks  $n <= 707$  sein muss.\ref{maxsize}
+Dann folgt dass unser $n$ für eine Nutzung des Stacks  $n <= 707$  sein muss.\ref{maxsize}
  \begin{equation}
  \label{maxsize}
   4*4*n*n <= 8*10^6
  \end{equation}
- Um etwas Spielraum zu haben haben wir uns entschieden schon ab einem $n >= 700$ auf dem Heap zu allozieren.\\\\\\
+ Um etwas Spielraum zu haben haben wir uns entschieden schon ab einem $n >= 700$ auf dem Heap zu allozieren.\\
 
 
 \subsection{Verschiedene Implementierungen}
-Wie eben schon erwähnt ist uns aufgefallen dass die LU Zerlegung vieler Matrizen immer noch gelöst werden kann wenn man die Pivotisierung weg lässt. In der Theorie könnte man dadurch einen Performance Gewinn erbringen. 
-Um dies zu überprüfen haben wir eine Vergleichsimplementierung in erstellt welche pivotisierungen nicht berücksichtigt. Abgesehen davon ist diese Implementierung aber Analog zu obigen Ansatz.
-Abgesehen davon haben wir Verschiedene Implementierungen des genannten Ansatzes Erstellt auf die unter Performance noch genauer eingegangen wird.
+Wie eben schon erwähnt ist uns aufgefallen dass die LU Zerlegung vieler Matrizen auch noch gelöst werden kann wenn man die Pivotisierung weg lässt. In der Theorie könnte man dadurch einen Performancgewinn erbringen. 
+Um dies zu überprüfen haben wir eine Vergleichsimplementierung erstellt welche Pivotisierungen nicht berücksichtigt. Diese kann dann natürlich nicht mehr jede Matrix zerlegen hat aber potential schneller zu sein.
+  Ansonsten ist diese Implementierung Analog zu obigen Ansatz.
+Jenen Ansatz haben wir dann auf 3 verschiedene Arten Implementiert. Einmal in einfachen C, einmal unter Verwendung von Intrinsics und einmal als direktes Assembler Programm.
+ Auf die speziefischeren Unterschiede wird im Abschnitt \ref{Performanzanalyse} noch genauer eingegangen.
 
 
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
@@ -160,6 +195,7 @@ Abgesehen davon haben wir Verschiedene Implementierungen des genannten Ansatzes 
 - 
 
 \section{Performanzanalyse}
+\label{Performanzanalyse}
 Die Laufzeit berechnet sich über  $ \frac{1}{3}n^3 -\frac{1}{3} n $ und befindet sich somit in $O(n^3)$ \cite{LULaufzeit}
 In unserer Performanceanalyse vergleichen wir folgende Implementierungen:\\
 \begin{itemize}
@@ -172,26 +208,43 @@ Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln ausgeführt.
 
 
 \subsection{Pivotisierung vs. keine Pivotisierung}
-Leider ist der Perfomace Gewinn wie man an Grafik* unschwer erkennen Kann wenn überhaut bloß maginal. Dies liegt an\ldots\\
+Leider ist der Perfomace Gewinn wie man an Grafik* unschwer erkennen Kann wenn überhaut bloß maginal. Dies kann man vermutlich auf zwei grundlegende Effekte zurückführen. Erstens Verändert das weglasen der Pivotisierung nicht die
+ arithmethische Laufzeit welche weiterhin in $O(n^3)$ liegt. Der einzige Gewinn ligt also darin dass pro Schleifendurchlauf etwas weniger Operationen ausgeführt werden müssen. Dies kann aber maximal einen linearen Speedup erbringen. 
+ Dieser lineare Speedup ist aber ebenfalls nicht wirklich signifikant da, wie man mit einer Performance Analyse erkennt, die Pivotisierung so oder so nur einen sehr kleinen Prozentsatz der Laufzeit beansprucht. 
+ 
+ Unter Betrachtung dieser Erkenntnis zusätzlich zu den Ergebnissen der Genauigkeitsanalyse sind wir zu dem Schluss gekommen das eine Implementierung ohne Pivotisierung keinen Vorteil und Signifikante Nachteile bringt und dieser
+  Ansatz somit nicht weiter Verfolgt werden muss.
 
 \subsection{Linear vs. Parallel durch Intrinsics}
-Mit Hilfe von perf tool haben wir unsere C Implementierung auf die Performanz getestet und festgestellt , dass die Meiste Zeit in einer bestimmten Schleife verbracht wird.
- Diese Schleife konnten wir da sie über die Einträge einer Matrix iteriert rellativ einfach mit hilfe von C intrinsics vektorisieren. Die Auswirkung auf die Laufzeit lässt sich an Abbildung 1 erkennen.
+Eine Performanzanalyse unserer Linearen C Implementierung mit perf tool hat ergeben, dass ein Großteil der Rechenzeit in einer bestimmten Schleife verbracht wird. Ausserdem zeigt perf tool uns das innerhalb der
+ Schleife die meiste Zeit für mov Befehle aufgewandt wird dicht gefolgt von arithmetischen Operationen. Diese Befehle sind in unserem Kontext Teil von Zeilenoperationen auf eine Matrix. Dies bedeutet dass diese Operationen zu 
+ großen Teilen Unabhänig voneinander sind. Also können wir diese Operationen rellativ einfach, unter Zuhilfenahme von C Intrinsics, Parallelisieren.
+ Die Laufzeit der Implementierung in der wir diese teuren Operationen vektorisiert haben wird In Abbildung 1 mit der Laufzeit der unvektorisierten Implementierung verglichen. 
 
  \begin{figure}[h]
 \label{fig:perf1}
 \caption{C-linear vs. C-vektorisiert}
  \centering
- \includegraphics[width = 0.8\linewidth]{cvsintrinsics.png}
+ \includegraphics[width = 0.8\linewidth]{CvsIntrins.png}
  
 \end{figure}
-Durch den zusätzlichen Overhead der Vektorisieung sieht man bei kleineren Eingabegrößen keinen signifikanten Unterschied. Um so größer die Eingabe aber wird desto deutlicher sieht man an den sich von einander entfernenden Graphen dass die Vektorisierung einen guten Speedup bringt. 
+Durch den zusätzlichen Overhead der Vektorisieung sieht man bei kleineren Eingabegrößen keinen signifikanten Unterschied. Aber um so größer die Eingabe wird desto deutlicher sieht man, an den sich von einander entfernenden 
+Graphen, dass die Vektorisierung einen guten Speedup generiert. 
 Wir haben den Speedup Punktuell bei einer Eingabegröße von $n = 1000$ berechnet wo dieser bei ******** liegt.\\
 
  \subsection{Compiler optimierter Code vs. ASM mit SIMD}
+Als letztes haben wir um optimale Performance zu erreichen eine reine ASM Implementierung entwickelt. In dieser Implementierung haben wir möglichst viel Optimiert und vor allem die im vorherigen Kapitel als Laufzeit aufwendig
+ intendefizierten Stellen direkt mit xmm Instruktionen Vektorisiert. Zum Vergleich haben wir unsere einfache C Implementierung mit -O3 kompilliert um zu analysieren ob unsere Implementierung besser, schlechter oder ähnlich gut wie der Compiler ist.
+ Wie man an Abbildung 2 erkennen kann bringt unsere händische Implementierung eine deutlich bessere Performance als die compileroptimierte Version. Dies Ist ein für uns überraschendes Ergebnis was uns aber zeigt das 
+ es manchmal tatsächlich noch sinnvoll sein kann Assembler Code per Hand zu schreiben.
 
-Wie gut sind wir an der Performanze des Compilers
-
+ \begin{figure}[h]
+\label{fig:perf2}
+\caption{C-ompileroptimiert vs. Assembler-vektorisiert}
+ \centering
+ \includegraphics[width = 0.8\linewidth]{CvsASM.png}
+ 
+\end{figure}
 
 
 
@@ -199,7 +252,7 @@ Wie gut sind wir an der Performanze des Compilers
 Welche Performance war jetzt am besten?\\
 Rückblickend hätte man ohne pivotisierung weglassen können\\
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
-% Referenzieren Sie diese dann mit \cite{}.
+% Referenzieren Sie diese dann mit \cite{
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
 \bibliographystyle{plain}
 \bibliography{Ausarbeitung}{}
