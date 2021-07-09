@@ -22,26 +22,39 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
     }
 
     // Writing Identity matrices in P and L
-
-    for (size_t i = 0; i < n; i++)
+    __m128 nulls = _mm_setzero_ps();
+    size_t i = 0;
+    while (i < n * n)
     {
-        for (size_t j = 0; j < n; j++)
+        P[i] = 1;
+        L[i] = 1;
+        i++;
+        // Vectorized
+        if (i >= n * n)
+            break;
+        size_t k = 0;
+        if (n > 3)
         {
-            if (i == j)
+            for (k = 0; k < (n - 4); k += 4)
             {
-                P[i * n + j] = 1;
-                L[i * n + j] = 1;
+                _mm_storeu_ps(&P[i], nulls);
+                _mm_storeu_ps(&L[i], nulls);
+                i += 4;
             }
-            else
-            {
-                P[i * n + j] = 0;
-                L[i * n + j] = 0;
-            }
+        }
+        // Scalar
+        for (size_t j = k; k < n; k++)
+        {
+            P[i] = 0;
+            L[i] = 0;
+            i++;
         }
     }
 
     for (size_t i = 0; i < n; i++)
     {
+
+        //Pivoting
 
         // Searching for maximal absolute value in Column i
         float max = U[i + i * n];
@@ -55,33 +68,65 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
 
-        // Pivotizing
-
-        // Swapping rows i and row_with_max in U and L
-        for (size_t k = 0; k < n; k++)
+        // Swapping rows i and row_with_max in U and L if needed
+        if (row_with_max != i)
         {
-            float temp = U[i * n + k];
-            U[i * n + k] = U[row_with_max * n + k];
-            U[row_with_max * n + k] = temp;
+            size_t k = 0;
 
-            // swapping in L (Only before i-th column)
-            if (k < i)
+            // Swapping in U
+            // Vectorized
+            if (n > 3)
             {
-                temp = L[i * n + k];
+                for (k = 0; k < (n - 4); k += 4)
+                {
+                    __m128 row1_U = _mm_loadu_ps(&U[i * n + k]);
+                    __m128 row2_U = _mm_loadu_ps(&U[row_with_max * n + k]);
+                    _mm_storeu_ps(&U[i * n + k], row2_U);
+                    _mm_storeu_ps(&U[row_with_max * n + k], row1_U);
+                }
+            }
+
+            // Scalar
+            while (k < n)
+            {
+                float temp = U[i * n + k];
+                U[i * n + k] = U[row_with_max * n + k];
+                U[row_with_max * n + k] = temp;
+
+                k++;
+            }
+
+            // Swappipng in L
+            k = 0;
+            if (i > 3)
+            {
+                for (k = 0; k < (i - 4); k += 4)
+                {
+                    __m128 row1_L = _mm_loadu_ps(&L[i * n + k]);
+                    __m128 row2_L = _mm_loadu_ps(&L[row_with_max * n + k]);
+                    _mm_storeu_ps(&L[i * n + k], row2_L);
+                    _mm_storeu_ps(&L[row_with_max * n + k], row1_L);
+                }
+            }
+            //swapping in L(Only before i - th column) if (k < i)
+            while (k < i)
+            {
+                float temp = L[i * n + k];
                 L[i * n + k] = L[row_with_max * n + k];
                 L[row_with_max * n + k] = temp;
+                k++;
+            }
+
+            // Swapping Columns in P
+            for (size_t j = 0; j < n; j++)
+            {
+                float temp = P[j * n + i];
+                P[j * n + i] = P[j * n + row_with_max];
+                P[j * n + row_with_max] = temp;
             }
         }
 
-        // Swapping Columns in P
-        for (size_t k = 0; k < n; k++)
-        {
-            float temp = P[k * n + i];
-            P[k * n + i] = P[k * n + row_with_max];
-            P[k * n + row_with_max] = temp;
-        }
-
-        // pivotizing done
+        // Pivoting done
 
         for (size_t j = i; j < n - 1; j++)
         {

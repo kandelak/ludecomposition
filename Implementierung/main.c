@@ -81,11 +81,11 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
         fprintf(output, "Testing...\n");
         if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, TOLERATE_ERROR))
         {
-            fprintf(output, "Test on Operation %ld failed.\n", i);
+            fprintf(output, "Test %ld failed.\n", i);
         }
         else
         {
-            fprintf(output, "Test on Operation %ld succeeded.\n", i);
+            fprintf(output, "Test %ld succeeded.\n", i);
         }
     }
 
@@ -162,7 +162,7 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
         }
         else
         {
-            fprintf(output, "Test %ld Passed.\n", i + 1);
+            fprintf(output, "Test %ld succeeded.\n", i + 1);
         }
     }
 

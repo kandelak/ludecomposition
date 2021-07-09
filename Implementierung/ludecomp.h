@@ -85,14 +85,15 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 
     for (size_t i = 0; i < n; i++)
     {
+        //Pivoting
 
         // Searching for maximal absolute value in Column i
         float max = U[i + i * n];
-       
+
         size_t row_with_max = i;
         for (size_t k = i + 1; k < n; k++)
         {
-             
+
             if (fabsf(U[i + k * n]) > max)
             {
                 max = fabsf(U[i + k * n]);
@@ -100,31 +101,31 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
 
-        // Pivoting
-
-        // Swapping rows i and row_with_max in U and L
-        for (size_t k = 0; k < n; k++)
+        if (row_with_max != i)
         {
-            float temp = U[i * n + k];
-            U[i * n + k] = U[row_with_max * n + k];
-            U[row_with_max * n + k] = temp;
-
-            // swapping in L (Only before i-th column)
-            if (k < i)
+            // Swapping rows i and row_with_max in U and L if needed
+            for (size_t k = 0; k < n; k++)
             {
-                temp = L[i * n + k];
-                L[i * n + k] = L[row_with_max * n + k];
-                L[row_with_max * n + k] = temp;
-            }
-        }
-      
+                float temp = U[i * n + k];
+                U[i * n + k] = U[row_with_max * n + k];
+                U[row_with_max * n + k] = temp;
 
-        // Swapping Columns in P
-        for (size_t k = 0; k < n; k++)
-        {
-            float temp = P[k * n + i];
-            P[k * n + i] = P[k * n + row_with_max];
-            P[k * n + row_with_max] = temp;
+                // swapping in L (Only before i-th column)
+                if (k < i)
+                {
+                    temp = L[i * n + k];
+                    L[i * n + k] = L[row_with_max * n + k];
+                    L[row_with_max * n + k] = temp;
+                }
+            }
+
+            // Swapping Columns in P
+            for (size_t k = 0; k < n; k++)
+            {
+                float temp = P[k * n + i];
+                P[k * n + i] = P[k * n + row_with_max];
+                P[k * n + row_with_max] = temp;
+            }
         }
 
         // pivotizing done
