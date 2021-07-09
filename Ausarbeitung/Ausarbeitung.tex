@@ -25,7 +25,7 @@ benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokument
 
 \noindent\hspace*{15mm}%
 Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt,
- bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen.
+ bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen. Dies Findet z.b. Anwendung bei der berechnung Von Schaltkreisen\cite{LUAnwendung}
 Dazu liefert die LU-Zerlegung für jedes eindeutig
  lösbare Gleichungssystem, also wenn A regulär ist,
   zwei Dreiecksmatrizen L und U und eine Pivot-Matrix P,
@@ -139,7 +139,7 @@ optimierungen bietet.\\\\
  
  \begin{equation}
  \label{size}
-  #bytes = 4*4*n*n
+  bytes = 4*4*n*n
  \end{equation}
 Daraus folgt dass unser $n$ für eine nutzung des Stacks  $n <= 707$  sein muss.\ref{maxsize}
  \begin{equation}
@@ -160,24 +160,33 @@ Abgesehen davon haben wir Verschiedene Implementierungen des genannten Ansatzes 
 - 
 
 \section{Performanzanalyse}
+Die Laufzeit berechnet sich über  $ \frac{1}{3}n^3 -\frac{1}{3} n $ und befindet sich somit in $O(n^3)$ \cite{LULaufzeit}
 In unserer Performanceanalyse vergleichen wir folgende Implementierungen:\\
 \begin{itemize}
 \item Lineare C Implementierung ohne Compileroptimierung und mit Pivotisierung vs. Lineare C implementierung ohne Compileroptimierung und ohne Pivotisierung. 
 \item Lineare C Implementierung ohne Compileroptimierung vs. C Implementierung mit Vektorisierung durch Intrinsics. 
 \item Lineare C Implementierung mit Compileroptimierung -O3 vs. Assembler Implementierung mit SIMD Vektorisierung.
 \end{itemize}
-Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln ausgeführt.
+Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln ausgeführt. \\
+\\
+
 
 \subsection{Pivotisierung vs. keine Pivotisierung}
-Leider ist der Perfomace Gewinn wie man an Grafik* unschwer erkennen Kann wenn überhaut bloß maginal. Dies liegt an\ldots
+Leider ist der Perfomace Gewinn wie man an Grafik* unschwer erkennen Kann wenn überhaut bloß maginal. Dies liegt an\ldots\\
+
 \subsection{Linear vs. Parallel durch Intrinsics}
-Mit Hilfe von perf tool haben wir unsere C Implementierung auf die Performanz getestet und festgestellt , dass die Meiste Zeit in einem bestimmten Loop verbracht wird.
- Wir haben versucht den Abschnitt mit C intrinsics zu vektorisieren, was auch geklappt hat. Das hatte eine positive Auswirkung fuer die Laufzeit der Zerlegung was auch in diesem Graph zu sehen ist.\\\\
- \begin{figure}[t]
+Mit Hilfe von perf tool haben wir unsere C Implementierung auf die Performanz getestet und festgestellt , dass die Meiste Zeit in einer bestimmten Schleife verbracht wird.
+ Diese Schleife konnten wir da sie über die Einträge einer Matrix iteriert rellativ einfach mit hilfe von C intrinsics vektorisieren. Die Auswirkung auf die Laufzeit lässt sich an Abbildung 1 erkennen.
+
+ \begin{figure}[h]
+\label{fig:perf1}
+\caption{C-linear vs. C-vektorisiert}
  \centering
  \includegraphics[width = 0.8\linewidth]{cvsintrinsics.png}
- \label{CvsIntrinsics}
+ 
 \end{figure}
+Durch den zusätzlichen Overhead der Vektorisieung sieht man bei kleineren Eingabegrößen keinen signifikanten Unterschied. Um so größer die Eingabe aber wird desto deutlicher sieht man an den sich von einander entfernenden Graphen dass die Vektorisierung einen guten Speedup bringt. 
+Wir haben den Speedup Punktuell bei einer Eingabegröße von $n = 1000$ berechnet wo dieser bei ******** liegt.\\
 
  \subsection{Compiler optimierter Code vs. ASM mit SIMD}
 
