@@ -47,7 +47,7 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                         exit(EXIT_FAILURE);
                 }
                 int i = 0;
-                float exp = 1.0;
+                float exp = 1000.0;
                 while (i++ < 1)
                 {
                        
