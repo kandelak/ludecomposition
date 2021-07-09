@@ -130,18 +130,25 @@ lea r10,[rdx+4*rdi]
 # Address for all Entries in each Column (Under each Leading Entry)
 # U
 lea r15,[rcx+4*rdi]
-mov r13,r15
+
+# ?? mov r13,r15
+
 mov r11,rcx
 
 # P
 mov r14,r8
 
+
 .L_pivotize:
 
 mov rax,r9
+inc rax
+# r11 : runner for U
 mov r11,rcx
 mov r15,rcx
-mov r14,r8
+# r14 :  counts offset for swapping
+mov r14,0
+# r10 : runner for L
 mov r10,rdx
 mov rbx,0
 
@@ -152,17 +159,37 @@ jle .L_handle_addresses
 
 lea r11,[r11+4*rdi]
 
+
+ # Comparision of column entries
+
 movss xmm0,dword ptr [r15]
+
+# setting to absolute value
+xorps xmm3,xmm3
+subps xmm3,xmm0
+maxps xmm0,xmm3
+
+
 movss xmm1,dword ptr [r11]
 
-# abs compare
+# setting to absolute value
+xorps xmm3,xmm3
+subps xmm3,xmm1
+maxps xmm1,xmm3
+
+
 comiss xmm1,xmm0
+
 jbe .L_find_max
 
 mov r15,r11
 
+# Saves distance from leading Entry in Column to the entry, which has the maximal absolute Value in Column
 mov rbx,r9
+inc rbx
 sub rbx,rax
+# Saving for later use to swap columns in P
+mov r14,rbx
 
 jmp .L_find_max
 
@@ -170,104 +197,137 @@ jmp .L_find_max
 
 cmp rbx,0
 jle .L_swap
-lea r14,[r14+4*rdi]
 lea r10,[r10+4*rdi]
-
+dec rbx
 jmp .L_handle_addresses
 
 
+# Swapping Rows in U
+# swap([r11],[r15])
 .L_swap:
 cmp r15,rcx
 je .L_swap_end
 
 mov r11,rcx
 mov rax,r9
-mov r12,rdx
+inc rax
 
 
-.L_swap_vect:
+
+.L_swap_vect_U:
 cmp rax,4
-jl .L_swap_scalar
+jl .L_swap_scalar_U
 
-# Swapping in U
+
 movups xmm1 , xmmword ptr [r11]
 movups xmm0 , xmmword ptr [r15] 
 movups xmmword ptr [r11] , xmm0
 movups xmmword ptr [r15] , xmm1
 
-# Swapping in L
+
+sub rax,4
+add r11,16
+add r15,16
+
+jmp .L_swap_vect_U
+
+.L_swap_scalar_U:
+cmp rax,0
+jle .L_swap_L
+
+
+movss xmm1 , dword ptr [r11]
+movss xmm0 , dword ptr [r15] 
+movss dword ptr [r11] , xmm0
+movss dword ptr [r15] , xmm1
+
+dec rax
+add r11,4
+add r15,4
+
+jmp .L_swap_scalar_U
+
+
+# Swapping Rows in L 
+# Swap([r12],[r10])
+.L_swap_L:
+mov r12,rdx
+mov rax,rdi
+sub rax,r9
+cmp rax,1 
+jle .L_swap_P
+
+.L_swap_vect_L:
+cmp rax,4
+jl .L_swap_scalar_L
+
+sub r12,16
+sub r10,16
+
 movups xmm1 , xmmword ptr [r12]
 movups xmm0 , xmmword ptr [r10] 
 movups xmmword ptr [r12] , xmm0
 movups xmmword ptr [r10] , xmm1
 
 sub rax,4
-add r11,16
-add r15,16
-add r12,16
-add r10,16
-jmp .L_swap_vect
 
-.L_swap_scalar:
+jmp .L_swap_vect_L
+
+.L_swap_scalar_L:
 cmp rax,0
 jle .L_swap_P
 
-# Swapping in U
-movss xmm1 , dword ptr [r11]
-movss xmm0 , dword ptr [r15] 
-movss dword ptr [r11] , xmm0
-movss dword ptr [r15] , xmm1
+sub r12,4
+sub r10,4
 
-# Swapping in L
 movss xmm1 , dword ptr [r12]
 movss xmm0 , dword ptr [r10] 
 movss dword ptr [r12] , xmm0
 movss dword ptr [r10] , xmm1
 
 dec rax
-add r11,4
-add r15,4
-add r12,4
-add r10,4
-jmp .L_swap_scalar
 
+jmp .L_swap_scalar_L
+
+
+# Swapping Columns in P
+# r14 : Offset for swapping columns
+# r11 : Offset for swapping columns
 .L_swap_P:
+cmp r14,0
+jle .L_swap_end
 mov rbx,r8
 mov rax,rdi
-
-.L_swap_vect_P:
-cmp rax,4
-jl .L_swap_scalar_P
-
-# Swapping in P
-movups xmm1 , xmmword ptr [rbx]
-movups xmm0 , xmmword ptr [r14] 
-movups xmmword ptr [rbx] , xmm0
-movups xmmword ptr [r14] , xmm1
-
-add rbx,16
-add r14,16
-sub rax,4
-jmp .L_swap_vect_P
-
+mov r11,rdi
+sub r11,r9
+dec r11
+add r14,r11
 
 .L_swap_scalar_P:
 cmp rax,0
 jle .L_swap_end
 
 # Swapping in P
-movss xmm1 , dword ptr [rbx]
-movss xmm0 , dword ptr [r14] 
-movss dword ptr [rbx] , xmm0
-movss dword ptr [r14] , xmm1
+movss xmm1 , dword ptr [rbx+4*r11]
+movss xmm0 , dword ptr [rbx+4*r14] 
+movss dword ptr [rbx+4*r14] , xmm1
+movss dword ptr [rbx+4*r11] , xmm0
 
-add rbx,4
-add r14,4
+lea rbx,[rbx+4*rdi]
 dec rax
+jmp .L_swap_scalar_P
 
 .L_swap_end:
-jmp .L_end_pivotize
 
+lea r15,[rcx+4*rdi]
+mov r13,r15
+
+mov r11,rcx
+
+lea r10,[rdx+4*rdi]
+
+mov rax,r9
+inc rax
 
 .L_loop1:
 dec rax
@@ -287,25 +347,10 @@ jle .L_loop1_end
 
 lea rcx,[rcx+4*rdi+4]
 
-lea r8,[r8+4*rdi]
-
 lea rdx,[rdx+4*rdi+4]
 
 
 jmp .L_pivotize
-
-
-.L_end_pivotize:
-
-
-
-lea r15,[rcx+4*rdi]
-
-mov r11,rcx
-
-lea r10,[rdx+4*rdi]
-
-mov rax,r9
 
 
 
@@ -378,6 +423,8 @@ pop rbx
 
  
 ret
+
+
 
 .L_V1:
     .long 1065353216
