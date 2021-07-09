@@ -37,7 +37,7 @@ void printHelp()
     printf("-r/--generate : Test randomly matrices with specified max_size\n");
 }
 
-void ludecomp_asm2(size_t n, float *, float *, float *, float *);
+void ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
 
 void ludecomp_asm(size_t n, float *, float *, float *, float *);
 
@@ -79,7 +79,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
     {
 
         fprintf(output, "Testing...\n");
-        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, print, TOLERATE_ERROR))
+        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, TOLERATE_ERROR))
         {
             fprintf(output, "Test on Operation %ld failed.\n", i);
         }
@@ -155,8 +155,8 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
 
     if (testing)
     {
-
-        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, print, TOLERATE_ERROR))
+        fprintf(output, "Testing...\n");
+        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld Failed.\n", i + 1);
         }
@@ -191,7 +191,7 @@ typedef struct implementation_version implementation_version;
 const implementation_version implementations[] = {
     {"c", ludecomp},
     {"c_intrinsics", ludecomp_intrinsics},
-    {"asm_simd", ludecomp_asm2},
+    {"asm_simd", ludecomp_asm_simd},
     {"asm", ludecomp_asm},
     {"c_no_P", ludecomp_without_P}};
 

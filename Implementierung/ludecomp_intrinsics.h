@@ -50,7 +50,7 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
         {
             if (fabsf(U[i + k * n]) > max)
             {
-                max = U[i + k * n];
+                max = fabsf(U[i + k * n]);
                 row_with_max = k;
             }
         }

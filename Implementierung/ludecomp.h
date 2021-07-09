@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
+#include "matr_utilities.h"
 
 /**
  * Last @param (flaot* P) is always Identity Matrix whilst operating without Pivoting
@@ -57,6 +58,7 @@ void ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
 
 void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 {
+
     // Copying A in U
     for (size_t index = 0; index < n * n; index++)
     {
@@ -86,12 +88,14 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 
         // Searching for maximal absolute value in Column i
         float max = U[i + i * n];
+       
         size_t row_with_max = i;
         for (size_t k = i + 1; k < n; k++)
         {
+             
             if (fabsf(U[i + k * n]) > max)
             {
-                max = U[i + k * n];
+                max = fabsf(U[i + k * n]);
                 row_with_max = k;
             }
         }
@@ -113,6 +117,7 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
                 L[row_with_max * n + k] = temp;
             }
         }
+      
 
         // Swapping Columns in P
         for (size_t k = 0; k < n; k++)

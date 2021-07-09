@@ -214,7 +214,7 @@ void print_error_matrix(size_t n, float *orgM, float *M, FILE *output, float tol
     }
 }
 
-int test_matrix_eq(size_t n, float *orgM, float *M, int print, float tolerate)
+int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 {
     int res = 1;
     size_t matr_size = n * n;
@@ -223,7 +223,7 @@ int test_matrix_eq(size_t n, float *orgM, float *M, int print, float tolerate)
     {
         if (fabsf(orgM[i] - M[i]) >= tolerate)
         {
-            if (print && print_max-- > 0)
+            if (print_max-- > 0)
             {
                 printf("Matrix entry: %ld,%ld\n", i / matr_size, i % n);
                 printf("Expected: %f, Got: %f\n", orgM[i], M[i]);
@@ -246,22 +246,22 @@ void fill_matrix_with(size_t n, float *A, float a)
 }
 void run_bench(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row, int print)
 {
-    double start, end;
+
     if (print)
     {
         fprintf(output, "Operation %ld took (in Seconds) : \n", name, i + 1);
     }
-    double diff = 0;
+    double start, end, time = 0;
     for (size_t k = 0; k < iterations; k++)
     {
         start = curtime();
         func(size_of_matr_row, A, L, U, P);
         end = curtime();
-        diff += (end - start);
+        time += (end - start);
     }
     iterations = (double)iterations;
-    diff /= iterations;
-    fprintf(output, "%f\n", diff);
+    time /= iterations;
+    fprintf(output, "%f\n", time);
 }
 
 void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
@@ -302,7 +302,7 @@ void matrix_generator_intervals(size_t n, float *A, float exp)
  * Returns 1 if no errors found and 0 if yes. 
  */
 int print_result_without_solution(size_t n, float *A, float *L, float *U,
-                                  float *P, FILE *output, int print, float tolerate)
+                                  float *P, FILE *output,float tolerate)
 {
     int res = 1;
     size_t size_of_matr = n * n;
@@ -326,7 +326,7 @@ int print_result_without_solution(size_t n, float *A, float *L, float *U,
     matrix_mul(n, L, U, LxU);
     matrix_mul(n, P, LxU, PxLxU);
 
-    int test_PxLxU = test_matrix_eq(n, A, PxLxU, print, tolerate);
+    int test_PxLxU = test_matrix_eq(n, A, PxLxU, tolerate);
 
     if (!test_PxLxU)
     {
