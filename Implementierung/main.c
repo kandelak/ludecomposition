@@ -2,7 +2,6 @@
 #include "ludecomp.h"
 #include "test.h"
 #include <unistd.h>
-#include "ludecomp_intrinsics.h"
 #include <sys/resource.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -13,28 +12,42 @@
 #include <sys/time.h>
 #include <float.h>
 
-/**
- * For choosing Implementation 
- */
 
-/**
- * TODO! With Examples and better Explanation
- */
 void printHelp()
 {
-    printf("-h/--help: Display brief summaries of command line Options\n");
-    printf("--bench-all : Activates Benchmarking for pre-defined inputs");
+    printf("--help/-h : Display brief summaries of command line Options\n\n");
+    printf("--bench-all : Activates Benchmarking for pre-defined inputs\n\n"
+    "       Example: ./main --bench-all\n\n");
 
-    printf("--input: Specify input stream\n (use --input alternatively)");
-    printf("--no-print: Tell Program not to Print results of the LU decomposition");
-    printf("-p: Deactivates pivoting Method."
-           "No guarantee for correct answer");
-    printf("-b: Activate Benchmarking Mode (Functional Mode is Default)\n");
-    printf("--output: Choose Output stream \n (use -o alternatively)");
-    printf("-v: Choose Version of the Implementation\n");
-    printf("-i : Choose number of iterations\n");
-    printf("-t/--test-all : Test pre-defined input from predefined file\n");
-    printf("-r/--generate : Test randomly matrices with specified max_size\n");
+    printf("--input/-f: Specify input stream\n\n"
+    "       Example: ./main --input=input_file.txt\n"
+    "       Example: ./main --input input_file.txt\n"
+    "       Example: ./main -f=input_file.txt\n\n");
+    printf("--no-print: Deactivates user-friendly printing. For instance for testing/benchmarking purposes or during computations on larger matrices.\n\n"
+    "       Example: ./main --input=input_file.txt --no-print\n\n");
+    printf("-b: Activates Benchmarking\n\n"
+    "       Example: ./main --input=input_file.txt -b\n"
+    "       Example: ./main --input=input_file.txt -b --no-print\n\n");
+    printf("--output/-o: Chooses output stream for storing the results\n"
+    "       Note: Standart output stream is the default output stream\n\n"
+    "       Example: ./main --input=input_file.txt -b --output=results.txt\n\n");
+    printf("-v: Chooses the implementation for the decomposition\n\n"
+    "   Implementations:\n\n"
+    "       0 : C\n"
+    "       1 : C with intrinsics\n"
+    "       2 : Assembler with SIMD\n"
+    "       3 : Assembler\n"
+    "       4 : C without Pivoting\n"
+    "       Note: C is the default implementation\n\n"
+    "       Example: ./main --input=input_file.txt --output=results.txt -v 2\n"
+    "       Example: ./main -f input_file.txt -v 1 -b");
+    printf("-i : Choose number of iterations for decomposition\n\n"
+    "       Note: If benchmarking the average time is computed automatically\n\n"
+    "       Example: ./main --input input_file.txt -o result.txt -b -v 3 -i 10\n\n");
+    printf("-t/--test-all : Test pre-defined input from predefined file\n\n");
+    printf("--random-test : Generates single random input with specified row/column size of the matrix\n\n"
+    "       Example: ./main --random-test 500\n"
+    "       This will generate 500x500 randomized matrix\n\n");
 }
 
 void ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
@@ -42,12 +55,7 @@ void ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
 void ludecomp_asm(size_t n, float *, float *, float *, float *);
 
 /**
- *
- * Warning  : Exception Handling & Heap Allocation not yet implemented !!!
- *
- *@param out : pointer to output of the calculations : command line  / output file
- * This function uses @read_matrix_from_file(size_t,FILE,float) function to get multiple Matrices
- * from the specified @param input stream
+ * Runs LU-Decomposition on the Stack
  */
 
 void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
@@ -79,7 +87,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
     {
 
         fprintf(output, "Testing...\n");
-        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, TOLERATE_ERROR))
+        if (!test_ludecomp(size_of_matr_row, A, L, U, P,TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld failed.\n", i);
         }
@@ -95,6 +103,9 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
     }
 }
 
+/**
+ * Runs LU-decomposition on the heap
+ */
 void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
@@ -156,7 +167,7 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
     if (testing)
     {
         fprintf(output, "Testing...\n");
-        if (!print_result_without_solution(size_of_matr_row, A, L, U, P, output, TOLERATE_ERROR))
+        if (!test_ludecomp(size_of_matr_row, A, L, U, P,TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld Failed.\n", i + 1);
         }
@@ -176,6 +187,10 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
     free(U);
 }
 
+/**
+ *  To choose different implementations
+ */
+
 struct implementation_version
 {
     const char *name;
@@ -183,9 +198,7 @@ struct implementation_version
     void (*func)(size_t, const float *, float *, float *, float *);
 };
 
-/**
- *  Tool to Choose different implementations
- */
+
 typedef struct implementation_version implementation_version;
 
 const implementation_version implementations[] = {
@@ -194,6 +207,7 @@ const implementation_version implementations[] = {
     {"asm_simd", ludecomp_asm_simd},
     {"asm", ludecomp_asm},
     {"c_no_P", ludecomp_without_P}};
+
 
 int main(int argc, char **argv)
 {
@@ -210,7 +224,7 @@ int main(int argc, char **argv)
     int generate_single_input = 0;
     int benchmarking = 0;
     int bench_predefined = 0;
-    int version = 0; //ludecomp is the default Version
+    int version = 0;
     char *input = NULL;
     char *output = NULL;
     char *random = NULL;
@@ -323,7 +337,7 @@ int main(int argc, char **argv)
     }
 
     /**
-     * Handling to Input and Output Streams 
+     * Handling Input and Output Streams 
      */
 
     FILE *in;
@@ -358,7 +372,7 @@ int main(int argc, char **argv)
     }
 
     /**
-     * Calculate and print pre-defined Benches
+     * Calculate and print pre-defined benches
      */
 
     if (bench_predefined)

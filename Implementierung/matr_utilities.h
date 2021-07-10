@@ -12,7 +12,6 @@
 
 /**
  * Checks validity of the input
- * 
  */
 
 int check_validity(FILE *input)
@@ -129,6 +128,9 @@ static inline double curtime(void)
     return t.tv_sec + t.tv_nsec * 1e-9;
 }
 
+/**
+ * Writes Matrix M in the stream specified with out (Used for generating input file)
+ */
 void writeMatrix(FILE *out, size_t n, const float *M)
 {
     for (size_t index = 0; index < n * n - 1; index++)
@@ -137,7 +139,9 @@ void writeMatrix(FILE *out, size_t n, const float *M)
     }
     fprintf(out, "%f\n", M[n * n - 1]);
 }
-
+/**
+ * Writes Matrix M in the stream specified with out (Used for representing matrices to User)
+ */
 void write_pretty(FILE *out, size_t n, const float *M)
 {
     for (size_t index = 0; index < n * n - 1; index++)
@@ -148,25 +152,11 @@ void write_pretty(FILE *out, size_t n, const float *M)
     }
     fprintf(out, "%f\n\n", M[n * n - 1]);
 }
+
 #define STACK_LIMIT 700
-/**
- * Allocates Memory Space for Matrix
- * If size to large : Heap Allocation
- * If not : Stack Allocation
- * Explanation : 
- * matr_size : Matrix size
- * matr_size*sizeof()float*4 <=> matr_size*4*4 for number of BYTES allocation needed for 4 Matrices (We need always 4 Matrices for our Calculations)
- * MAX_STACK_MEM : Maximum number of BYTES one can allocate in the linux operating system
- * @return Pointer to the Allocated space for the Matrix with of @param matr_size 
- */
 
 /**
- *
- * Warning : Exception handling not implemented yet !!!
- *
- * @param n : size
- * @param fp
- * @param matrix
+ * Reads matrix entries from the stream specified with fp and writes in matrix
  */
 void read_matrix_from_stream(size_t n, FILE *fp, const float *matrix)
 {
@@ -185,6 +175,9 @@ void read_matrix_from_stream(size_t n, FILE *fp, const float *matrix)
     }
 }
 
+/**
+ * Basic matrix multiplication
+ */
 void matrix_mul(size_t n, float *A, float *B, float *Res)
 {
     size_t i, j, k;
@@ -199,6 +192,9 @@ void matrix_mul(size_t n, float *A, float *B, float *Res)
     }
 }
 
+/**
+ * Prints Error Matrix if the tolerated error is exceeded
+ */
 void print_error_matrix(size_t n, float *orgM, float *M, FILE *output, float tolerate)
 {
     for (size_t i = 0; i < n * n; i++)
@@ -214,6 +210,9 @@ void print_error_matrix(size_t n, float *orgM, float *M, FILE *output, float tol
     }
 }
 
+/**
+ * Tests if two matrices are equal based on the given error toleration
+ */
 int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 {
     int res = 1;
@@ -236,20 +235,15 @@ int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 
 #define LINE_SEPARATOR " \n############################################### \n\n"
 
-void fill_matrix_with(size_t n, float *A, float a)
-{
-    size_t matr_size = n * n;
-    for (size_t k = 0; k < matr_size; k++)
-    {
-        A[k] = a;
-    }
-}
+/**
+ * Runs Benchmark using given function
+ */
 void run_bench(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row, int print)
 {
 
     if (print)
     {
-        fprintf(output, "Operation %ld took (in Seconds) : \n", name, i + 1);
+        fprintf(output, "Operation %ld took (in Seconds) : \n",i + 1);
     }
     double start, end, time = 0;
     for (size_t k = 0; k < iterations; k++)
@@ -264,6 +258,9 @@ void run_bench(void (*func)(size_t, const float *, float *, float *, float *), F
     fprintf(output, "%f\n", time);
 }
 
+/**
+ * Writes Decomposition matrices on the stream specified with output
+ */
 void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
 {
 
@@ -281,17 +278,10 @@ void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t s
     fprintf(output, LINE_SEPARATOR);
 }
 
-void printMatrix(size_t n, const float *M, FILE *output)
-{
-    for (size_t index = 0; index < n * n; index++)
-    {
-        fprintf(output, "%f ", M[index]);
-        if ((index + 1) % n == 0)
-            printf("\n");
-    }
-}
-
-void matrix_generator_intervals(size_t n, float *A, float exp)
+/**
+ * Generates Matrix with given exponent as and upper boundary
+ */
+void matrix_generator(size_t n, float *A, float exp)
 {
     srand((unsigned int)time(NULL));
     for (size_t i = 0; i < n * n; i++)
@@ -299,10 +289,10 @@ void matrix_generator_intervals(size_t n, float *A, float exp)
 }
 
 /**
- * Returns 1 if no errors found and 0 if yes. 
+ * Tests correctness of the decomposition
  */
-int print_result_without_solution(size_t n, float *A, float *L, float *U,
-                                  float *P, FILE *output,float tolerate)
+int test_ludecomp(size_t n, float *A, float *L, float *U,
+                                  float *P, float tolerate)
 {
     int res = 1;
     size_t size_of_matr = n * n;
@@ -337,30 +327,3 @@ int print_result_without_solution(size_t n, float *A, float *L, float *U,
     free(PxLxU);
     return res;
 }
-
-// void print_result_with_solution(size_t n, float *orgL, float *L, float *orgU,
-//                              float *U, float *orgP, float *P, FILE *output)
-// {
-//     printf("Testing ...\n");
-//     int fehlerL = test_matrix_eq(n, orgL, L);
-//     int fehlerU = test_matrix_eq(n, orgU, U);
-//     int fehlerP = test_matrix_eq(n, orgP, P);
-//     printf("%d Fehler in L;   %d Fehler in U;   %d Fehler in P\n", fehlerL,
-//            fehlerU, fehlerP);
-//     if (fehlerL != 0)
-//     {
-//         printf("Fehler in L:\n");
-//         print_error_matrix(n, orgL, L, output);
-//     }
-//     if (fehlerU != 0)
-//     {
-//         printf("Fehler in U:\n");
-//         print_error_matrix(n, orgU, U, output);
-
-//         if (fehlerP != 0)
-//         {
-//             printf("Fehler in P:\n");
-//             print_error_matrix(n, orgP, P, output);
-//         }
-//         printf("\n\n\n");
-//     }

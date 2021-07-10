@@ -52,7 +52,7 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                 {
                        
                         fprintf(out, "%ld\n", k);
-                        matrix_generator_intervals(k, A, exp);
+                        matrix_generator(k, A, exp);
                         exp *= 10;
                         writeMatrix(out, k, A);
                 }
