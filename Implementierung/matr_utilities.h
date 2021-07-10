@@ -176,7 +176,7 @@ void read_matrix_from_stream(size_t n, FILE *fp, const float *matrix)
 }
 
 /**
- * Basic matrix multiplication
+ * Matrix multiplication
  */
 void matrix_mul(size_t n, float *A, float *B, float *Res)
 {
@@ -243,7 +243,7 @@ void run_bench(void (*func)(size_t, const float *, float *, float *, float *), F
 
     if (print)
     {
-        fprintf(output, "Operation %ld took (in Seconds) : \n",i + 1);
+        fprintf(output, "Operation %ld took (in Seconds) : \n", i + 1);
     }
     double start, end, time = 0;
     for (size_t k = 0; k < iterations; k++)
@@ -292,7 +292,7 @@ void matrix_generator(size_t n, float *A, float exp)
  * Tests correctness of the decomposition
  */
 int test_ludecomp(size_t n, float *A, float *L, float *U,
-                                  float *P, float tolerate)
+                  float *P, float tolerate)
 {
     int res = 1;
     size_t size_of_matr = n * n;
@@ -327,3 +327,5 @@ int test_ludecomp(size_t n, float *A, float *L, float *U,
     free(PxLxU);
     return res;
 }
+
+

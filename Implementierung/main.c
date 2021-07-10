@@ -12,42 +12,88 @@
 #include <sys/time.h>
 #include <float.h>
 
+void pivot_vs_no_pivot()
+{
+    FILE *exp = fopen("pivot_example.txt", "r");
+    if (!exp)
+    {
+        perror("Unable to open file for reading.\n");
+        exit(EXIT_FAILURE);
+    }
+    printf("Decomposing with pivoting..(See read-only file pivoting_example.txt)\n\n");
+    size_t num_of_matrices;
+    fscanf(exp, "%ld", &num_of_matrices);
+
+    size_t size_of_matr_row;
+
+    for (size_t i = 0; i < num_of_matrices; i++)
+    {
+        fscanf(exp, "%ld", &size_of_matr_row);
+        run_on_heap("C", ludecomp, exp, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
+    }
+    printf("\n        As you can see this particular input is successfully decomposed using implementation.\n\n"
+           "        But if we use non-pivoting Implementation, this will happen:\n\n");
+    freopen("pivot_example.txt", "r", exp);
+    if (!exp)
+    {
+        perror("Unable to open file for reading.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    fscanf(exp, "%ld", &num_of_matrices);
+    for (size_t i = 0; i < num_of_matrices; i++)
+    {
+        fscanf(exp, "%ld", &size_of_matr_row);
+        run_on_heap("C without P", ludecomp_without_P, exp, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
+    }
+
+    printf("\n        Due to limited computation resources of the floating-point numbers larger rounding errors will occur while not pivoting.\n\n");
+    fclose(exp);
+}
 
 void printHelp()
 {
     printf("--help/-h : Display brief summaries of command line Options\n\n");
     printf("--bench-all : Activates Benchmarking for pre-defined inputs\n\n"
-    "       Example: ./main --bench-all\n\n");
+           "       Example: ./main --bench-all\n\n");
 
     printf("--input/-f: Specify input stream\n\n"
-    "       Example: ./main --input=input_file.txt\n"
-    "       Example: ./main --input input_file.txt\n"
-    "       Example: ./main -f=input_file.txt\n\n");
+           "       Example: ./main --input=input_file.txt\n"
+           "       Example: ./main --input input_file.txt\n"
+           "       Example: ./main -f=input_file.txt\n\n");
     printf("--no-print: Deactivates user-friendly printing. For instance for testing/benchmarking purposes or during computations on larger matrices.\n\n"
-    "       Example: ./main --input=input_file.txt --no-print\n\n");
+           "       Example: ./main --input=input_file.txt --no-print\n\n");
     printf("-b: Activates Benchmarking\n\n"
-    "       Example: ./main --input=input_file.txt -b\n"
-    "       Example: ./main --input=input_file.txt -b --no-print\n\n");
+           "       Example: ./main --input=input_file.txt -b\n"
+           "       Example: ./main --input=input_file.txt -b --no-print\n\n");
     printf("--output/-o: Chooses output stream for storing the results\n"
-    "       Note: Standart output stream is the default output stream\n\n"
-    "       Example: ./main --input=input_file.txt -b --output=results.txt\n\n");
+           "       Note: Standart output stream is the default output stream\n\n"
+           "       Example: ./main --input=input_file.txt -b --output=results.txt\n\n");
     printf("-v: Chooses the implementation for the decomposition\n\n"
-    "   Implementations:\n\n"
-    "       0 : C\n"
-    "       1 : C with intrinsics\n"
-    "       2 : Assembler with SIMD\n"
-    "       3 : Assembler\n"
-    "       4 : C without Pivoting\n"
-    "       Note: C is the default implementation\n\n"
-    "       Example: ./main --input=input_file.txt --output=results.txt -v 2\n"
-    "       Example: ./main -f input_file.txt -v 1 -b");
+           "   Implementations:\n\n"
+           "       0 : C\n"
+           "       1 : C with intrinsics\n"
+           "       2 : Assembler with SIMD\n"
+           "       3 : Assembler\n"
+           "       4 : C without Pivoting\n"
+           "       Note: C is the default implementation\n\n"
+           "       Example: ./main --input=input_file.txt --output=results.txt -v 2\n"
+           "       Example: ./main -f input_file.txt -v 1 -b");
     printf("-i : Choose number of iterations for decomposition\n\n"
-    "       Note: If benchmarking the average time is computed automatically\n\n"
-    "       Example: ./main --input input_file.txt -o result.txt -b -v 3 -i 10\n\n");
+           "       Note: If benchmarking the average time is computed automatically\n\n"
+           "       Example: ./main --input input_file.txt -o result.txt -b -v 3 -i 10\n\n");
     printf("-t/--test-all : Test pre-defined input from predefined file\n\n");
     printf("--random-test : Generates single random input with specified row/column size of the matrix\n\n"
-    "       Example: ./main --random-test 500\n"
-    "       This will generate 500x500 randomized matrix\n\n");
+           "       Example: ./main --random-test 500\n"
+           "       This will generate 500x500 randomized matrix\n\n");
+    printf("--random-tests : Generates multiple random inputs with specified specified parameter\n\n"
+           "       Example: ./main --random-tests 500\n"
+           "       This will generate multiple matrices with size from 1 till 500\n\n");
+    printf("--bench-all : Generates temporary input for benchmarking and deletes it after completion of the benchmarking cycle\n\n"
+           "       Example: ./main --bench-all\n"
+           "       This will generate and benchmark multiple inputs with matrix row/column size varying from 1 till 1000\n\n");
+    printf("--pivot/-p : Shows comparision example for decomposition with and without pivoting\n\n"
+           "       Example: ./main --pivot\n\n");
 }
 
 void ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
@@ -87,7 +133,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
     {
 
         fprintf(output, "Testing...\n");
-        if (!test_ludecomp(size_of_matr_row, A, L, U, P,TOLERATE_ERROR))
+        if (!test_ludecomp(size_of_matr_row, A, L, U, P, TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld failed.\n", i);
         }
@@ -167,7 +213,7 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
     if (testing)
     {
         fprintf(output, "Testing...\n");
-        if (!test_ludecomp(size_of_matr_row, A, L, U, P,TOLERATE_ERROR))
+        if (!test_ludecomp(size_of_matr_row, A, L, U, P, TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld Failed.\n", i + 1);
         }
@@ -198,7 +244,6 @@ struct implementation_version
     void (*func)(size_t, const float *, float *, float *, float *);
 };
 
-
 typedef struct implementation_version implementation_version;
 
 const implementation_version implementations[] = {
@@ -207,7 +252,6 @@ const implementation_version implementations[] = {
     {"asm_simd", ludecomp_asm_simd},
     {"asm", ludecomp_asm},
     {"c_no_P", ludecomp_without_P}};
-
 
 int main(int argc, char **argv)
 {
@@ -244,11 +288,12 @@ int main(int argc, char **argv)
         {"test-all", no_argument, 0, 't'},
         {"random-tests", required_argument, 0, 'r'},
         {"random-test", required_argument, 0, 's'},
+        {"pivoting", no_argument, 0, 'p'},
     };
 
     int opt;
 
-    while ((opt = getopt_long(argc, argv, "o:bhv:r:f:i:nts:", long_options, NULL)) !=
+    while ((opt = getopt_long(argc, argv, "o:bphv:r:f:i:nts:", long_options, NULL)) !=
            -1)
     {
 
@@ -277,9 +322,12 @@ int main(int argc, char **argv)
             input = optarg;
             break;
         case 'a':
-            input = "bench.txt";
             bench_predefined = 1;
             benchmarking = 1;
+            break;
+        case 'p':
+            pivot_vs_no_pivot();
+            exit(EXIT_SUCCESS);
             break;
         case 'n':
             print = 0;
@@ -315,6 +363,10 @@ int main(int argc, char **argv)
     const implementation_version *impl = &implementations[version];
 
     const char *gen_file = "gen_file.txt";
+
+    /**
+     * Predefined Benchmarking 
+     */
 
     /**
      * Generating the random Inputs for Testing
