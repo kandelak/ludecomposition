@@ -26,14 +26,14 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
         if (only_this_size)
         {
                 start = max_size_of_row;
-                fprintf(out, "%ld\n",1);
+                fprintf(out, "%ld\n", 1);
         }
         else
         {
-                fprintf(out, "%ld\n", max_size_of_row/10);
+                fprintf(out, "%ld\n", max_size_of_row / 10);
         }
 
-        for (size_t k = start; k <= max_size_of_row; k+=10)
+        for (size_t k = start; k <= max_size_of_row; k += 10)
         {
                 float *A;
 
@@ -47,13 +47,14 @@ void generate_random_tests(size_t max_size_of_row, int only_this_size, char *out
                         exit(EXIT_FAILURE);
                 }
                 int i = 0;
-                float exp = 100000.0;
+                float exp = 1000.0;
                 while (i++ < 1)
                 {
-                       
+
                         fprintf(out, "%ld\n", k);
                         matrix_generator(k, A, exp);
                         exp *= 10;
+                       // must_pivotize(k, A);
                         writeMatrix(out, k, A);
                 }
                 free(A);

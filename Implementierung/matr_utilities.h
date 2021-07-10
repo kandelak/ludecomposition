@@ -238,9 +238,9 @@ int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 /**
  * Runs Benchmark using given function
  */
-void run_bench(void (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row, int print)
+int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row, int print)
 {
-
+    int decomposed = 1;
     if (print)
     {
         fprintf(output, "Operation %ld took (in Seconds) : \n", i + 1);
@@ -249,13 +249,17 @@ void run_bench(void (*func)(size_t, const float *, float *, float *, float *), F
     for (size_t k = 0; k < iterations; k++)
     {
         start = curtime();
-        func(size_of_matr_row, A, L, U, P);
+        if (!func(size_of_matr_row, A, L, U, P))
+        {
+            decomposed = 0;
+        };
         end = curtime();
         time += (end - start);
     }
     iterations = (double)iterations;
     time /= iterations;
-    fprintf(output, "%f\n", time);
+    if (decomposed)
+        fprintf(output, "%f\n", time);
 }
 
 /**
@@ -276,6 +280,28 @@ void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t s
     fprintf(output, " Matrix P: \n\n");
     write_pretty(output, size_of_matr_row, P);
     fprintf(output, LINE_SEPARATOR);
+}
+
+/**
+ * Worst Case input for Pivoting
+ */
+
+void must_pivotize(size_t n, float *A)
+{
+    size_t offset = n;
+    A[0] = 1;
+    for (size_t i = 1; i < n * n; i++)
+    {
+        if (i % offset == 0)
+        {
+            A[i] = 5.0;
+            offset += (n + 1);
+        }
+        else
+        {
+            A[i] = 1.0;
+        }
+    }
 }
 
 /**
@@ -327,5 +353,3 @@ int test_ludecomp(size_t n, float *A, float *L, float *U,
     free(PxLxU);
     return res;
 }
-
-

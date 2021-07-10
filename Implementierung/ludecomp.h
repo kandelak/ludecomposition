@@ -10,7 +10,7 @@
 /**
  * LU-Decomposition without using Pivoting method
  */
-void ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
+int ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
 {
 
     // Copying A in U
@@ -43,26 +43,37 @@ void ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
 
         for (size_t j = i; j < n - 1; j++)
         {
+            // Check if this Matrix can be decomposed
+            if (U[i + i * n])
+            {
+                return 0;
+            }
             // Calculating factor for given column entry
             float faktor = U[i + (j + 1) * n] / U[i + (i * n)];
 
             // Writing factors in L
             L[i + (j + 1) * n] = faktor;
 
-            // Setting given column entry to null using subtraction 
+            // Setting given column entry to null using subtraction
             for (size_t x = 0; x < n; x++)
             {
                 U[(j + 1) * n + x] -= U[(i * n) + x] * faktor;
             }
         }
     }
+
+    if (U[n * n - 1] == 0)
+    {
+        return 0;
+    }
+    return 1;
 }
 /**
  * Decomposition using Pivoting
  */
-void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
+int ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 {
-
+    size_t pivoted = 0;
     // Copying A in U
     for (size_t index = 0; index < n * n; index++)
     {
@@ -108,6 +119,7 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
         // If row with max abs value is the actual row itself -> skip
         if (row_with_max != i)
         {
+            pivoted++;
             // Swapping rows i and row_with_max in U and L if needed
             for (size_t k = 0; k < n; k++)
             {
@@ -137,7 +149,10 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 
         for (size_t j = i; j < n - 1; j++)
         {
-
+            if (U[i + (i * n)] == 0)
+            {
+                return 0;
+            }
             float faktor = U[i + (j + 1) * n] / U[i + (i * n)];
 
             // Writing factors in L
@@ -149,12 +164,17 @@ void ludecomp(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
     }
+    if (U[n * n - 1] == 0)
+    {
+        return 0;
+    }
+    return 1;
 }
 
 /**
  * LU-Decomposition using SIMD Intrinsics
  */
-void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
+int ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
 {
 
     // Copying A in U
@@ -291,7 +311,10 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
             // Calculating frequently used offsets in advance
             int offset2 = (j + 1) * n;
             int offset1 = i * n;
-
+            if (U[i + offset1] == 0)
+            {
+                return 0;
+            }
             float faktor = U[i + offset2] / U[i + offset1];
 
             float faktor_arr[4] = {faktor, faktor, faktor, faktor};
@@ -303,7 +326,6 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
 
             __m128 factors = _mm_loadu_ps(faktor_arr);
 
-            
             // why n > 3 ?  n is unsigned -> if n < 3 -> n-3 = very big number
             // Vectorized
             if (n > 3)
@@ -317,7 +339,7 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
                     _mm_storeu_ps(&U[(j + 1) * n + k], temp3);
                 }
             }
-            
+
             // Scalar
             for (size_t x = k; x < n; x++)
             {
@@ -325,5 +347,9 @@ void ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
     }
+    if (U[n * n - 1] == 0)
+    {
+        return 0;
+    }
+    return 1;
 }
-

@@ -14,41 +14,42 @@
 
 void pivot_vs_no_pivot()
 {
-    FILE *exp = fopen("pivot_example.txt", "r");
-    if (!exp)
+    FILE *example = fopen("pivot_example.txt", "r");
+    if (!example)
     {
         perror("Unable to open file for reading.\n");
         exit(EXIT_FAILURE);
     }
     printf("Decomposing with pivoting..(See read-only file pivoting_example.txt)\n\n");
     size_t num_of_matrices;
-    fscanf(exp, "%ld", &num_of_matrices);
+    fscanf(example, "%ld", &num_of_matrices);
 
     size_t size_of_matr_row;
 
     for (size_t i = 0; i < num_of_matrices; i++)
     {
-        fscanf(exp, "%ld", &size_of_matr_row);
-        run_on_heap("C", ludecomp, exp, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
+        fscanf(example, "%ld", &size_of_matr_row);
+        run_on_heap("C", ludecomp, example, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
     }
-    printf("\n        As you can see this particular input is successfully decomposed using implementation.\n\n"
+    printf("\n        As you can see this particular input is successfully decomposed using implementation with pivoting.\n\n"
            "        But if we use non-pivoting Implementation, this will happen:\n\n");
-    freopen("pivot_example.txt", "r", exp);
-    if (!exp)
+    freopen("pivot_example.txt", "r", example);
+    if (!example)
     {
         perror("Unable to open file for reading.\n");
         exit(EXIT_FAILURE);
     }
-    
-    fscanf(exp, "%ld", &num_of_matrices);
+
+    fscanf(example, "%ld", &num_of_matrices);
     for (size_t i = 0; i < num_of_matrices; i++)
     {
-        fscanf(exp, "%ld", &size_of_matr_row);
-        run_on_heap("C without P", ludecomp_without_P, exp, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
+
+        fscanf(example, "%ld", &size_of_matr_row);
+        run_on_heap("C without P", ludecomp_without_P, example, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
     }
 
     printf("\n        Due to limited computation resources of the floating-point numbers larger rounding errors will occur while not pivoting.\n\n");
-    fclose(exp);
+    fclose(example);
 }
 
 void printHelp()
@@ -96,15 +97,15 @@ void printHelp()
            "       Example: ./main --pivot\n\n");
 }
 
-void ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
+int ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
 
-void ludecomp_asm(size_t n, float *, float *, float *, float *);
+int ludecomp_asm(size_t n, float *, float *, float *, float *);
 
 /**
  * Runs LU-Decomposition on the Stack
  */
 
-void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
+void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
 
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
@@ -117,19 +118,30 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
 
     float P[size_of_matr];
 
+    int decomposed = 1;
+
     read_matrix_from_stream(size_of_matr_row, input, A);
 
     if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print);
+        if (!run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print))
+        {
+            decomposed = 0;
+        };
     }
     else
     {
         for (int k = 0; k < iterations; k++)
-            func(size_of_matr_row, A, L, U, P);
+        {
+            if (!func(size_of_matr_row, A, L, U, P))
+            {
+                fprintf(output, "This Matrix can not be decomposed.\n");
+                decomposed = 0;
+            };
+        }
     }
 
-    if (testing)
+    if (testing & decomposed)
     {
 
         fprintf(output, "Testing...\n");
@@ -143,7 +155,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
         }
     }
 
-    if (print)
+    if (print && decomposed)
     {
         print_pretty(output, A, L, U, P, size_of_matr_row, i);
     }
@@ -152,7 +164,7 @@ void run_on_stack(char *name, void (*func)(size_t, const float *, float *, float
 /**
  * Runs LU-decomposition on the heap
  */
-void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
+void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
@@ -160,7 +172,8 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
     float *L = NULL;
     float *P = NULL;
     float *U = NULL;
-
+    int decomposed = 1;
+    ;
     A = malloc(sizeof(float) * size_of_matr);
     if (!A)
     {
@@ -200,17 +213,23 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
 
     if (benchmarking && !testing)
     {
-        run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print);
+        if (!run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print))
+        {
+            decomposed = 0;
+        }
     }
     else
     {
         for (int k = 0; k < iterations; k++)
         {
-            func(size_of_matr_row, A, L, U, P);
+            if (!func(size_of_matr_row, A, L, U, P))
+            {
+                decomposed = 0;
+            };
         }
     }
 
-    if (testing)
+    if (testing && decomposed)
     {
         fprintf(output, "Testing...\n");
         if (!test_ludecomp(size_of_matr_row, A, L, U, P, TOLERATE_ERROR))
@@ -223,7 +242,7 @@ void run_on_heap(char *name, void (*func)(size_t, const float *, float *, float 
         }
     }
 
-    if (print)
+    if (print && decomposed)
     {
         print_pretty(output, A, L, U, P, size_of_matr_row, i);
     }
@@ -241,7 +260,7 @@ struct implementation_version
 {
     const char *name;
 
-    void (*func)(size_t, const float *, float *, float *, float *);
+    int (*func)(size_t, const float *, float *, float *, float *);
 };
 
 typedef struct implementation_version implementation_version;
@@ -337,6 +356,7 @@ int main(int argc, char **argv)
             generate_single_input = 1;
             break;
         case 't':
+            test_predefined = 1;
             testing = 1;
             break;
 
@@ -365,8 +385,27 @@ int main(int argc, char **argv)
     const char *gen_file = "gen_file.txt";
 
     /**
-     * Predefined Benchmarking 
+     * Benchmarking with predefined configuration
      */
+    if (bench_predefined)
+    {
+        max_size_random_tests = 1000;
+        print = 0;
+        printf("Generating inputs for Benchmarking in temporary file (bench_tmp.txt)...\n");
+        generate_random_tests(max_size_random_tests, 0, "bench_tmp.txt");
+        printf("Generating done. (In file bench_tmp.txt)\n");
+        input = "bench_tmp.txt";
+    }
+
+    /**
+     * Predefined Testing
+     */
+    if (test_predefined)
+    {
+        //input = "testing/test.txt";
+        testing = 1;
+        print = 0;
+    }
 
     /**
      * Generating the random Inputs for Testing
@@ -397,7 +436,8 @@ int main(int argc, char **argv)
 
     if (input == NULL)
     {
-        in = stdin;
+        printf("Please specify the input file. Refer to --help/-h\n");
+        exit(EXIT_FAILURE);
     }
     else
     {
@@ -419,20 +459,6 @@ int main(int argc, char **argv)
         if (!out)
         {
             perror("Error opening file for writing");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    /**
-     * Calculate and print pre-defined benches
-     */
-
-    if (bench_predefined)
-    {
-        in = fopen("bench.txt", "r");
-        if (!in)
-        {
-            perror("Error opening file for reading");
             exit(EXIT_FAILURE);
         }
     }
@@ -491,6 +517,19 @@ int main(int argc, char **argv)
     }
 
     printf("Calculating done.\n");
+
+    // Delete Temporary file
+    if (bench_predefined)
+    {
+        if (remove("bench_tmp.txt") == -1)
+        {
+            perror("Could not remove temporary file.");
+            fclose(in);
+            fclose(out);
+            exit(EXIT_FAILURE);
+        }
+    }
+
     fclose(in);
     fclose(out);
 

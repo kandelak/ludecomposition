@@ -303,9 +303,14 @@ jmp .L_pivotize_
 
 
 .L_factor_and_subtract_:
-
+xorps xmm3,xmm3
 # Calculating Factor and Writing in L
 movss xmm0,dword ptr [rcx]
+
+# Check if the Matrix can be decomposed
+comiss xmm0,xmm3
+je .L_not_decomposed_
+
 movss xmm1,dword ptr [r15]
 divss xmm1,xmm0
 movss [r10],xmm1
@@ -339,8 +344,22 @@ dec rbx
 jmp .L_subtract_scalar_
 
 
+.L_not_decomposed_:
+mov rax,0
+pop r15
+pop r14
+pop r13
+pop r12
+pop rbx
+ret
 .L_loop1_end_:
-
+# If the last entry in the U is 0 -> can not be decomposed
+lea rcx,[rcx+4*rdi+4]
+xorps xmm3,xmm3
+movss xmm0,dword ptr [rcx]
+comiss xmm0,xmm3
+je .L_not_decomposed_
+mov rax,1
 pop r15
 pop r14
 pop r13
@@ -708,8 +727,14 @@ jmp .L_pivotize
 
 .L_factor_and_subtract:
 
+xorps xmm3,xmm3
 # Calculating Factor and Writing in L
 movss xmm0,dword ptr [rcx]
+
+# Check if the Matrix can be decomposed
+comiss xmm0,xmm3
+je .L_not_decomposed
+
 movss xmm1,dword ptr [r15]
 divss xmm1,xmm0
 movss [r10],xmm1
@@ -761,16 +786,30 @@ add r11,4
 dec rbx
 jmp .L_subtract_scalar
 
-
-.L_loop1_end:
-
+.L_not_decomposed:
+mov rax,0
 pop r15
 pop r14
 pop r13
 pop r12
 pop rbx
 
- 
+ret
+
+.L_loop1_end:
+# If the last entry in the U is 0 -> can not be decomposed
+lea rcx,[rcx+4*rdi+4]
+xorps xmm3,xmm3
+movss xmm0,dword ptr [rcx]
+comiss xmm0,xmm3
+je .L_not_decomposed
+mov rax,1
+pop r15
+pop r14
+pop r13
+pop r12
+pop rbx
+
 ret
 
 
