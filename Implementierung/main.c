@@ -54,20 +54,27 @@ void pivot_vs_no_pivot()
 
 void printHelp()
 {
-    printf("--help/-h : Display brief summaries of command line Options\n\n");
-    printf("--bench-all : Activates Benchmarking for pre-defined inputs\n\n"
-           "       Example: ./main --bench-all\n\n");
-
+    printf("\n--help/-h : Display brief summaries of command line Options\n\n");
+    printf("--bench-all : Generates and runs benchmark on the pre-defined input configuration (in bench.txt)\n\n"
+           "       Example: ./main --bench-all\n\n"
+           "      Note: After this flag used you can then use the generated file for benchmarkin other implementations\n\n"
+           "       Example: ./main --input=bench.txt -v 2 --no-print -b\n\n");
     printf("--input/-f: Specify input stream\n\n"
            "       Example: ./main --input=input_file.txt\n"
            "       Example: ./main --input input_file.txt\n"
-           "       Example: ./main -f=input_file.txt\n\n");
+           "       Example: ./main -f=input_file.txt\n\n"
+           "       Note: Standart input stream will not be used as default or at all. Always specify input file"
+           "       How input works?\n\n"
+           "       Input for our program is just enter (new line) seperated numbers in the file\n\n"
+           "       First number is always integer and specifies the number of the matrices to be decomposed\n"
+           "       After that each and every time first comes the row/column size (Also integer) of the Matrix and then the matrix entries\n\n");
     printf("--no-print: Deactivates user-friendly printing. For instance for testing/benchmarking purposes or during computations on larger matrices.\n\n"
-           "       Example: ./main --input=input_file.txt --no-print\n\n");
+           "       Example: ./main --input=input_file.txt --no-print\n\n"
+           "       Note: Always use this if the matrices are too large\n\n");
     printf("-b: Activates Benchmarking\n\n"
            "       Example: ./main --input=input_file.txt -b\n"
            "       Example: ./main --input=input_file.txt -b --no-print\n\n");
-    printf("--output/-o: Chooses output stream for storing the results\n"
+    printf("--output/-o: Chooses output stream for storing the results\n\n"
            "       Note: Standart output stream is the default output stream\n\n"
            "       Example: ./main --input=input_file.txt -b --output=results.txt\n\n");
     printf("-v: Chooses the implementation for the decomposition\n\n"
@@ -76,23 +83,24 @@ void printHelp()
            "       1 : C with intrinsics\n"
            "       2 : Assembler with SIMD\n"
            "       3 : Assembler\n"
-           "       4 : C without Pivoting\n"
+           "       4 : C without Pivoting\n\n"
            "       Note: C is the default implementation\n\n"
+           "       Note: C without Pivoting is not working properly most of the time. Nevertheless you can still try to decompose with it\n\n"
            "       Example: ./main --input=input_file.txt --output=results.txt -v 2\n"
            "       Example: ./main -f input_file.txt -v 1 -b");
-    printf("-i : Choose number of iterations for decomposition\n\n"
+    printf("-i : Choose number of iterations\n\n"
            "       Note: If benchmarking the average time is computed automatically\n\n"
            "       Example: ./main --input input_file.txt -o result.txt -b -v 3 -i 10\n\n");
-    printf("-t/--test-all : Test pre-defined input from predefined file\n\n");
-    printf("--random-test : Generates single random input with specified row/column size of the matrix\n\n"
+    printf("--test-all/-k : Tests pre-defined input from predefined file (test.txt)\n\n");
+    printf("--random-test : Generates single random input with specified row/column size of the matrix (in file random_single.txt)\n\n"
            "       Example: ./main --random-test 500\n"
-           "       This will generate 500x500 randomized matrix\n\n");
-    printf("--random-tests : Generates multiple random inputs with specified specified parameter\n\n"
+           "       This will generate 500x500 randomized matrix\n\n"
+           "       After that you can use this command to run the test:\n\n"
+           "       Example: ./main --input=random_single.txt --no-print -t\n"
+           "       Example: ./main --input=random_single.txt --no-print -t -v 2\n\n");
+    printf("--random-tests : Generates multiple random inputs with specified range for testing purposes(in file random_multiple.txt)\n\n"
            "       Example: ./main --random-tests 500\n"
-           "       This will generate multiple matrices with size from 1 till 500\n\n");
-    printf("--bench-all : Generates temporary input for benchmarking and deletes it after completion of the benchmarking cycle\n\n"
-           "       Example: ./main --bench-all\n"
-           "       This will generate and benchmark multiple inputs with matrix row/column size varying from 1 till 1000\n\n");
+           "       This will generate multiple matrices with size in the range from 1 till 500\n\n");
     printf("--pivot/-p : Shows comparision example for decomposition with and without pivoting\n\n"
            "       Example: ./main --pivot\n\n");
 }
@@ -135,7 +143,7 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
         {
             if (!func(size_of_matr_row, A, L, U, P))
             {
-                fprintf(output, "This Matrix can not be decomposed.\n");
+                fprintf(output, "This Matrix can not be decomposed. (If not try using implementation with pivoting)\n");
                 decomposed = 0;
             };
         }
@@ -143,8 +151,6 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
 
     if (testing & decomposed)
     {
-
-        fprintf(output, "Testing...\n");
         if (!test_ludecomp(size_of_matr_row, A, L, U, P, TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld failed.\n", i);
@@ -153,6 +159,10 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
         {
             fprintf(output, "Test %ld succeeded.\n", i);
         }
+    }
+    else if (testing && !decomposed)
+    {
+        fprintf(output, "Test %ld succeeded.\n", i);
     }
 
     if (print && decomposed)
@@ -173,7 +183,7 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
     float *P = NULL;
     float *U = NULL;
     int decomposed = 1;
-    ;
+
     A = malloc(sizeof(float) * size_of_matr);
     if (!A)
     {
@@ -215,6 +225,7 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
     {
         if (!run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print))
         {
+            fprintf(output, "This Matrix can not be decomposed. (If not try using implementation with pivoting)\n");
             decomposed = 0;
         }
     }
@@ -231,7 +242,6 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
 
     if (testing && decomposed)
     {
-        fprintf(output, "Testing...\n");
         if (!test_ludecomp(size_of_matr_row, A, L, U, P, TOLERATE_ERROR))
         {
             fprintf(output, "Test %ld Failed.\n", i + 1);
@@ -283,15 +293,15 @@ int main(int argc, char **argv)
     }
 
     int test_predefined = 0;
-    int generate_multiple_input = 0;
-    int generate_single_input = 0;
+    int random_testing_multiple = 0;
+    int random_testing_single = 0;
     int benchmarking = 0;
     int bench_predefined = 0;
     int version = 0;
     char *input = NULL;
     char *output = NULL;
     char *random = NULL;
-    size_t max_size_random_tests = 0;
+    size_t single_input_size = 0;
     int testing = 0;
 
     int print = 1;
@@ -304,15 +314,15 @@ int main(int argc, char **argv)
         {"output", required_argument, 0, 'o'},
         {"bench-all", no_argument, 0, 'a'},
         {"no-print", no_argument, 0, 'n'},
-        {"test-all", no_argument, 0, 't'},
-        {"random-tests", required_argument, 0, 'r'},
+        {"test-all", no_argument, 0, 'k'},
+        {"random-tests", no_argument, 0, 'r'},
         {"random-test", required_argument, 0, 's'},
         {"pivoting", no_argument, 0, 'p'},
     };
 
     int opt;
 
-    while ((opt = getopt_long(argc, argv, "o:bphv:r:f:i:nts:", long_options, NULL)) !=
+    while ((opt = getopt_long(argc, argv, "o:bphv:rf:i:nts:", long_options, NULL)) !=
            -1)
     {
 
@@ -322,8 +332,7 @@ int main(int argc, char **argv)
             iterations = strtol(optarg, NULL, 10);
             break;
         case 'r':
-            generate_multiple_input = 1;
-            max_size_random_tests = strtol(optarg, NULL, 10);
+            random_testing_multiple = 1;
             break;
         case 'v':
             version = strtol(optarg, NULL, 10);
@@ -351,16 +360,19 @@ int main(int argc, char **argv)
         case 'n':
             print = 0;
             break;
-        case 's':
-            max_size_random_tests = strtol(optarg, NULL, 10);
-            generate_single_input = 1;
-            break;
-        case 't':
+        case 'k':
             test_predefined = 1;
             testing = 1;
             break;
+        case 's':
+            single_input_size = strtol(optarg, NULL, 10);
+            random_testing_single = 1;
+            break;
+        case 't':
+            testing = 1;
+            break;
 
-        default: /* '?' oder 'h' */
+        default:
             fprintf(stderr, "Refer to --help/-h\n\n");
             exit(EXIT_FAILURE);
         }
@@ -371,7 +383,7 @@ int main(int argc, char **argv)
      */
     if (version >= sizeof(implementations) / sizeof(implementation_version) || version < 0)
     {
-        if (!output && max_size_random_tests > 20)
+        if (!output && single_input_size > 20)
         {
             fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
             exit(EXIT_FAILURE);
@@ -389,12 +401,13 @@ int main(int argc, char **argv)
      */
     if (bench_predefined)
     {
-        max_size_random_tests = 1000;
+        single_input_size = 1000;
         print = 0;
-        printf("Generating inputs for Benchmarking in temporary file (bench_tmp.txt)...\n");
-        generate_random_tests(max_size_random_tests, 0, "bench_tmp.txt");
-        printf("Generating done. (In file bench_tmp.txt)\n");
-        input = "bench_tmp.txt";
+        printf("Generating inputs for Benchmarking...\n");
+        generate_bench("bench.txt");
+        printf("Generating done. (In file bench.txt)\n");
+        input = "bench.txt";
+        benchmarking = 1;
     }
 
     /**
@@ -402,7 +415,7 @@ int main(int argc, char **argv)
      */
     if (test_predefined)
     {
-        //input = "testing/test.txt";
+        input = "test.txt";
         testing = 1;
         print = 0;
     }
@@ -410,21 +423,23 @@ int main(int argc, char **argv)
     /**
      * Generating the random Inputs for Testing
      */
-    if (generate_multiple_input)
+    if (random_testing_multiple)
     {
         testing = 1;
         printf("Generating randomized Inputs for Testing...\n");
-        generate_random_tests(max_size_random_tests, 0, gen_file);
-        printf("Generating done. (In file gen_file.txt)\n");
-        exit(EXIT_SUCCESS);
+        random_multiple_input("random_multiple.txt");
+        printf("Generating done. (In file random_multiple.txt)\n");
+        print = 0;
+        input = "random_multiple.txt";
     }
-    else if (generate_single_input)
+    else if (random_testing_single)
     {
         testing = 1;
         printf("Generating randomized Inputs for Testing...\n");
-        generate_random_tests(max_size_random_tests, 1, gen_file);
-        printf("Generating done. (In file gen_file.txt)\n");
-        exit(EXIT_SUCCESS);
+        random_single_input("random_single.txt", single_input_size);
+        printf("Generating done. (In file random_single.txt)\n");
+        print = 0;
+        input = "random_multiple.txt";
     }
 
     /**
@@ -495,7 +510,15 @@ int main(int argc, char **argv)
      * Calculating Decompositions
      */
 
-    printf("Calculating using %s Implementation...\n", impl->name);
+    printf("Using %s Implementation...\n", impl->name);
+    if (testing)
+    {
+        printf("Testing..\n");
+    }
+    else if (benchmarking)
+    {
+        printf("Testing..\n");
+    }
 
     size_t num_of_matrices;
     fscanf(in, "%ld", &num_of_matrices);
@@ -516,19 +539,7 @@ int main(int argc, char **argv)
         }
     }
 
-    printf("Calculating done.\n");
-
-    // Delete Temporary file
-    if (bench_predefined)
-    {
-        if (remove("bench_tmp.txt") == -1)
-        {
-            perror("Could not remove temporary file.");
-            fclose(in);
-            fclose(out);
-            exit(EXIT_FAILURE);
-        }
-    }
+    printf("done.\n");
 
     fclose(in);
     fclose(out);

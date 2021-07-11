@@ -80,7 +80,7 @@ int check_validity(FILE *input)
         }
         else if ((int)size_of_matr_row <= 0)
         {
-            printf("Size of the Matrix can not be less than or equal zero.\n");
+            printf("Row/Column size of the Matrix can not be less than or equal zero.\n");
             return 0;
         }
 
@@ -131,7 +131,7 @@ static inline double curtime(void)
 /**
  * Writes Matrix M in the stream specified with out (Used for generating input file)
  */
-void writeMatrix(FILE *out, size_t n, const float *M)
+void write_matrix_in_stream(FILE *out, size_t n, const float *M)
 {
     for (size_t index = 0; index < n * n - 1; index++)
     {
@@ -139,6 +139,7 @@ void writeMatrix(FILE *out, size_t n, const float *M)
     }
     fprintf(out, "%f\n", M[n * n - 1]);
 }
+
 /**
  * Writes Matrix M in the stream specified with out (Used for representing matrices to User)
  */
@@ -193,24 +194,6 @@ void matrix_mul(size_t n, float *A, float *B, float *Res)
 }
 
 /**
- * Prints Error Matrix if the tolerated error is exceeded
- */
-void print_error_matrix(size_t n, float *orgM, float *M, FILE *output, float tolerate)
-{
-    for (size_t i = 0; i < n * n; i++)
-    {
-        if (fabsf(orgM[i] - M[i]) >= tolerate)
-        {
-            fprintf(output, "<<%f (!=%f)>> ", M[i], orgM[i]);
-        }
-        else
-            fprintf(output, "%f ", M[i]);
-        if ((i + 1) % n == 0)
-            fprintf(output, "\n");
-    }
-}
-
-/**
  * Tests if two matrices are equal based on the given error toleration
  */
 int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
@@ -241,10 +224,9 @@ int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row, int print)
 {
     int decomposed = 1;
-    if (print)
-    {
-        fprintf(output, "Operation %ld took (in Seconds) : \n", i + 1);
-    }
+
+    fprintf(output, "%ldx%ld took (in Seconds) : ", size_of_matr_row, size_of_matr_row, i + 1);
+
     double start, end, time = 0;
     for (size_t k = 0; k < iterations; k++)
     {
@@ -260,10 +242,14 @@ int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FIL
     time /= iterations;
     if (decomposed)
         fprintf(output, "%f\n", time);
+    else
+    {
+        fprintf(output, "Can not be decomposed (using this implementation)\n");
+    }
 }
 
 /**
- * Writes Decomposition matrices on the stream specified with output
+ * Writes Decomposition matrices in the stream specified with output
  */
 void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
 {
@@ -285,7 +271,6 @@ void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t s
 /**
  * Worst Case input for Pivoting
  */
-
 void must_pivotize(size_t n, float *A)
 {
     size_t offset = n;
@@ -305,13 +290,40 @@ void must_pivotize(size_t n, float *A)
 }
 
 /**
- * Generates Matrix with given exponent as and upper boundary
+ * Generates Matrix with entries from 0 to range
  */
-void matrix_generator(size_t n, float *A, float exp)
+void matrix_generator(size_t n, float *A, float range)
 {
     srand((unsigned int)time(NULL));
     for (size_t i = 0; i < n * n; i++)
-        A[i] = ((float)rand() / (RAND_MAX)) * exp;
+        A[i] = ((float)rand() / (RAND_MAX)) * range;
+}
+
+/**
+ * Generates Matrix with entries from 0 to range (negative numbers)
+ */
+void matrix_generator2(size_t n, float *A, float range)
+{
+    srand((unsigned int)time(NULL));
+    for (size_t i = 0; i < n * n; i++)
+    {
+        A[i] = ((float)rand() / (RAND_MAX)) * range;
+        int num = (int) A[i];
+        A[i] = (num % 7 > 4 ? 1 : -1) * A[i];
+    }
+}
+
+/**
+ * Generates Matrix with entries from 0 to range (no fraction part & negatives)
+ */
+void matrix_generator3(size_t n, float *A, float range)
+{
+    srand((unsigned int)time(NULL));
+    for (size_t i = 0; i < n * n; i++)
+    {
+        int num = (int)(((float)rand() / (RAND_MAX)) * range);
+        A[i] = (num % 7 > 4 ? 1 : -1) * num;
+    }
 }
 
 /**

@@ -44,8 +44,9 @@ int ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
         for (size_t j = i; j < n - 1; j++)
         {
             // Check if this Matrix can be decomposed
-            if (U[i + i * n])
+            if (U[i + i * n]==0)
             {
+                printf("Entry: %ld,%ld ",i,j);
                 return 0;
             }
             // Calculating factor for given column entry
@@ -166,6 +167,7 @@ int ludecomp(size_t n, const float *A, float *L, float *U, float *P)
     }
     if (U[n * n - 1] == 0)
     {
+        
         return 0;
     }
     return 1;
