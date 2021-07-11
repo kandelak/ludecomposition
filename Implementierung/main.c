@@ -1,6 +1,6 @@
 #include <limits.h>
 #include "ludecomp.h"
-#include "test.h"
+#include "generator.h"
 #include <unistd.h>
 #include <sys/resource.h>
 #include <getopt.h>
@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <float.h>
+
 
 void pivot_vs_no_pivot()
 {
@@ -52,61 +53,6 @@ void pivot_vs_no_pivot()
     fclose(example);
 }
 
-void printHelp()
-{
-    printf("\n--help/-h : Display brief summaries of command line Options\n\n");
-    printf("--bench-all : Generates and runs benchmark on the pre-defined input configuration (in bench.txt)\n\n"
-           "       Example: ./main --bench-all\n\n"
-           "      Note: After this flag used you can then use the generated file for benchmarkin other implementations\n\n"
-           "       Example: ./main --input=bench.txt -v 2 --no-print -b\n\n");
-    printf("--input/-f: Specify input stream\n\n"
-           "       Example: ./main --input=input_file.txt\n"
-           "       Example: ./main --input input_file.txt\n"
-           "       Example: ./main -f=input_file.txt\n\n"
-           "       Note: Standart input stream will not be used as default or at all. Always specify input file"
-           "       How input works?\n\n"
-           "       Input for our program is just enter (new line) seperated numbers in the file\n\n"
-           "       First number is always integer and specifies the number of the matrices to be decomposed\n"
-           "       After that each and every time first comes the row/column size (Also integer) of the Matrix and then the matrix entries\n\n");
-    printf("--no-print: Deactivates user-friendly printing. For instance for testing/benchmarking purposes or during computations on larger matrices.\n\n"
-           "       Example: ./main --input=input_file.txt --no-print\n\n"
-           "       Note: Always use this if the matrices are too large\n\n");
-    printf("-b: Activates Benchmarking\n\n"
-           "       Example: ./main --input=input_file.txt -b\n"
-           "       Example: ./main --input=input_file.txt -b --no-print\n\n");
-    printf("--output/-o: Chooses output stream for storing the results\n\n"
-           "       Note: Standart output stream is the default output stream\n\n"
-           "       Example: ./main --input=input_file.txt -b --output=results.txt\n\n");
-    printf("-v: Chooses the implementation for the decomposition\n\n"
-           "   Implementations:\n\n"
-           "       0 : C\n"
-           "       1 : C with intrinsics\n"
-           "       2 : Assembler with SIMD\n"
-           "       3 : Assembler\n"
-           "       4 : C without Pivoting\n\n"
-           "       Note: C is the default implementation\n\n"
-           "       Note: C without Pivoting is not working properly most of the time. Nevertheless you can still try to decompose with it\n\n"
-           "       Example: ./main --input=input_file.txt --output=results.txt -v 2\n"
-           "       Example: ./main -f input_file.txt -v 1 -b");
-    printf("-i : Choose number of iterations\n\n"
-           "       Note: If benchmarking the average time is computed automatically\n\n"
-           "       Example: ./main --input input_file.txt -o result.txt -b -v 3 -i 10\n\n");
-    printf("--test-all/-k : Tests chosen implementation with pre-defined input from predefined file (test.txt)\n\n");
-    printf("--random-test : Generates single random input with specified row/column size of the matrix (in file random_single.txt)\n\n"
-           "       Example: ./main --random-test 500\n"
-           "       This will generate 500x500 randomized matrix\n\n"
-           "       After that you can use this command to run the test:\n\n"
-           "       Example: ./main --input=random_single.txt --no-print -t\n"
-           "       Example: ./main --input=random_single.txt --no-print -t -v 2\n\n"
-           "       Or you can also run bench using this command and write results in output file:"
-           "       Example: ./main --input=random_single.txt --no-print -b -o result.txt -v 3\n\n");
-    printf("--random-tests : Generates multiple random inputs for testing purposes with specified(in file random_multiple.txt)\n\n"
-           "       Example: ./main --random-tests\n"
-           "       After that you can run tests again and write results in output file using this command:\n"
-           "       Example: ./main --input=random_multiple.txt --output=result.txt --no-print -t -v 2");
-    printf("--pivot/-p : Shows comparision example for decomposition with and without pivoting\n\n"
-           "       Example: ./main --pivot\n\n");
-}
 
 int ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
 
@@ -525,7 +471,7 @@ int main(int argc, char **argv)
     }
     else if (benchmarking)
     {
-        printf("Testing..\n");
+        printf("Benchmarking..\n");
     }
 
     size_t num_of_matrices;
