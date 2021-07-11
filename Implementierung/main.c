@@ -91,16 +91,19 @@ void printHelp()
     printf("-i : Choose number of iterations\n\n"
            "       Note: If benchmarking the average time is computed automatically\n\n"
            "       Example: ./main --input input_file.txt -o result.txt -b -v 3 -i 10\n\n");
-    printf("--test-all/-k : Tests pre-defined input from predefined file (test.txt)\n\n");
+    printf("--test-all/-k : Tests chosen implementation with pre-defined input from predefined file (test.txt)\n\n");
     printf("--random-test : Generates single random input with specified row/column size of the matrix (in file random_single.txt)\n\n"
            "       Example: ./main --random-test 500\n"
            "       This will generate 500x500 randomized matrix\n\n"
            "       After that you can use this command to run the test:\n\n"
            "       Example: ./main --input=random_single.txt --no-print -t\n"
-           "       Example: ./main --input=random_single.txt --no-print -t -v 2\n\n");
-    printf("--random-tests : Generates multiple random inputs with specified range for testing purposes(in file random_multiple.txt)\n\n"
-           "       Example: ./main --random-tests 500\n"
-           "       This will generate multiple matrices with size in the range from 1 till 500\n\n");
+           "       Example: ./main --input=random_single.txt --no-print -t -v 2\n\n"
+           "       Or you can also run bench using this command and write results in output file:"
+           "       Example: ./main --input=random_single.txt --no-print -b -o result.txt -v 3\n\n");
+    printf("--random-tests : Generates multiple random inputs for testing purposes with specified(in file random_multiple.txt)\n\n"
+           "       Example: ./main --random-tests\n"
+           "       After that you can run tests again and write results in output file using this command:\n"
+           "       Example: ./main --input=random_multiple.txt --output=result.txt --no-print -t -v 2");
     printf("--pivot/-p : Shows comparision example for decomposition with and without pivoting\n\n"
            "       Example: ./main --pivot\n\n");
 }
@@ -145,6 +148,7 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
             {
                 fprintf(output, "This Matrix can not be decomposed. (If not try using implementation with pivoting)\n");
                 decomposed = 0;
+                break;
             };
         }
     }
@@ -250,6 +254,10 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
         {
             fprintf(output, "Test %ld succeeded.\n", i + 1);
         }
+    }
+    else if (testing && !decomposed)
+    {
+        fprintf(output, "Test %ld succeeded.\n", i + 1);
     }
 
     if (print && decomposed)

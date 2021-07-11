@@ -106,7 +106,7 @@ void random_multiple_input(char *output)
         write_matrix_in_stream(out, next_size, B);
 
         range = 10000.0;
-        for (size_t k = 1; k <= 600; k+=20)
+        for (size_t k = 1; k <= 600; k += 20)
         {
                 float *D = malloc(sizeof(float) * k * k);
 
@@ -124,8 +124,7 @@ void random_multiple_input(char *output)
                 free(D);
         }
 
-        range = 10000.0;
-        for (size_t k = 1; k <= 600; k+=20)
+        for (size_t k = 1; k <= 600; k += 20)
         {
                 float *D = malloc(sizeof(float) * k * k);
 
@@ -183,8 +182,8 @@ void generate_bench(char *bench_file)
                         exit(EXIT_FAILURE);
                 }
         }
-        fprintf(bench, "%ld\n", 1002 / 25);
-        for (size_t i = 1; i < 1002; i += 50)
+        fprintf(bench, "%ld\n", 1000 / 25);
+        for (size_t i = 1; i < 1000; i += 50)
         {
                 float *A;
 
@@ -199,11 +198,12 @@ void generate_bench(char *bench_file)
                 matrix_generator(i, A, 1000.0);
                 fprintf(bench, "%ld\n", i);
                 write_matrix_in_stream(bench, i, A);
+                
                 fprintf(bench, "%ld\n", i);
                 must_pivotize(i, A);
                 write_matrix_in_stream(bench, i, A);
                 free(A);
         }
-        
+
         fclose(bench);
 }
