@@ -393,7 +393,7 @@ int main(int argc, char **argv)
         random_single_input("random_single.txt", single_input_size);
         printf("Generating done. (In file random_single.txt)\n");
         print = 0;
-        input = "random_multiple.txt";
+        input = "random_single.txt";
     }
 
     /**

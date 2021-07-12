@@ -61,7 +61,6 @@ void matrix_generator3(size_t n, float *A, float range)
         }
 }
 
-
 /**
  * Generates non-decomposable Matrices
  */
@@ -224,9 +223,11 @@ void random_single_input(char *output, size_t n)
                 perror("Could not allocate Memory");
                 exit(EXIT_FAILURE);
         }
-
+        float range = 10000.0;
         fprintf(out, "%ld\n", 1);
-        matrix_generator(n, A, 1000.0);
+        fprintf(out, "%ld\n", n);
+        matrix_generator(n, A, range);
+        write_matrix_in_stream(out, n, A);
         fclose(out);
 }
 

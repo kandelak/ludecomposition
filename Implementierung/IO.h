@@ -95,7 +95,7 @@ int check_validity(FILE *input)
     }
     else if (*endptr && *endptr != '\n')
     {
-        printf("Wrong Input Format (All numbers must be enter seperated). Please refer to --help/-h.\n");
+        printf("Wrong Input Format (All numbers must be enter seperated). Did you specify number of the Matrices?. Please refer to --help/-h.\n");
         return 0;
     }
     else if ((int)num_of_matr <= 0)
@@ -126,7 +126,7 @@ int check_validity(FILE *input)
         }
         else if (*endptr && *endptr != '\n')
         {
-            printf("Wrong Input Format (All numbers must be enter seperated). Please refer to --help/-h.\n");
+            printf("Wrong Input Format (All numbers must be enter seperated). Did you specify row/column length of the Matrix?  Please refer to --help/-h.\n");
             return 0;
         }
         else if ((int)size_of_matr_row <= 0)
