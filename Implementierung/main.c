@@ -340,7 +340,6 @@ int main(int argc, char **argv)
         if (!output && single_input_size > 20)
         {
             fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
-            exit(EXIT_FAILURE);
         }
         fprintf(stderr, "Invalid Implementation Specifier \nExiting..\n");
         exit(EXIT_FAILURE);
