@@ -12,7 +12,7 @@
 
 % Diese Zeile bitte -nicht- aendern.
 \title{Gruppe \theGroup{} -- Abgabe zu Aufgabe \theNumber}
-
+\usepackage{gauss}
 \begin{document}
 \maketitle
 
@@ -33,43 +33,33 @@ Dazu liefert die LU-Zerlegung für jedes eindeutig
    wobei P*L*U = A ergibt. Hierbei haben die Matrizen besondere 
    Eigenschaften. L hat in allen Einträgen oberhalb der Diagonalen die Werte 0 (Siehe Matrix \ref{unteremx}). U hingegen hat in allen Einträgen unterhalb
     der Diagonalen die Werte 0 (Siehe Matrix \ref{oberemx}). Die Matrix P ist eine Einheitsmatrix mit ggf. 
-    vertauschten Zeilen (Siehe Matrix \ref{pivotmx}).
-    \begin{equation}
-\label{unteremx}
+    vertauschten Zeilen.
+    
+  \begin{equation}
 Untere Dreiecksatrix: \begin{bmatrix}
-
- x_{1,1}  & 0      &  0     & 0\\
- x_{2,1}  & x_{2,2}  &  0	  & 0 \\
- x_{3,1}	& x_{3,2}  & x_{3,3}  & 0\\
- x_{4,1}	& x_{4,2}	 & x_{4,3}  & x_{4,4} \\
+\caption{\label{unteremx}}
+ l_{1,1}    & 0        &  0       & \cdots   & 0\\
+ l_{2,1}    & l_{2,2}  &  0	      &          & \vdots\\
+ l_{3,1}	& l_{3,2}  & l_{3,3}  & \ddots   & \vdots\\
+ \vdots	    & \vdots   & \vdots   & \ddots   & 0 \\
+ l_{n,1}	& l_{n,2}  & l_{n,3}  & \cdots   & l_{n, n} \\
 
 
  \end{bmatrix}
 \end{equation}
-
+   
 \begin{equation}
-\label{oberemx}
 Obere Dreiecksatrix: \begin{bmatrix}
- x_{1,1}	& x_{1,2}	 & x_{1,3}  & x_{1,4} \\
- 0	    & x_{2,2}	 & x_{2,3}  & x_{2,4}\\
- 0	    & 0      & x_{3,3}  & x_{3,4}\\
- 0	    & 0      & 0      & x_{4,4}\\
+ \caption{\label{oberemx}}
+
+ u_{1,1} & u_{1,2} & u_{1,3}  & \cdots & u_{1,n} \\
+ 0	     & u_{2,2} & u_{2,3}  & \cdots & u_{2,n}\\
+ 0	     & 0       & u_{3,3}  & \cdots & u_{3,n}\\
+ \vdots  & \vdots  &          & \ddots & \vdots\\
+ 0       & 0       & \cdots   & 0      & u_{n, n}\\
  \end{bmatrix}
 \end{equation}
-
-\begin{equation}
-\label{pivotmx}
-Pivotmatrix: \begin{bmatrix}
-
- x_{1,1}  & x_{1,2}	 & x_{1,3}  & x_{1,4} \\
- x_{2,1}  & x_{2,2}	 & x_{2,3}  & x_{2,4} \\
- x_{3,1}	& x_{3,2}  & x_{3,3}  & x_{3,4}\\
- x_{4,1}	& x_{4,2}	 & x_{4,3}  & x_{4,4} \\
-
-\end{bmatrix}
-
-\end{equation}
-
+\\
 
 Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
 \begin{eqnarray}
@@ -132,8 +122,8 @@ Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
 \section{Lösungsansatz}
 Zur Durchführung diser Zerlegung haben wir uns entschieden ein Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
 Das gaußsche Eliminationsverfahren ändert die Einträge einer Matrix unter Verwendung elementarer Zeilenoperationen.
-Die verwendeten elementaren Zeilenoperationen sind das Tauschen zweier Zeilen und das Addieren von
-vielfachen einer Zeile auf eine Andere.
+Die verwendeten elementaren Zeilenoperationen sind das Tauschen zweier Zeilen (Siehe Gleichung \ref{swap}) und das Addieren von
+vielfachen einer Zeile auf eine Andere (Siehe Gleichung \ref{add}). 
  Dabei wird das Gleichungssystem A*x = b verändert die Lösung bleibt aber erhalten.\\
 
 Mit diesem Verfahren erstellen wir eine obere Dreieckmatrix bei der alle Einträge unter der 
@@ -155,7 +145,56 @@ eingegeangen warum wir immer die Zeile mit dem größten Eintrag nach oben tausc
 Zusätzlich sei gesagt dass nicht jede Matrixzerlegung den Schritt der Zeilenvertauschung benötigt und das der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was potential für 
 Optimierungen bieten könnte.\\
  
+Hier ein Beispiel für Zeilenvertauschungen:
+\begin{equation}
+ \caption{\label{swap}}
+\centering
+ \begin{gmatrix}[b]
+ 
+ 0	& 3	 & 5  & 7 \\
+ 2	& 6	 & 10 & 14 \\
+-4	& 12 & 15 & -21\\
+ 6	& 9  & -3 & -9
+ 
+ \rowops 
+ \swap{0}{3}
+ \end{gmatrix}
+ \rightarrow 
+  \begin{gmatrix}[b]
+ 6	& 9  & -3 & -9\\
+ 2	& 6	 & 10 & 14 \\
+-4	& 12 & 15 & -21\\
+ 0	& 3	 & 5  & 7
+\end{gmatrix}
+ \end{equation}
+  \\
+  
+   Hier ein Beispiel für Zeilenaddition:
+  \begin{equation}
+ \caption{\label{add}}
+\centering
+ \begin{gmatrix}[b]
+ 
+ 6	& 9  & -3 & -9\\
+ 2	& 6	 & 10 & 14 \\
+-4	& 12 & 15 & -21\\
+ 0	& 3	 & 5  & 7
+ 
+ \rowops 
+  \add[\frac{1}{3}]{0}{2}
+ \end{gmatrix}
+ \rightarrow 
+  \begin{gmatrix}[b]
+6	& 9  & -3 & -9\\
+ 2	& 6	 & 10 & 14 \\
+ 0	& 15 & 14 & -24\\
+ 0	& 3	 & 5  & 7
+\end{gmatrix}
+ \end{equation}
+  \\
+ 
 
+ 
 
 
 \subsection{Stack vs. Heap}
@@ -168,13 +207,13 @@ Optimierungen bieten könnte.\\
  Die größe unserer Eingabematrix A muss 4 mal alloziert werden da temporär A, L, U und P abgespeichert werdem müssen.
  Der in der Methode übergebene Parameter n ist die Anzahl Zeilen / Spalten unseren Matrix da unsere Matrizem immer quadratisch sein müssen. Dadurch ergibt sich eine Anzahl Einträge pro Matrix von $n * n $. 
  Jeder dieser Einträge ist in unserem Fall ein Floating Point Wert und somit 4 Bytes groß.
- Daraus ergibt sich die Formel \ref{size} Welche die benötigte Anzahl bytes in Abhängigkeit unserer Eingabegröße n Berechnet.
+ Daraus ergibt sich die Formel \ref{size} Welche die benötigte Anzahl bytes in Abhängigkeit unserer Eingabegröße n Berechnet.\\
  
  \begin{equation}
  \label{size}
   bytes = 4*4*n*n
  \end{equation}
-Dann folgt dass unser $n$ für eine Nutzung des Stacks  $n <= 707$  sein muss.\ref{maxsize}
+Dann folgt dass unser $n$ für eine Nutzung des Stacks  $n <= 707$  sein muss.(Formel \ref{maxsize})
  \begin{equation}
  \label{maxsize}
   4*4*n*n <= 8*10^6
@@ -185,14 +224,152 @@ Dann folgt dass unser $n$ für eine Nutzung des Stacks  $n <= 707$  sein muss.\r
 \subsection{Verschiedene Implementierungen}
 Wie eben schon erwähnt ist uns aufgefallen dass die LU Zerlegung vieler Matrizen auch noch gelöst werden kann wenn man die Pivotisierung weg lässt. In der Theorie könnte man dadurch einen Performancgewinn erbringen. 
 Um dies zu überprüfen haben wir eine Vergleichsimplementierung erstellt welche Pivotisierungen nicht berücksichtigt. Diese kann dann natürlich nicht mehr jede Matrix zerlegen hat aber potential schneller zu sein.
-  Ansonsten ist diese Implementierung Analog zu obigen Ansatz.
-Jenen Ansatz haben wir dann auf 3 verschiedene Arten Implementiert. Einmal in einfachen C, einmal unter Verwendung von Intrinsics und einmal als direktes Assembler Programm.
- Auf die speziefischeren Unterschiede wird im Abschnitt \ref{Performanzanalyse} noch genauer eingegangen.
+  Ansonsten ist diese Implementierung Analog zu obigen Ansatz.\\
+  
+Den Ansatz mit Pivotisierung haben wir dann auf 4 verschiedene Arten Umgesetzt. Einmal als einfaches, lineares C Programm, einmal als C Programm unter Verwendung von Intrinsics.
+ Ebenso haben wir zwei verschiedene Assembler Implementierungen geschaffen. Wieder eine Lineare Implementierung und eine Vektorisierte Version mit Hife von SIMD Operationen.
+ Auf die speziefischen Unterschiede wird im Abschnitt \ref{Performanzanalyse} noch genauer eingegangen.
 
 
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
 \section{Genauigkeit}
-- 
+In diesen Abschnitt wird die Genauigkeit unserer LU-Zerlegung analysiert und anhand
+ passender Beispiele demonstriert und getestet. Wir haben uns für die 
+Genauigkeitsanalyse entschieden, da die ein großen Problem bei der LU-Zerlegung
+ darstellt besonders wenn der Algorithmus ohne Pivotisierung arbeitet. In diesen Fall 
+handelt es sich nämlich um keinen stabilen Algorithmus und es kann zu komplett 
+falschen Ergebnissen kommen. Das Problem der Genauigkeit ist auf die Kondition der 
+Matrix A und auf die endliche Rechengenauigkeit von Computern zurückzuführen. \\
+
+Unsere Methode werden float-Werte als Eingabewerte geliefert, weshalb wir auch im
+ folgenden stets mit float-Werten arbeiten. Floats sind Gleitkommazahlen mit der Größe 
+bzw. Genauigkeit von 32 Bit und können neben einen sehr großen Wertebereich auch 
+sehr genaue Zahlen darstellen, was durch eine flexible Position des Kommas erreicht 
+wird. Dennoch ist die Genauigkeit der Gleitkommazahlen allein durch die Endlichkeit an 
+Rechenleistung und Speicher begrenzt und in unseren Fall auf 32 Bit. Somit beträgt die 
+Genauigkeit im Folgenden ungefähr immer 8 Stellen. Aber auch schon bei Zahlen wie 
+0,2 kommt es schon zu Rundungsfehler, da diese in Gleitkommadarstellung unendlich 
+viele Stellen benötigen würde. Es kommt also allgemein immer zu Störungen beim 
+Darstellen von Zahlen als Gleitkommazahlen im Computer. Aber neben den reinen 
+Darstellungsproblemen gibt es noch das viel größere Problem, dass beim Rechnen mit 
+Gleitkommazahlen die sogenannten Effekte Absorption und Auslösung auftreten, die 
+weit aus größere Störungen bewirken. So passiert es das bei Addition bzw. Subtraktion 
+von einer sehr großen und einer sehr kleinen Zahlen, dass sich durch Rundung die 
+große Zahl nicht ändert so also die kleine Zahl absorbiert.\\
+Beispielsweise 
+\begin{equation}
+1000000.00f + 0.01f = 1000000.00f
+\end{equation}
+
+
+ Unter der Auslöschung versteht man, dass bei der 
+Subtraktion zweier großen fast gleicher Zahlen das Ergebnis deutlich stärkere 
+Rundungsfehler aufweist . Ein Beispiel hierfür wäre: 
+
+
+$1000000.1f − 1000000,0f = 0,125f \neq 0,1f$ da $1000000,1f$ tatsächlich als $1000000,125$ 
+dargestellt wird. Problematisch wird dies nun weil in der LR-Zerlegung $n^2 /2 - n/2 $
+Additionen auftreten\cite{LUGenauigkeit} 
+und so diese Effekte bei größeren n sehr wahrscheinlich auftreten. Durch die 
+Gleitkommadarstellung kommt es nun also bei der LR-Zerlegung immer und 
+unvermeidlich zu einer Vielzahl an Rundungsfehler durch die Übersetzung in 
+Gleitkommazahlen und dazu zu noch zu ggf. auch sehr großen Fehler durch Absorption 
+und Auslöschung.
+Beide führen zu Störungen im Gleichungssystem Ax=b, die Frage ist nun ob sich diese 
+Störung auch stark auf die Lösung des Gleichungssystems auswirkt. Hierzu nehmen wir 
+als Beispiel $A = (1 1 1 1) b = (4 4) $ und mit $e$ als sehr klein Störung. Das System wird                    %Korrektur
+nun beispielsweise durch e so gestört, dass $((1 1 1 1-e)*x = b = (4 4-e)$ gilt mit$ x = (3 1)$. 
+Wenn man nun das System nochmals stört durch zum Beispiel $\bar{b} = b + (e -e)$ sodass 
+gilt $(1 1 1 1-e)*x = (4+e 4-2e)$. Dies führt nun dazu, dass $\bar{x} = ( 1+e 3)$ ist also komplett 
+anders als die vorherige Lösung. Hieran ist gut zu sehen, dass allein das Problem also 
+das lineare Gleichungssystem, sehr empfindlich gegenüber Störungen ist. Dann sagt 
+man auch das Problem ist schlecht konditioniert. Dies stellt natürlich nun ein großes 
+Problem dar besonders da bei der LR-Zerlegung einige Störungen in Matrix A auftreten.
+
+Um zu verstehen wie und ob die LU-Zerlegung verbessern werden kann muss man 
+zuerst das Problem weiter Analysieren und verstehen wie die Lösung des linearen 
+Gleichungssystem von Störungen der Eingabe abhängt. Diesen Zusammenhang nennt 
+man auch Kondition des linearen Gleichungssystems. Es gibt auch den Begriff der 
+Stabilität, welcher sich aber auf Algorithmen bezieht und beschreibt wie stark die 
+Lösung des Algorithmus abhängig von den Rundungsfehlern die während des Prozess 
+gemacht werden abhängt. Ein Algorithmus wie die LU-Zerlegung heißt stabil wenn 
+kleine Fehler in der Eingabe auch nur einen kleinen Effekt auf die Lösung haben, was 
+dem ziel entspricht.
+
+Um die Größe einer Störung und die Abhängigkeit der Lösung zur Störung messen zu 
+können braucht man ein Maß, mit dem man in der Lage ist  den Abstand zweier 
+Vektoren zu messen wie zum Beispiel zwischen der Korrekten Lösung oder der 
+tatsächlichen Ausgabe. Hier für biete sich das Konzept der Normen an. Es wird aber 
+auch die Norm für Matrizen benötigt, diese nennt man die zugehörige Matrizen Norm, 
+die wie folgt definiert ist: 
+es sein $||$.$||$ eine beliebige Norm auf $R^n$ dann ist  
+
+wodurch dann die Norm von $||Ax||$ wie folgt abgeschätzt werden kann
+ 
+
+Mit dieser Definition von Norm lässt sich nun die Kondition eines linearen 
+Gleichungssystems genauer untersuchen. Sei Ax=b unser lineares Gleichungssystem 
+welches wir ganz leicht in b stören, sodass nun A´x=´b gilt da sich natürlich auch x 
+ändert wenn b leicht gestört wurde. 
+Der absolute Fehler entspricht nun also
+$||x-\bar{x}|| = ||\hat{A}-1 (b-\bar{b})||$  welcher sich von oben durch $ ||A|| \mul ||(b-\bar{b})||$	begrenzen lässt. Aktuell 
+lassen wir jedoch jegliche Art und Größe von Störung in jeder Komponente zu mit der 
+absoluten Störung $||(b-\bar{b})||$.
+
+Jetzt wäre es aber sinnvoll den relativen Fehler zur Größe von x zu betrachten also 
+definiert man nun den relativen Fehler durch $||x-\bar{x}|| / ||x||$ und die relative Störung durch 
+||(b-´b)|| / ||b||. Dadurch ergibt sich nun wieder 
+
+$||x-\bar{x}|| / ||x||   <=    ||b|| / ||x|| \mul ||A^-1|| \mul ||(b-\bar{b})|| / ||b|| $
+was weiter noch durch $|A|| \mul ||A^-1|| \mul ||(b-\bar{b})|| / ||b||$ von oben beschränkt werden kann. 
+Hier definiert man nun $||A|| \mul ||A^-1||$ als Kondition von A was nun schlussendlich 
+bedeutet der Relative Fehler wird durch die Kondition von A mal der relativen Störung 
+von oben beschränkt. Daraus lässt sich schließen, dass wenn die relative Störung klein 
+ist der relative Fehler nicht auch zwingend klein ist, sondern nur dann wenn auch die 
+Kondition von A klein ist.
+Jetzt haben wir aber nur b gestört, wenn man nun auch die Matrix A stört, dann ist 
+unser gestörtes System nun $\bar{A} \bar{x} = \bar{b}$ wofür dann folgender Satz gilt, wenn A eine 
+invertierbare Matrix ist und $||A - \bar{A}|| / ||A|| <= ea $	und 	$||b - \bar{b}|| / ||b|| <= eb $ ist:
+$||x-\bar{x}|| / ||x|| <= [cond(A) / 1-(ea \mul cond(A))] \mul (ea + eb) 	$   falls $ ea \mul cond(A) < 1$
+
+
+Es ist nun also sicher zu sagen, dass bei einer kleinen relativen Störung des linearen 
+Gleichungssystems auch die Kondition von A klein sein muss damit der relative Fehler 
+klein bleibt, aber auch das ein gewisser relativer Fehler unvermeidbar ist.
+Wir kennen nun also die beiden Faktoren die die Kondition des linearen 
+Gleichungssystems beeinflussen, nun ist aber noch die Frage ob die LU-Zerlegung 
+einen relativen Fehler in der selben Größenordnung liefert wie der unvermeidbare 
+relative Fehler des Problems an sich, oder nicht?
+
+Es ist also nun die Frage ob die LU-Zerlegung stabil ist. Allgemein heißt ein Algorithmus 
+stabil im Sinne der Rückwärtsanalyse, falls \hat{x} die exakte Lösung von $\bar{A}^x =$ ist mit 
+  und nicht all zu großem C, wobei eps für die Maschinengenauigkeit steht.
+
+Das heißt der Algorithmus hat die exakte Lösung ermittelt aber nun mal von einen
+ gestörten System, in welchen das gestörte System nicht stark vom eigentlichem 
+System unterscheidet.
+Wendet man dies nun auf die LU-Zerlegung an zeigt sich, dass diese nicht stabil ist. 
+Dies erschließt sich daraus, dass die LU-Zerlegung selbst wenn die Eingabe ohne 
+Rundungsfehler erfolgt, heißt A und b bestehen aus Gleitkommazahlen, \hat{L} und \hat{R} mit 
+\hat{x} als Ergebnis ermittelt da Rundungsfehler bei dem Verfahren auftreten. Für \hat{x} gilt 
+dann, dass dies die korrekte Lösung für ein System mit Störung in A ist $\hat{A}^x=b$ bei der 
+folgende Ungleichung gilt:   in der der 
+Betrag immer Komponentenweise zu verstehen ist also auch das Ungleichheitszeichen.
+Hier ist nun ersichtlich, dass der Abstand zwischen A und \bar{A} auch von $|\hat{L}|$ und $|\hat{R}|$
+abhängt, was problematisch wird, da der relative Abstand von A zu \bar{A} eigentlich durch 
+$C\mul eps$ abgeschätzt werden sollte. Hier lässt sich jedoch $|\hat{L}|$ und $|\hat{R}|$ nicht sinnvoll 
+beschränken weshalb C hier auch sehr groß werden kann.
+Man kann jedoch durch die Spaltenpivotisierung den Faktor $|\hat{L}|$ in der Ungleichung 
+begrenzen, da nun für alle $i,j = 0,...,n |Ii,j| <= 1$ gilt. Bei $|\hat{R}|$ lässt sich weiterhin keine gute 
+Abschätzung finden und so gilt nun folgende Ungleichung:  
+Hier ist nun der Quotient das Problem bzw. entscheidet über die Stabilität der LR-
+Zerlegung. Für diesen kann jetzt jedoch nur: $QUOTIENT <= 2^n-1$ angenommen 
+werden, folglich ist der Algorithmus auch durch die Spaltenpivotwahl über die Menge 
+aller invertierbaren Matrizen nicht stabil. Aber in der Realität mit zufälligen Matrizen wird 
+sich der Quotient
+ deutlich besser abschätzen lassen und so gilt die 
+ LR-Zerlegung mit Pivotsuche als stabil.
+
 
 \section{Performanzanalyse}
 \label{Performanzanalyse}
@@ -204,14 +381,23 @@ In unserer Performanceanalyse vergleichen wir folgende Implementierungen:\\
 \item Lineare C Implementierung mit Compileroptimierung -O3 vs. Assembler Implementierung mit SIMD Vektorisierung.
 \end{itemize}
 Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln ausgeführt. \\
-\\
+
 
 
 \subsection{Pivotisierung vs. keine Pivotisierung}
-Leider ist der Perfomace Gewinn wie man an Grafik* unschwer erkennen Kann wenn überhaut bloß maginal. Dies kann man vermutlich auf zwei grundlegende Effekte zurückführen. Erstens Verändert das weglasen der Pivotisierung nicht die
+Leider ist der Perfomace Gewinn wie man an Grafik \ref{PvsNP} unschwer erkennen kann wenn überhaut bloß maginal. Und dass obwohl wir zum Erstellen der Grafik mit Worst-case Eingaben gearbeitet haben bei denen $n-1$ mal pivotisiert werden musste.
+ Dies kann man vermutlich auf zwei grundlegende Effekte zurückführen. Erstens Verändert das weglassen der Pivotisierung nicht die
  arithmethische Laufzeit welche weiterhin in $O(n^3)$ liegt. Der einzige Gewinn ligt also darin dass pro Schleifendurchlauf etwas weniger Operationen ausgeführt werden müssen. Dies kann aber maximal einen linearen Speedup erbringen. 
  Dieser lineare Speedup ist aber ebenfalls nicht wirklich signifikant da, wie man mit einer Performance Analyse erkennt, die Pivotisierung so oder so nur einen sehr kleinen Prozentsatz der Laufzeit beansprucht. 
+ \begin{figure}[H]
+ \begin{center}
+ \caption{Pivotisierend vs. Nicht-Pivotisierend} 
+  \label{PvsNP}
+ \includegraphics[width = 0.8\linewidth]{PvsNP.pdf}
+
  
+ \end{center}
+\end{figure}
  Unter Betrachtung dieser Erkenntnis zusätzlich zu den Ergebnissen der Genauigkeitsanalyse sind wir zu dem Schluss gekommen das eine Implementierung ohne Pivotisierung keinen Vorteil und Signifikante Nachteile bringt und dieser
   Ansatz somit nicht weiter Verfolgt werden muss.
 
@@ -219,39 +405,43 @@ Leider ist der Perfomace Gewinn wie man an Grafik* unschwer erkennen Kann wenn �
 Eine Performanzanalyse unserer Linearen C Implementierung mit perf tool hat ergeben, dass ein Großteil der Rechenzeit in einer bestimmten Schleife verbracht wird. Ausserdem zeigt perf tool uns das innerhalb der
  Schleife die meiste Zeit für mov Befehle aufgewandt wird dicht gefolgt von arithmetischen Operationen. Diese Befehle sind in unserem Kontext Teil von Zeilenoperationen auf eine Matrix. Dies bedeutet dass diese Operationen zu 
  großen Teilen Unabhänig voneinander sind. Also können wir diese Operationen rellativ einfach, unter Zuhilfenahme von C Intrinsics, Parallelisieren.
- Die Laufzeit der Implementierung in der wir diese teuren Operationen vektorisiert haben wird In Abbildung 1 mit der Laufzeit der unvektorisierten Implementierung verglichen. 
-
- \begin{figure}[h]
-\label{fig:perf1}
-\caption{C-linear vs. C-vektorisiert}
- \centering
- \includegraphics[width = 0.8\linewidth]{CvsIntrins.pdf}
- 
-\end{figure}
+ Die Laufzeit der Implementierung in der wir diese teuren Operationen vektorisiert haben wird In Abbildung \ref{CvsIntrins} mit der Laufzeit der unvektorisierten Implementierung verglichen. \\
 Durch den zusätzlichen Overhead der Vektorisieung sieht man bei kleineren Eingabegrößen keinen signifikanten Unterschied. Aber um so größer die Eingabe wird desto deutlicher sieht man, an den sich von einander entfernenden 
 Graphen, dass die Vektorisierung einen guten Speedup generiert. 
 Wir haben den Speedup Punktuell bei einer Eingabegröße von $n = 1000$ berechnet wo dieser bei ******** liegt.\\
+\begin{figure}[H]
+\begin{center}
+ \caption{C-linear vs. C-vektorisiert}
+   \label{CvsIntrins}
+ \includegraphics[width = 0.8\linewidth]{CvsIntrins.pdf}
+\end{center}
+\end{figure}
 
  \subsection{Compiler optimierter Code vs. ASM mit SIMD}
 Als letztes haben wir um optimale Performance zu erreichen eine reine ASM Implementierung entwickelt. In dieser Implementierung haben wir möglichst viel Optimiert und vor allem die im vorherigen Kapitel als Laufzeit aufwendig
  intendefizierten Stellen direkt mit xmm Instruktionen Vektorisiert. Zum Vergleich haben wir unsere einfache C Implementierung mit -O3 kompilliert um zu analysieren ob unsere Implementierung besser, schlechter oder ähnlich gut wie der Compiler ist.
- Wie man an Abbildung 2 erkennen kann bringt unsere händische Implementierung eine deutlich bessere Performance als die compileroptimierte Version. Dies Ist ein für uns überraschendes Ergebnis was uns aber zeigt das 
+ Wie man an Abbildung \ref{CvsASM} erkennen kann bringt unsere händische Implementierung eine deutlich bessere Performance als die compileroptimierte Version. Dies Ist ein für uns überraschendes Ergebnis was uns aber zeigt das 
  es manchmal tatsächlich noch sinnvoll sein kann Assembler Code per Hand zu schreiben.
 
- \begin{figure}[h]
-\label{fig:perf2}
-\caption{C-ompileroptimiert vs. Assembler-vektorisiert}
- \centering
+ \begin{figure}[H]
+ \begin{center}
+ \caption{Compileroptimiert vs. ASM-Vektorisiert} 
+  \label{CvsASM}
  \includegraphics[width = 0.8\linewidth]{CvsASM.pdf}
+
  
+ \end{center}
 \end{figure}
 
 
 
 \section{Zusammenfassung und Ausblick}
+Im laufe diser Ausarbeitung haben wir Verschiedee Implementiuerungen der LU ZErlegung Erstellt und miteinander verglichen. Es hat sich herrausgestellt dass Implementierungen ohne Pivotisierungen nicht zu Empfehlen sind,
+die sie aufgrund von Floatingpoint arithmethischen Gegebenheitenheiten sehr ungenau sind und auch keinen sonderlichen Performance Gewinn erbringen. Performance techicht haben wir herrausgefunden dass eine per Hand Vektorisiere ASM Implementierung am 
+schnellsten läuft. Dies war für uns ein überraschendes ergebis war da wir davon ausgegangen sind das Compileroptimierter Code effizienter laufen würde.   
 Welche Performance war jetzt am besten?\\
 Rückblickend hätte man ohne pivotisierung weglassen können\\
-% TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
+% TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hi
 % Referenzieren Sie diese dann mit \cite{
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
 \bibliographystyle{plain}
