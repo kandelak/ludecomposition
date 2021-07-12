@@ -74,7 +74,6 @@ int ludecomp_without_P(size_t n, const float *A, float *L, float *U, float *P)
  */
 int ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 {
-    size_t pivoted = 0;
     // Copying A in U
     for (size_t index = 0; index < n * n; index++)
     {
@@ -104,7 +103,7 @@ int ludecomp(size_t n, const float *A, float *L, float *U, float *P)
         //Pivoting
 
         // Searching for maximal absolute value in Column i
-        float max = U[i + i * n];
+        float max = fabsf(U[i + i * n]);
 
         size_t row_with_max = i;
         for (size_t k = i + 1; k < n; k++)
@@ -120,8 +119,7 @@ int ludecomp(size_t n, const float *A, float *L, float *U, float *P)
         // If row with max abs value is the actual row itself -> skip
         if (row_with_max != i)
         {
-            pivoted++;
-            // Swapping rows i and row_with_max in U and L if needed
+    // Swapping rows i and row_with_max in U and L if needed
             for (size_t k = 0; k < n; k++)
             {
                 float temp = U[i * n + k];
@@ -167,7 +165,6 @@ int ludecomp(size_t n, const float *A, float *L, float *U, float *P)
     }
     if (U[n * n - 1] == 0)
     {
-        
         return 0;
     }
     return 1;
@@ -235,7 +232,7 @@ int ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
         //Pivoting
 
         // Searching for maximal absolute value in Column i
-        float max = U[i + i * n];
+        float max = fabsf(U[i + i * n]);
         size_t row_with_max = i;
         for (size_t k = i + 1; k < n; k++)
         {
