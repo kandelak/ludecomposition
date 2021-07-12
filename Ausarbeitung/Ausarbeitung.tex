@@ -312,15 +312,7 @@ Problem dar, da hier einige Störungen in Matrix $A$ auftreten.
 
 Um zu verstehen wie und ob die LU-Zerlegung verbessert werden kann muss man 
 zuerst das Problem weiter Analysieren und verstehen wie die Lösung des linearen 
-<<<<<<< HEAD
-Gleichungssystem von Störungen der Eingabe abhängt. Diesen Zusammenhang nennt 
-man auch Kondition des linearen Gleichungssystems. Es gibt auch den Begriff der 								%Vielleicht kürzen? Spagetti Sätze\lcdots
-Stabilität, welcher sich aber nun auf Algorithmen bezieht. Dieser beschreibt wie stark die 
-Lösung des Algorithmus abhängig von den Rundungsfehlern der Eingabe ist. Ein Algorithmus wie die LU-Zerlegung heißt stabil wenn 
-kleine Fehler in der Eingabe auch nur einen kleinen Effekt auf die Lösung haben.
-=======
 Gleichungssystem von Störungen der Eingabe abhängt. 
->>>>>>> a144ef94b25dfeab3cef2e6ee1d56d99e2df479a
 Um die Größe einer Störung und die Abhängigkeit der Lösung von der Störung messen zu 
 können braucht man ein Maß. Hier für bietet sich das Konzept der Normen an. Es wird aber 
 auch die Norm für Matrizen benötigt, diese nennt man die zugehörige Matrizen Norm, 
@@ -349,43 +341,43 @@ $||(b-\bar{b})|| / ||b||$. Dadurch ergibt sich nun
 
 \begin{equation}
 \label{norm}
-$\frac{||x-\bar{x}||}{||x||}   \leq    \frac{||b||} {||x||} \cdot ||A^{-1}|| \cdot \frac{||(b-\bar{b})||}{||b||}$
+\frac{||x- \bar{x}||}{||x||}   \leq    \frac{||b||} {||x||} \cdot ||A^{-1}|| \cdot \frac{||b-\bar{b}||}{||b||} \leq ||A|| \cdot ||A^{-1}|| \cdot \frac{||(b-\bar{b})||} {||b||}
 \end{equation}
 
-
-was weiter noch durch $||A|| \cdot ||A^{-1}|| \cdot \frac{||(b-\bar{b})||} {||b||}$ von oben beschränkt werden kann. 
+ 
 Hier definiert man nun $||A|| \cdot ||A^{-1}||$ als Kondition von $A$. Anders gesagt wird 
 der relative Fehler durch die Kondition von $A$ mal der relativen Störung 
 von oben beschränkt. Daraus lässt sich schließen, dass wenn die relative Störung klein 
-ist der relative Fehler nicht auch zwingend klein ist, sondern nur dann wenn auch die 
-Kondition von $A$ klein ist.
+ist der relative Fehler nicht auch zwingend klein ist, sondern nur dann wenn die 
+Kondition von $A$ auch klein ist.
 Jetzt haben wir aber nur $b$ gestört, wenn man nun auch die Matrix $A$ stört, dann ist 
-unser gestörtes System nun $\bar{A} \bar{x} = \bar{b}$ wofür dann folgender Satz gilt, wenn $A$ eine 
-invertierbare Matrix ist und $\frac{||A - \bar{A}||} {||A||} <= ea $	und 	$\frac{||b - \bar{b}||} {||b||} <= eb $ ist:
-$\frac{||x-\bar{x}||} {||x||} <= [\frac{cond(A)} {1-(ea \cdot cond(A))}] \cdot (ea + eb) 	$   falls $ ea \cdot cond(A) < 1$
-
+unser gestörtes System nun $\bar{A} \bar{x} = \bar{b}$ wofür dann folgender Satz gilt, wenn $ea \cdot cond(A) < 1$
+ und $\frac{||A - \bar{A}||} {||A||} \leq ea $	und 	$\frac{||b - \bar{b}||} {||b||} \leq eb $ ist:\\
+\begin{equation}
+\frac{||x-\bar{x}||} {||x||} \leq \frac{cond(A)} {1- ea \cdot cond(A)} \cdot (ea + eb)   
+\end{equation}
 Es ist nun also sicher zu sagen, dass bei einer kleinen relativen Störung des linearen 
 Gleichungssystems auch die Kondition von A klein sein muss damit der relative Fehler 
 klein bleibt, aber auch dass ein gewisser relativer Fehler unvermeidbar ist.
 
-Die Frage ist nun, ob die LU-Zerlegung stabil ist?
-Stabil ist ein Algorithmus, wenn bei der Störung der Eingabedaten er nur einen relativen Fehler macht, 
+Die Frage ist nun, ob die LU-Zerlegung stabil ist.
+Stabil ist ein Algorithmus, wenn er bei der Störung der Eingabedaten nur einen relativen Fehler macht, 
 der in der selben Größenordnung liegt wie der unvermeidbare relative Fehler des Problems an sich. 
 
 Allgemein heißt ein Algorithmus stabil im Sinne der Rückwärtsanalyse, 
-falls \hat{x} die exakte Lösung von $\bar{A}^x =$ ist mit 							%What?+++++++++++++++++++++++++++++++++
+falls $\hat{x}$ die exakte Lösung von $\bar{A}^x =$ ist mit 							
 
  \begin{equation}
 \label{norm}
 \frac{|| A - \bar{A}||}{||A||} \leq C \; eps \;\; \;\;\;\;\;\;\;\;  \frac{|| b - \bar{b}||}{||b||} \leq C \; eps
 \end{equation}
 
- mit nicht all zu großem C, wobei eps für die Maschinengenauigkeit steht.
+ mit einem nicht all zu großem $C$, wobei $eps$ für die Maschinengenauigkeit steht.
 
 Die LU-Zerlegung ermittelt nun selbst wenn die Eingabe ohne 
-Rundungsfehler erfolgt, heißt A und b bestehen aus Gleitkommazahlen, \hat{L} und \hat{R} mit 
-\hat{x} als Ergebnis, da Rundungsfehler bei dem Verfahren auftreten. Für \hat{x} gilt 
-dann, dass dies die korrekte Lösung für ein System mit Störung in A ist $\hat{A}^x=b$ bei der 
+Rundungsfehler erfolgt, heißt $A$ und $b$ bestehen aus Gleitkommazahlen, $\hat{L}$ und $\hat{U}$ mit 
+$\hat{x}$ als Ergebnis, da Rundungsfehler bei dem Verfahren auftreten. Für $\hat{x}$ gilt 
+dann, dass dies die korrekte Lösung für ein System mit Störung in A ist $\hat{A}x=b$ bei der 
 folgende Ungleichung gilt:
 
  \begin{equation}
@@ -393,26 +385,26 @@ folgende Ungleichung gilt:
 |A - \bar{A}| \leq 2n \; eps \; |\bar{L}||\bar{R}| + O(eps^2)
 \end{equation}
 
-hier ist jeder Betrag immer Komponentenweise zu verstehen ist also auch das Kleinergleichzeichen.										% was willst du damit sagen? 
-Hier ist nun ersichtlich, dass der Abstand zwischen A und \bar{A} auch von $|\hat{L}| \cdot |\hat{R}|$
-abhängt, was problematisch wird, da der relative Abstand von A zu \bar{A} eigentlich durch 
-$C\cdot eps$ abgeschätzt werden sollte. Hier lässt sich jedoch $|\hat{L}|$ und $|\hat{R}|$ nicht sinnvoll 
-beschränken weshalb C hier auch sehr groß werden kann.
-Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil, man kann jedoch durch die Spaltenpivotisierung 
-den Faktor $|\hat{L}|$  begrenzen. Dies liegt daran, dass nun für alle $i,j = 0,...,n |Ii,j| <= 1$ gilt. 
-Bei $|\hat{R}|$ lässt sich weiterhin keine gute Abschätzung finden und so gilt nun folgende Ungleichung:  
+Hier ist jeder Betrag immer Komponentenweise zu verstehen als auch das Kleinergleichzeichen.										% was willst du damit sagen? 
+Nun wird ersichtlich, dass der Abstand zwischen $A$ und $\bar{A}$ auch von $|\hat{L}| \cdot |\hat{U}|$
+abhängt. Dies wird problematisch, da der relative Abstand von $A$ zu $\bar{A}$ eigentlich durch 
+$C\cdot eps$ abgeschätzt werden sollte. $|\hat{L}|$ und $|\hat{U}|$ lässt sich jedoch nicht sinnvoll 
+beschränken weshalb $C$ hier auch sehr groß werden kann.
+Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil. Es lässt sich jedoch durch die Spaltenpivotisierung 
+der Faktor $|\hat{L}|$  begrenzen. Dies liegt daran, dass nun für alle $i,j = 0,...,n |Ii,j| \leq 1$ gilt. 
+Bei $|\hat{U}|$ lässt sich weiterhin keine gute Abschätzung finden und so gilt nun folgende Ungleichung:  
 
  \begin{equation}
 \label{eg3}
-\frac{||A - \bar{A}||\infty}{||A||\infty} \leq 2n^3 \; eps \;\frac{max_{i,j}| \hat{r}_{ij}|}{max_{i,j}|a_{ij}|} + O(eps^2)
+\frac{||A - \bar{A}||\infty}{||A||\infty} \leq 2n^3 \; eps \;\frac{max_{i,j}| \hat{U}_{ij}|}{max_{i,j}|a_{ij}|} + O(eps^2)
 \end{equation}
 
 
-Hier ist nun der Quotient das Problem bzw. entscheidet über die Stabilität der LR-
-Zerlegung. Für diesen kann jetzt jedoch nur: $\frac{max_{i,j}| \hat{r}_{ij}|}{max_{i,j}|a_{ij}|} <= 2^{n-1}$ angenommen 
+Hier ist nun der Quotient das Problem bzw. entscheidet über die Stabilität der LU-
+Zerlegung. Für diesen kann jetzt jedoch nur: $\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} <= 2^{n-1}$ angenommen 
 werden, folglich ist der Algorithmus auch durch die Spaltenpivotwahl über die Menge 
 aller invertierbaren Matrizen nicht stabil. Aber in der Realität mit zufälligen Matrizen wird 
-sich der Quotient deutlich besser abschätzen lassen und so gilt die LR-Zerlegung mit Pivotsuche als stabil.
+sich der Quotient deutlich besser abschätzen lassen und so gilt die LU-Zerlegung mit Pivotsuche als stabil.
 
 
 \section{Performanzanalyse}
