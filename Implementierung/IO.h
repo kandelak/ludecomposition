@@ -59,6 +59,8 @@ void printHelp()
            "       Example: ./main --input=random_multiple.txt --output=result.txt --no-print -t -v 2");
     printf("--pivot/-p : Shows comparision example for decomposition with and without pivoting\n\n"
            "       Example: ./main --pivot\n\n");
+    printf("-t : Tests the specified input file and version of Implementation\n\n"
+           "       Example: ./main --input=input_file.txt -t -v 2 --no-print\n\n");
 }
 
 /**
