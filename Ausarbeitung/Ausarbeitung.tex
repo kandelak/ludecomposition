@@ -256,9 +256,10 @@ Gleitkommazahlen die sogenannten Effekte Absorption und Auslöschung auftreten. 
 Problematisch wird dies weil in der LU-Zerlegung $\frac{n^2}{2} - \frac{n}{2} $
 Additionen und genau so viele Multiplikationen auftreten\cite{LUGenauigkeit}.
 Durch die Gleitkommadarstellung kommt es nun also bei der LU-Zerlegung immer und 
-unvermeidlich zu einer Vielzahl an Rundungsfehlern.
-Diese führen zu Störungen im Gleichungssystem $Ax=b$. Die Frage ist nun ob sich diese 
-Störung auch stark auf die Lösung des Gleichungssystems auswirkt.\\
+unvermeidlich zu einer Vielzahl an Rundungsfehlern. Diese führen zu Störungen im Gleichungssystem $Ax=b$. 
+In wie fern diese Störungen der Eingabedatein auch die Lösung des Problems stören nennt man Kondition. 
+Die Frage ist nun ob das Gleichungssystems gut oder schlecht konditioniert ist?
+
 
 Hierzu ein Beispiel:
 
@@ -304,23 +305,22 @@ Störung der rechten Seite mit $ 0 < \epsilon \ll 1$:
 \end{bmatrix}
 \end{equation}
 
- $A = (1 1 1 1) b = (4 4)$ und mit $e$ als sehr klein Störung. Das System wird                    %Korrektur
-nun beispielsweise durch $e$ so gestört, dass $((1 1 1 1-e)*x = b = (4 4-e)$ gilt mit$ x = (3 1)$. 
-Wenn man nun das System nochmals stört durch zum Beispiel $\bar{b} = b + (e -e)$ sodass 
-gilt $(1 1 1 1-e) \cdot x = (4+e 4-2e)$. Dies führt nun dazu, dass $\bar{x} = ( 1+e 3)$ ist also komplett 
-anders als die vorherige Lösung.
-Hierran ist gut zu sehen, dass allein das Problem, also 
-das lineare Gleichungssystem, sehr empfindlich gegenüber Störungen ist.
-Das Problem ist schlecht konditioniert. In der LU-Zerlegung stellt dies nun ein großes 
+Hier lässt sich sehen, dass die zusätzliche sehr kleine Störung in $b$ dazu führt, 
+dass nun $\bar{x} = ( 1+e 3)$ eine komplett andere Lösung des linearen Gleichungssystems darstellt.
+Ein lineares Gleichungssystem ist also schlecht konditioniert. In der LU-Zerlegung stellt dies nun ein großes 
 Problem dar, da hier einige Störungen in Matrix $A$ auftreten.
 
 Um zu verstehen wie und ob die LU-Zerlegung verbessert werden kann muss man 
 zuerst das Problem weiter Analysieren und verstehen wie die Lösung des linearen 
+<<<<<<< HEAD
 Gleichungssystem von Störungen der Eingabe abhängt. Diesen Zusammenhang nennt 
 man auch Kondition des linearen Gleichungssystems. Es gibt auch den Begriff der 								%Vielleicht kürzen? Spagetti Sätze\lcdots
 Stabilität, welcher sich aber nun auf Algorithmen bezieht. Dieser beschreibt wie stark die 
 Lösung des Algorithmus abhängig von den Rundungsfehlern der Eingabe ist. Ein Algorithmus wie die LU-Zerlegung heißt stabil wenn 
 kleine Fehler in der Eingabe auch nur einen kleinen Effekt auf die Lösung haben.
+=======
+Gleichungssystem von Störungen der Eingabe abhängt. 
+>>>>>>> a144ef94b25dfeab3cef2e6ee1d56d99e2df479a
 Um die Größe einer Störung und die Abhängigkeit der Lösung von der Störung messen zu 
 können braucht man ein Maß. Hier für bietet sich das Konzept der Normen an. Es wird aber 
 auch die Norm für Matrizen benötigt, diese nennt man die zugehörige Matrizen Norm, 
@@ -364,12 +364,13 @@ unser gestörtes System nun $\bar{A} \bar{x} = \bar{b}$ wofür dann folgender Sa
 invertierbare Matrix ist und $\frac{||A - \bar{A}||} {||A||} <= ea $	und 	$\frac{||b - \bar{b}||} {||b||} <= eb $ ist:
 $\frac{||x-\bar{x}||} {||x||} <= [\frac{cond(A)} {1-(ea \cdot cond(A))}] \cdot (ea + eb) 	$   falls $ ea \cdot cond(A) < 1$
 
-
 Es ist nun also sicher zu sagen, dass bei einer kleinen relativen Störung des linearen 
 Gleichungssystems auch die Kondition von A klein sein muss damit der relative Fehler 
 klein bleibt, aber auch dass ein gewisser relativer Fehler unvermeidbar ist.
-Die Frage ist nun, ob die LU-Zerlegung einen relativen Fehler in der selben Größenordnung liefert 
-wie der unvermeidbare relative Fehler des Problems an sich, also ob sie stabil ist?
+
+Die Frage ist nun, ob die LU-Zerlegung stabil ist?
+Stabil ist ein Algorithmus, wenn bei der Störung der Eingabedaten er nur einen relativen Fehler macht, 
+der in der selben Größenordnung liegt wie der unvermeidbare relative Fehler des Problems an sich. 
 
 Allgemein heißt ein Algorithmus stabil im Sinne der Rückwärtsanalyse, 
 falls \hat{x} die exakte Lösung von $\bar{A}^x =$ ist mit 							%What?+++++++++++++++++++++++++++++++++
