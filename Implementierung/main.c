@@ -340,7 +340,6 @@ int main(int argc, char **argv)
         if (!output && single_input_size > 20)
         {
             fprintf(stderr, "Please specify output file while generating big number of matrices\n\n");
-            exit(EXIT_FAILURE);
         }
         fprintf(stderr, "Invalid Implementation Specifier \nExiting..\n");
         exit(EXIT_FAILURE);
@@ -393,7 +392,7 @@ int main(int argc, char **argv)
         random_single_input("random_single.txt", single_input_size);
         printf("Generating done. (In file random_single.txt)\n");
         print = 0;
-        input = "random_multiple.txt";
+        input = "random_single.txt";
     }
 
     /**
