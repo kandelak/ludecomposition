@@ -17,8 +17,6 @@
 \maketitle
 
 \section{Einleitung}
-
-
 Im Folgenden wird im Rahmen der Projektarbeit im Fach Einführung
 in die Rechnerarchitektur an der TU München ein in linearer Algebra häufig 
 benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokumentiert.\\
@@ -238,7 +236,7 @@ Genauigkeitsanalyse entschieden, da diese ein großes Problem bei der LU-Zerlegu
  darstellt, besonders wenn der Algorithmus ohne Pivotisierung arbeitet. In diesen Fall 
 handelt es sich um einen instabilen Algorithmus und es kann zu komplett 
 falschen Ergebnissen kommen. Das Problem der Genauigkeit ist auf die Kondition der 
-Matrix A und auf die endliche Rechengenauigkeit von Computern zurückzuführen.  \\
+Matrix A und auf die endliche Rechengenauigkeit von Computern zurückzuführen. \\
 
 Im folgenden arbeiten wir mit Floats. Floats sind Gleitkommazahlen mit der Größe 
 bzw. Genauigkeit von 32 Bit und können neben einen sehr großen Wertebereich auch 
@@ -335,8 +333,8 @@ Gleichungssystems genauer untersuchen. Sei $Ax=b$ unser lineares Gleichungssyste
 welches wir ganz leicht in $b$ stören, sodass nun $A \bar{x}=\bar{b}$ gilt da sich natürlich auch $x $
 ändert wenn $b$ leicht gestört wurde. 
 Der rellative Fehler zur Größe von $x$ entspricht also 
- $frac{||x-\bar{x}|}{||x||}$ und die relative Störung durch 
-$frac{||(b-\bar{b})||}{||b||}$. Dadurch ergibt sich nun 
+ $\frac{||x-\bar{x}|}{||x||}$ und die relative Störung durch 
+$\frac{||(b-\bar{b})||}{||b||}$. Dadurch ergibt sich nun 
 
 \begin{equation}
 \label{norm}
@@ -364,7 +362,7 @@ Stabil ist ein Algorithmus, wenn er bei der Störung der Eingabedaten nur einen 
 der in der selben Größenordnung liegt wie der unvermeidbare relative Fehler des Problems an sich. 
 
 Allgemein heißt ein Algorithmus stabil im Sinne der Rückwärtsanalyse, 
-falls $\hat{x}$ die exakte Lösung von $\bar{A}^x =$ ist mit 							
+falls $\hat{x}$ die exakte Lösung von $\hat{A}x = b$ ist mit 							
 
  \begin{equation}
 \label{norm}
@@ -390,7 +388,7 @@ abhängt. Dies wird problematisch, da der relative Abstand von $A$ zu $\bar{A}$ 
 $C\cdot eps$ abgeschätzt werden sollte. $|\hat{L}|$ und $|\hat{U}|$ lässt sich jedoch nicht sinnvoll 
 beschränken weshalb $C$ hier auch sehr groß werden kann.
 Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil. Es lässt sich jedoch durch die Spaltenpivotisierung 
-der Faktor $|\hat{L}|$  begrenzen. Dies liegt daran, dass nun für alle $i,j = 0,...,n |Ii,j| \leq 1$ gilt. 
+der Faktor $|\hat{L}|$  begrenzen. Dies liegt daran, dass nun für alle $i,j = 0,...,n |I_{i,j}| \leq 1$ gilt. 
 Bei $|\hat{U}|$ lässt sich weiterhin keine gute Abschätzung finden und so gilt nun folgende Ungleichung:  
 
  \begin{equation}
