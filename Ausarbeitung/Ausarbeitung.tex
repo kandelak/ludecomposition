@@ -335,8 +335,8 @@ Gleichungssystems genauer untersuchen. Sei $Ax=b$ unser lineares Gleichungssyste
 welches wir ganz leicht in $b$ stören, sodass nun $A \bar{x}=\bar{b}$ gilt da sich natürlich auch $x $
 ändert wenn $b$ leicht gestört wurde. 
 Der rellative Fehler zur Größe von $x$ entspricht also 
- $||x-\bar{x}|| / ||x||$ und die relative Störung durch 
-$||(b-\bar{b})|| / ||b||$. Dadurch ergibt sich nun 
+ $frac{||x-\bar{x}|}{||x||}$ und die relative Störung durch 
+$frac{||(b-\bar{b})||}{||b||}$. Dadurch ergibt sich nun 
 
 \begin{equation}
 \label{norm}
@@ -376,7 +376,7 @@ falls $\hat{x}$ die exakte Lösung von $\bar{A}^x =$ ist mit
 Die LU-Zerlegung ermittelt nun selbst wenn die Eingabe ohne 
 Rundungsfehler erfolgt, heißt $A$ und $b$ bestehen aus Gleitkommazahlen, $\hat{L}$ und $\hat{U}$ mit 
 $\hat{x}$ als Ergebnis, da Rundungsfehler bei dem Verfahren auftreten. Für $\hat{x}$ gilt 
-dann, dass dies die korrekte Lösung für ein System mit Störung in A ist $\hat{A}x=b$ bei der 
+dann, dass dies die korrekte Lösung für ein System mit Störung in A ist $\bar{A}x=b$ bei der 
 folgende Ungleichung gilt:
 
  \begin{equation}
@@ -395,12 +395,12 @@ Bei $|\hat{U}|$ lässt sich weiterhin keine gute Abschätzung finden und so gilt
 
  \begin{equation}
 \label{eg3}
-\frac{||A - \bar{A}||\infty}{||A||\infty} \leq 2n^3 \; eps \;\frac{max_{i,j}| \hat{U}_{ij}|}{max_{i,j}|a_{ij}|} + O(eps^2)
+\frac{||A - \bar{A}||\infty}{||A||\infty} \leq 2n^3 \; eps \;\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} + O(eps^2)
 \end{equation}
 
 
 Hier ist nun der Quotient das Problem bzw. entscheidet über die Stabilität der LU-
-Zerlegung. Für diesen kann jetzt jedoch nur: $\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} <= 2^{n-1}$ angenommen 
+Zerlegung. Für diesen kann jetzt jedoch nur: $\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} \leq 2^{n-1}$ angenommen 
 werden, folglich ist der Algorithmus auch durch die Spaltenpivotwahl über die Menge 
 aller invertierbaren Matrizen nicht stabil. Aber in der Realität mit zufälligen Matrizen wird 
 sich der Quotient deutlich besser abschätzen lassen und so gilt die LU-Zerlegung mit Pivotsuche als stabil.
@@ -460,7 +460,7 @@ Als letztes haben wir um optimale Performance zu erreichen eine reine ASM Implem
 
  \begin{figure}[H]
  \begin{center}
- \caption{Compileroptimiert vs. ASM-Vektorisiert} 
+ \caption{Compileroptimiert vs. ASM-vektorisiert} 
   \label{CvsASM}
  \includegraphics[width = 0.8\linewidth]{CvsASM.pdf}
 
