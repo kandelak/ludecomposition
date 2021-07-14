@@ -218,11 +218,11 @@ int ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
         // Scalar
-        for (size_t j = k; k < n; k++)
-        {
+        while(k<n){
             P[i] = 0;
             L[i] = 0;
             i++;
+            k++;
         }
     }
 
@@ -346,9 +346,11 @@ int ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
             }
         }
     }
+    
     if (U[n * n - 1] == 0)
     {
         return 0;
     }
+  
     return 1;
 }

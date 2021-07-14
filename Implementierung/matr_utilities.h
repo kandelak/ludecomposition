@@ -65,11 +65,11 @@ int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 /**
  *  * Runs Benchmark using given function
  */
-int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations, char *name, size_t i, size_t size_of_matr_row, int print)
+int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations,size_t size_of_matr_row)
 {
     int decomposed = 1;
 
-    fprintf(output, "%ldx%ld took (in Seconds) : ", size_of_matr_row, size_of_matr_row, i + 1);
+    fprintf(output, "%ldx%ld took (in Seconds) : ", size_of_matr_row, size_of_matr_row);
 
     double start, end, time = 0;
     for (size_t k = 0; k < iterations; k++)
@@ -90,6 +90,7 @@ int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FIL
     {
         fprintf(output, "Can not be decomposed (using this implementation)\n");
     }
+    return decomposed;
 }
 
 

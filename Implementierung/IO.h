@@ -70,12 +70,13 @@ void printHelp()
 int check_validity(FILE *input)
 {
     char buf[50];
-
+    size_t line_number = 1;
     size_t num_of_matr;
 
     if (!fgets(buf, 50, input))
     {
         fprintf(stderr, "Reading Input Failed. (empty file)\n");
+        printf("Line: %ld\n",line_number);
         return 0;
     }
 
@@ -85,64 +86,78 @@ int check_validity(FILE *input)
 
     num_of_matr = strtol(buf, &endptr, 10);
 
+
     if (errno == ERANGE)
     {
         perror("Integer Number read is too small or too large.\n");
+        printf("Line: %ld\n",line_number);
         return 0;
     }
     else if (endptr == buf)
     {
         printf("Nothing Read (No input for the number of the matrices)\n");
+        printf("Line: %ld\n",line_number);
         return 0;
     }
     else if (*endptr && *endptr != '\n')
     {
         printf("Wrong Input Format (All numbers must be enter seperated). Did you specify number of the Matrices?. Please refer to --help/-h.\n");
+        printf("Line: %ld\n",line_number);
         return 0;
     }
     else if ((int)num_of_matr <= 0)
     {
         printf("Number of Matrices can not be less than or equal 0.\n");
+        printf("Line: %ld\n",line_number);
         return 0;
     }
+
+        line_number++;
 
     for (size_t k = 0; k < num_of_matr; k++)
     {
         if (!fgets(buf, 50, input))
         {
             fprintf(stderr, "Reading Input Failed. (less input than specified/empty line)\n");
+            printf("Line: %ld\n",line_number);
             return 0;
         }
-
+        
         size_t size_of_matr_row = strtol(buf, &endptr, 10);
 
         if (errno == ERANGE)
         {
             perror("Integer number read was too small or too large.\n");
+            printf("Line: %ld\n",line_number);
             return 0;
         }
         else if (endptr == buf)
         {
             printf("Nothing Read (No input for the Size of the Matrix)\n");
+            printf("Line: %ld\n",line_number);
             return 0;
         }
         else if (*endptr && *endptr != '\n')
         {
             printf("Wrong Input Format (All numbers must be enter seperated). Did you specify row/column length of the Matrix?  Please refer to --help/-h.\n");
+            printf("Line: %ld\n",line_number);
             return 0;
         }
         else if ((int)size_of_matr_row <= 0)
         {
             printf("Row/Column size of the Matrix can not be less than or equal zero.\n");
+            printf("Line: %ld\n",line_number);
             return 0;
         }
 
+        line_number++;
         size_t size_of_matr = size_of_matr_row * size_of_matr_row;
         for (size_t i = 0; i < size_of_matr; i++)
         {
             if (!fgets(buf, 50, input))
             {
                 fprintf(stderr, "Reading Input Failed. (less input than specified/empty line)\n");
+                printf("Line: %ld\n",line_number);
                 return 0;
             }
 
@@ -151,19 +166,23 @@ int check_validity(FILE *input)
             if (errno == ERANGE)
             {
                 perror("Floating-point Number read was too small or too large.\n");
+                printf("Line: %ld\n",line_number);
                 return 0;
             }
             else if (endptr == buf)
             {
                 printf("Nothing Read (Not enough entries for specified size of the Matrix)\n");
+                printf("Line: %ld\n",line_number);
                 return 0;
             }
             else if (*endptr && *endptr != '\n')
             {
 
                 printf("Wrong Input Format (Matrix Entry. All numbers must be enter seperated). Please refer to --help/-h.\n");
+                printf("Line: %ld\n",line_number);
                 return 0;
             }
+            line_number++;
         }
     }
 

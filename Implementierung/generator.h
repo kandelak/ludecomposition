@@ -124,7 +124,7 @@ void random_multiple_input(char *output)
                 }
         }
 
-        fprintf(out, "%ld\n", 65);
+        fprintf(out, "%ld\n", (long int) 65);
 
         float range = 1000.0;
 
@@ -138,7 +138,7 @@ void random_multiple_input(char *output)
                 perror("Could not allocate Memory");
                 exit(EXIT_FAILURE);
         }
-        fprintf(out, "%ld\n", MUST_ALIGN_HEAP);
+        fprintf(out, "%ld\n", (long int )MUST_ALIGN_HEAP);
         matrix_generator(MUST_ALIGN_HEAP, C, range);
         write_matrix_in_stream(out, MUST_ALIGN_HEAP, C);
 
@@ -224,7 +224,7 @@ void random_single_input(char *output, size_t n)
                 exit(EXIT_FAILURE);
         }
         float range = 10000.0;
-        fprintf(out, "%ld\n", 1);
+        fprintf(out, "%ld\n", (long int) 1);
         fprintf(out, "%ld\n", n);
         matrix_generator(n, A, range);
         write_matrix_in_stream(out, n, A);
@@ -242,7 +242,7 @@ void generate_bench(char *bench_file)
                         exit(EXIT_FAILURE);
                 }
         }
-        fprintf(bench, "%ld\n", 1000 / 25);
+        fprintf(bench, "%ld\n",(long int) 1000 / 25);
         for (size_t i = 1; i < 1000; i += 50)
         {
                 float *A;

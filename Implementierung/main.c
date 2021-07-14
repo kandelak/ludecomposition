@@ -81,7 +81,7 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
 
     if (benchmarking && !testing)
     {
-        if (!run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print))
+        if (!run_bench(func, output, A, L, U, P, iterations, size_of_matr_row))
         {
             decomposed = 0;
         };
@@ -173,7 +173,7 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
 
     if (benchmarking && !testing)
     {
-        if (!run_bench(func, output, A, L, U, P, iterations, name, i, size_of_matr_row, print))
+        if (!run_bench(func, output, A, L, U, P, iterations, size_of_matr_row))
         {
             fprintf(output, "This Matrix can not be decomposed. (If not try using implementation with pivoting)\n");
             decomposed = 0;
