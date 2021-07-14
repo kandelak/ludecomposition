@@ -21,7 +21,6 @@ cmp rdi,0
 jbe .L_loop1_end_
 
 
-# Copy A in U
 
 
 mov rax,rdi
@@ -111,7 +110,7 @@ lea r15,[rcx+4*rdi]
 
 mov r11,rcx
 
-# r14 : handle for r8
+# r14 : handle for P
 mov r14,r8
 
 
@@ -144,7 +143,7 @@ lea r11,[r11+4*rdi]
 
 movss xmm0,dword ptr [r15]
 
-# setting to absolute value
+# setting this entry to absolute value for later comparision
 xorps xmm3,xmm3
 subps xmm3,xmm0
 maxps xmm0,xmm3
@@ -152,7 +151,7 @@ maxps xmm0,xmm3
 
 movss xmm1,dword ptr [r11]
 
-# setting to absolute value
+# setting this entry to absolute value for later comparision
 xorps xmm3,xmm3
 subps xmm3,xmm1
 maxps xmm1,xmm3

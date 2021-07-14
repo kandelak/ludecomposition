@@ -24,17 +24,18 @@ benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokument
 
 Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt,
  bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen. 
- Dies Findet z.b. Anwendung bei der Berechnung des Stromflusses In Schaltkreisen. Mit der LU-Zerlegung kann man wenn man die Wiederstände einzelner Leitungen gegeben hat den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
+ Dies Findet z.b Anwendung bei der Berechnung des Stromflusses In Schaltkreisen. Mit der LU-Zerlegung kann man wenn man die Wiederstände einzelner Leitungen gegeben hat den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
 Dazu liefert die LU-Zerlegung für jedes eindeutig
  lösbare Gleichungssystem, also wenn A regulär ist,
   zwei Dreiecksmatrizen L und U und eine Pivot-Matrix P,
    wobei P*L*U = A ergibt. Hierbei haben die Matrizen besondere 
    Eigenschaften. L hat in allen Einträgen oberhalb der Diagonalen die Werte 0 (Siehe Matrix \ref{unteremx}). U hingegen hat in allen Einträgen unterhalb
     der Diagonalen die Werte 0 (Siehe Matrix \ref{oberemx}). Die Matrix P ist eine Einheitsmatrix mit ggf. 
-    vertauschten Zeilen.
-    
+    vertauschten Zeilen.\\\\
+  
+  
   \begin{equation}
-Untere Dreiecksatrix: \begin{bmatrix}
+    Untere \, Dreieckmatrix : \begin{bmatrix}
 \caption{\label{unteremx}}
  l_{1,1}    & 0        &  0       & \cdots   & 0\\
  l_{2,1}    & l_{2,2}  &  0	      &          & \vdots\\
@@ -44,10 +45,10 @@ Untere Dreiecksatrix: \begin{bmatrix}
 
 
  \end{bmatrix}
-\end{equation}
-   
+\end{equation}\\\\
+ 
 \begin{equation}
-Obere Dreiecksatrix: \begin{bmatrix}
+Obere \, Dreiecksatrix: \begin{bmatrix}
  \caption{\label{oberemx}}
 
  u_{1,1} & u_{1,2} & u_{1,3}  & \cdots & u_{1,n} \\
@@ -224,7 +225,7 @@ Um dies zu überprüfen haben wir eine Vergleichsimplementierung erstellt, welch
   Ansonsten ist diese Implementierung analog zu obigen Ansatz.\\
   
 Den Ansatz mit Pivotisierung haben wir dann auf 4 verschiedene Arten umgesetzt. Einmal als einfaches, lineares C Programm und einmal als C Programm unter Verwendung von Intrinsics.
- Ebenso haben wir zwei verschiedene Assembler Implementierungen geschaffen. Wieder eine lineare Implementierung und eine Vektorisierte Version mit Hife von SIMD Operationen.
+ Ebenso haben wir zwei verschiedene Assembler Implementierungen geschaffen. Wieder eine lineare Implementierung und eine Vektorisierte Version mit Hilfe von SIMD Operationen.
  Auf die speziefischen Unterschiede wird im Abschnitt \ref{Performanzanalyse} noch genauer eingegangen.
 
 
@@ -435,13 +436,13 @@ Leider ist der Perfomace Gewinn wie man an Grafik \ref{PvsNP} unschwer erkennen 
   Ansatz somit nicht weiter Verfolgt werden muss.
 
 \subsection{Linear vs. Parallel durch Intrinsics}
-Eine Performanzanalyse unserer Linearen C Implementierung mit perf tool hat ergeben, dass ein Großteil der Rechenzeit in einer bestimmten Schleife verbracht wird. Ausserdem zeigt perf tool uns das innerhalb der
- Schleife die meiste Zeit für mov Befehle aufgewandt wird dicht gefolgt von arithmetischen Operationen. Diese Befehle sind in unserem Kontext Teil von Zeilenoperationen auf eine Matrix. Dies bedeutet dass diese Operationen zu 
- großen Teilen Unabhänig voneinander sind. Also können wir diese Operationen rellativ einfach, unter Zuhilfenahme von C Intrinsics, Parallelisieren.
+Eine Performanzanalyse unserer Linearen C Implementierung mit perf tool hat ergeben, dass ein Großteil der Rechenzeit in einer bestimmten Schleife verbracht wird. Ausserdem zeigt perf tool uns, dass innerhalb der
+ Schleife die meiste Zeit für \textbf{mov} Befehle aufgewandt wird dicht gefolgt von arithmetischen Operationen. Diese Befehle sind in unserem Kontext Teil von Zeilenoperationen auf eine Matrix. Dies bedeutet,dass diese Operationen zu 
+ großen Teilen Unabhänig voneinander sind. Also können wir diese Operationen relativ einfach, unter Zuhilfenahme von C Intrinsics, parallelisieren.
  Die Laufzeit der Implementierung in der wir diese teuren Operationen vektorisiert haben wird In Abbildung \ref{CvsIntrins} mit der Laufzeit der unvektorisierten Implementierung verglichen. \\
 Durch den zusätzlichen Overhead der Vektorisieung sieht man bei kleineren Eingabegrößen keinen signifikanten Unterschied. Aber um so größer die Eingabe wird desto deutlicher sieht man, an den sich von einander entfernenden 
 Graphen, dass die Vektorisierung einen guten Speedup generiert. 
-Wir haben den Speedup Punktuell bei einer Eingabegröße von $n = 1000$ berechnet wo dieser bei ******** liegt.\\
+Wir haben den Speedup Punktuell bei einer Eingabegröße von $n = 1000$ berechnet wo dieser bei $\approx 1.5$  liegt.\\
 \begin{figure}[H]
 \begin{center}
  \caption{C-linear vs. C-vektorisiert}
@@ -469,9 +470,9 @@ Als letztes haben wir um optimale Performance zu erreichen eine reine ASM Implem
 
 
 \section{Zusammenfassung und Ausblick}
-Im laufe diser Ausarbeitung haben wir Verschiedee Implementiuerungen der LU ZErlegung Erstellt und miteinander verglichen. Es hat sich herrausgestellt dass Implementierungen ohne Pivotisierungen nicht zu Empfehlen sind,
-die sie aufgrund von Floatingpoint arithmethischen Gegebenheitenheiten sehr ungenau sind und auch keinen sonderlichen Performance Gewinn erbringen. Performance techicht haben wir herrausgefunden dass eine per Hand Vektorisiere ASM Implementierung am 
-schnellsten läuft. Dies war für uns ein überraschendes ergebis war da wir davon ausgegangen sind das Compileroptimierter Code effizienter laufen würde.   
+Im laufe diser Ausarbeitung haben wir Verschiedee Implementiuerungen der LU Zerlegung Erstellt und miteinander verglichen. Es hat sich herrausgestellt dass Implementierungen ohne Pivotisierungen nicht zu Empfehlen sind,
+die sie aufgrund von Floating-point arithmethischen Gegebenheitenheiten sehr ungenau sind und auch keinen sonderlichen Performance Gewinn erbringen. Performance techicht haben wir herrausgefunden dass eine per Hand vektorisierte ASM Implementierung am 
+schnellsten läuft. Dies war für uns ein überraschendes ergebnis ,da wir davon ausgegangen sind, dass Compileroptimierter Code effizienter laufen würde.   
 Welche Performance war jetzt am besten?\\
 Rückblickend hätte man ohne pivotisierung weglassen können\\
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hi
