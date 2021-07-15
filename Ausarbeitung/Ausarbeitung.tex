@@ -1,15 +1,11 @@
 % Diese Zeile bitte -nicht- aendern.
 \documentclass[course=erap]{aspdoc}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
-%% mit den richtigen Werten.
-\newcommand{\theGroup}{196} % Beispiel: 42
-\newcommand{\theNumber}{A328} % Beispiel: A123
+%%
+\newcommand{\theGroup}{196} 
+\newcommand{\theNumber}{A328} 
 \author{⁨Aleksandre Kandelaki \and Matthias Staritz \and Benjamin Liertz}
-\date{Sommersemester 2020/21} % Beispiel: Wintersemester 2019/20
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\date{Sommersemester 2020/21} 
+%%
 % Diese Zeile bitte -nicht- aendern.
 \title{Gruppe \theGroup{} -- Abgabe zu Aufgabe \theNumber}
 \usepackage{gauss}
@@ -18,22 +14,23 @@
 
 %%%%%%%%%%%%%%% Einleitung %%%%%%%%%%%%%%%%%%
 \section{Einleitung}
-Im Folgenden wird im Rahmen der Projektarbeit im Fach Einführung
-in die Rechnerarchitektur an der TU München ein in linearer Algebra häufig 
+Im Folgenden wird im Rahmen einer Projektarbeit im Fach Einführung
+in die Rechnerarchitektur an der TU München ein in der linearen Algebra häufig 
 benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokumentiert.\\
 
 Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt,
 bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen. 
-Dies Findet z.b Anwendung bei der Berechnung des Stromflusses In Schaltkreisen. Mit der LU-Zerlegung kann man wenn man die Wiederstände einzelner Leitungen gegeben hat den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
-Dazu liefert die LU-Zerlegung für jedes eindeutig
-lösbare Gleichungssystem, also wenn A regulär ist,
-zwei Dreiecksmatrizen L und U und eine Pivot-Matrix P,
-wobei P*L*U = A ergibt. Hierbei haben die Matrizen besondere 
-Eigenschaften. L hat in allen Einträgen oberhalb der Diagonalen die Werte 0 (Siehe Matrix \ref{unteremx}). U hingegen hat in allen Einträgen unterhalb
-der Diagonalen die Werte 0 (Siehe Matrix \ref{oberemx}). Die Matrix P ist eine Einheitsmatrix mit ggf. 
-vertauschten Zeilen.\\\\
+Dies Findet z.B. Anwendung bei der Berechnung des Stromflusses in Schaltkreisen. Mit der LU-Zerlegung kann man, 
+wenn man die Wiederstände einzelner Leitungen gegeben hat, den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
+Dazu liefert die LU-Zerlegung für jedes eindeutig lösbare Gleichungssystem $A \cdotx = b$, also wenn $A$ regulär ist,
+zwei Dreiecksmatrizen $L$ und $U$ und eine Pivot-Matrix $P$,
+wobei $P \cdot L \cdot U = A$ ergibt. Hierbei haben die Matrizen besondere 
+Eigenschaften. $L$ hat in allen Einträgen oberhalb der Diagonalen die Werte 0 (siehe Matrix \ref{unteremx}). 
+$U$ hingegen hat in allen Einträgen unterhalb der Diagonalen die Werte 0 (siehe Matrix \ref{oberemx}). 
+Die Matrix $P$ ist eine Einheitsmatrix mit ggf. vertauschten Zeilen.\\\\
+%%%%%%% (1) %%%%%%%%%
   \begin{equation}
-    Untere \, Dreieckmatrix : \begin{bmatrix}
+    Untere \, Dreiecksmatrix : \begin{bmatrix}
     \caption{\label{unteremx}}
     l_{1,1}    & 0        &  0       & \cdots   & 0\\
     l_{2,1}    & l_{2,2}  &  0	      &          & \vdots\\
@@ -42,9 +39,10 @@ vertauschten Zeilen.\\\\
     l_{n,1}	& l_{n,2}  & l_{n,3}  & \cdots   & l_{n, n} \\
     \end{bmatrix}
   \end{equation}\\\\
- 
+
+%%%%%%% (2) %%%%%%%%%
   \begin{equation}
-    Obere \, Dreiecksatrix: \begin{bmatrix}
+    Obere \, Dreiecksmatrix: \begin{bmatrix}
     \caption{\label{oberemx}}
     u_{1,1} & u_{1,2} & u_{1,3}  & \cdots & u_{1,n} \\
     0	     & u_{2,2} & u_{2,3}  & \cdots & u_{2,n}\\
@@ -56,6 +54,7 @@ vertauschten Zeilen.\\\\
   \\
 
 Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
+%%%%%%% (3-6) %%%%%%%%%
   \begin{eqnarray}
     0x_1 + 3x_2 + 5x_3 + 7x_4 = 0 \\
     2x_1 + 6x_2 + 10x_3 + 14x_4 = 0\\
@@ -64,6 +63,7 @@ Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
   \end{eqnarray}
 
 Welches auch durch folgende Koeffizientenmatrix dargestellt werden kann:
+%%%%%%% (7) %%%%%%%%%
   \begin{equation}
     A = \begin{bmatrix}
     0	& 3	 & 5  & 7 \\
@@ -74,6 +74,7 @@ Welches auch durch folgende Koeffizientenmatrix dargestellt werden kann:
   \end{equation}
 
 Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
+%%%%%%% (8) %%%%%%%%%
   \begin{equation}
     A = \begin{bmatrix}
     0	& 3	 & 5  & 7 \\
@@ -110,27 +111,34 @@ Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
 \section{Lösungsansatz}
 Zur Durchführung dieser Zerlegung haben wir uns entschieden ein Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
 Das gaußsche Eliminationsverfahren ändert die Einträge einer Matrix unter Verwendung elementarer Zeilenoperationen.
-Die verwendeten elementaren Zeilenoperationen sind das Tauschen zweier Zeilen (siehe Gleichung \ref{swap}) und das Addieren von
-vielfachen einer Zeile auf eine Andere (Siehe Gleichung \ref{add}). 
- Dabei wird das Gleichungssystem $A \cdot x = b$ verändert die Lösung bleibt aber erhalten.\\
+Die verwendeten elementaren Zeilenoperationen sind das Tauschen zweier Zeilen (siehe Gleichung \ref{swap}) und 
+das Addieren von Vielfachen einer Zeile auf eine Andere (Siehe Gleichung \ref{add}). 
+Dabei wird das Gleichungssystem $A \cdot x = b$ verändert, die Lösung bleibt aber erhalten.\\
 
-Mit diesem Verfahren erstellen wir eine obere Dreieckmatrix bei der alle Einträge unter der 
-Diagonalen 0 sind. So erhalten wir unsere $U$ Matrix. Um nun auch unsere $L$ und $P$ Matrizen zu erhalten, müssen
-wir nur alle Schritte die zur Generierung der U Matrix beigetragen haben dokumentieren. Jedes mal wenn wir eine Zeile auf eine Andere addieren
-wird dies in der $L$ Matrix festgehalten indem genau dieselbe Operation auf dieser $L$ Matrix durchgeführt wird. Jede Zeilenvertauschung wird auf die selbe Art in $P$ festgehalten.  
-Um nun sicher eine gültige $L$ Matrix zu erhalten welche oberhalb der Diagonalen nur die 0 als Einträge hat und somit die gesuchte untere Dreiecksmatrix bildet, folgt der Algorithmus strikt der Vorgehensweise des Gauß Algorithmus.\\
+Mit diesem Verfahren wird die bereits genannte obere Dreiecksmatrix U generiert. So erhalten wir unsere $U$ Matrix. 
+Um nun auch die Matrizen $L$ und $P$ zu erhalten, müssen wir nur alle Schritte die zur Generierung 
+der $U$ Matrix beigetragen haben dokumentieren. Jedes mal, wenn wir eine Zeile auf eine Andere addieren,
+wird dies in der $L$ Matrix festgehalten, indem genau dieselbe Operation auf dieser $L$ Matrix durchgeführt wird. 
+Jede Zeilenvertauschung wird auf die selbe Art in $P$ festgehalten.  Um nun sicher eine gültige $L$ Matrix zu erhalten, 
+welche oberhalb der Diagonalen nur die 0 als Einträge hat und somit die gesuchte untere Dreiecksmatrix bildet, 
+folgt der Algorithmus strikt der Vorgehensweise des Gauß Algorithmus.\\
 
-Gehen wir davon aus das wir für jede der Matrizen $L$, $U$ und $P$ einen Speicherplatz haben.
-Zu Beginn müssen die passenden Startwerte in diesen Matrizen abgelegt werden. In $L$ und $P$ sind das einfach Einheitsmatrizen und in $U$ wird die Eingabematrix $A$ geschriben. Nun werden die Eintäge unterhalb der Diagonalen in $U$ 
-spaltenweise von links nach rechts auf 0 gesetzt indem man immer ein genau passendes vielfaches einer oberen Zeile von allen darunterliegenden 
-Zeilen abzieht. Die Wahl der Zeile hängt davon ab welche Spalte gerade auf 0 gesetzt werden soll. 
-Bei Spalte 1 ist es Zeile 1 bei Spalte 2 Zeile 2 und so weiter. Da man sich hierbei von oben nach unten bwz. von links nach rechts vorarbeitet generiert man schrittweise
-die gewünschten $L$ und $U$ Matrizen. Nun kann es aber vorkommen dass in der Zeile welche von den anderen Zeilen subtrahiert werden soll an dem Index der zu bearbeitenden
-Spalte eine 0 steht. Dies birgt das Problem dass nun kein vielfaches dieser Zeile jemals die anderen Einträge der Spalte durch Subtraktion auf 0 bringen kann,
-da $ 0 \times x = 0$. Um dieses Problem zu vermeiden haben wir uns entschieden generell, bevor wir mit der Nullung einer Zeile beginnen, immer die Zeile mit dem größsten Eintrag
-am entsprechenden Index nach oben zu tauschen (siehe Grafik). Dadurch wird garantiert, dass der Algorithmus bei einer regulären, quadratischen Matrix erfolgreich durchläuft. Im Abschnitt zur Genauigkeit wird noch genau darauf 
-eingegeangen warum wir immer die Zeile mit dem größten Eintrag nach oben tauschen und nicht bloß irgendeine Zeile mit Eintrag ungleich 0.
-Zusätzlich sei gesagt, dass nicht jede Matrixzerlegung den Schritt der Zeilenvertauschung benötigt und, dass der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was potential für 
+Gehen wir davon aus, dass wir für jede der Matrizen $L$, $U$ und $P$ einen Speicherplatz vorhanden ist.
+Dann müssen zu Beginn die für den Algorithmus notwendigen Startwerte dort abgelegt werden. Für $L$ und $P$ sind das 
+reguläre Einheitsmatrizen, während in $U$ zu Beginn die Eingabematrix $A$ gespeichert wird. Nun werden die Einträge unterhalb 
+der Diagonalen in $U$ spaltenweise von links nach rechts auf 0 gesetzt indem man immer ein genau passendes vielfaches 
+einer oberen Zeile von allen darunterliegenden Zeilen abzieht. Die Wahl der Zeile hängt davon ab, welche Spalte gerade 
+auf 0 gesetzt werden soll. Bei Spalte 1 ist es Zeile 1 bei Spalte 2 Zeile 2 und so weiter. Da man sich hierbei von oben 
+nach unten bwz. von links nach rechts vorarbeitet generiert man schrittweise die gewünschten $L$ und $U$ Matrizen. 
+Nun kann es aber vorkommen, dass in der Zeile welche von den anderen Zeilen subtrahiert werden soll an dem Index 
+der zu bearbeitenden Spalte eine 0 steht. Dies birgt das Problem, dass nun kein vielfaches dieser Zeile jemals 
+die anderen Einträge der Spalte durch Subtraktion auf 0 bringen kann, da $ 0 \times x = 0$. Um dieses Problem zu vermeiden 
+haben wir uns entschieden unabhängig von der Eingabe, bevor wir mit der Nullung einer Zeile beginnen, immer die Zeile mit dem betragsmäßig größsten Eintrag
+am entsprechenden Index nach oben zu tauschen (siehe Grafik). Dadurch wird garantiert, dass der Algorithmus bei einer 
+regulären, quadratischen Matrix erfolgreich durchläuft. Im Abschnitt zur Genauigkeit wird noch genau darauf 
+eingegeangen, warum wir immer die Zeile mit dem größten Eintrag nach oben tauschen und nicht bloß irgendeine Zeile 
+mit Eintrag ungleich 0. Zusätzlich sei gesagt, dass nicht jede Matrixzerlegung den Schritt der Zeilenvertauschung 
+benötigt und, dass der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was potential für 
 Optimierungen bieten könnte.\\
  
 Hier ein Beispiel für Zeilenvertauschungen:
@@ -180,32 +188,37 @@ Hier ein Beispiel für Zeilenaddition:
 
 \subsection{Stack vs. Heap}
 Bei der Wahl des Speicherortes muss noch eine weitere Gegebenheit beachtet werden
-und zwar haben wir hier die Wahl zwischen dem Heap und dem Stack. Auf Grund der besseren Zugriffszeiten des Stacks würden wir den Stack als Speicherort präferieren\cite{stack}.
-Aber leider wird bei Linux Betriebssystemen meistens blos circa 8MB Speicherplatz für die Stackallokationen zur Verfügung gestellt.\cite{stackSize} Dies birgt für uns das Problem, dass sofern der Stack als Speicher genutzt wird,
-es bei zu großen Matrizen zu einem Segmentation Fault kommen kann. Um trozdem die bessere Performance des Stacks nutzen zu können haben wir eine Fallunterscheidung Implementiert welche je nach größe der Matrix entscheidet
-ob eine Matrix noch auf dem Stack zerlegt werden kann oder ob der benötigte Specherplatz auf dem Heap alloziert werden muss.
-Die Maximalgröße einer Eingabematrix, dessen Zerlegung auf dem Stack durchgeführt werden kann, berechnen wir folgender maßen:
-Die Größe unserer Eingabematrix $A$ muss 4 mal alloziert werden, da temporär $A$, $L$, $U$ und $P$ abgespeichert werdem müssen.
-Der in der Methode übergebene Parameter $n$ gibt die Anzahl Zeilen / Spalten unserer Matrix an, da unsere Matrizen immer quadratisch sein müssen. Dadurch ergibt sich eine Anzahl Einträge pro Matrix von $n \cdot n $. 
-Jeder dieser Einträge ist in unserem Fall ein Floating Point Wert und somit 4 Bytes groß.
-Daraus ergibt sich die Formel \ref{size}, welche die benötigte Anzahl Bytes in Abhängigkeit unserer Eingabegröße n Berechnet.\\
+und zwar haben wir hier die Wahl zwischen dem Heap und dem Stack. Aufgrund der besseren Zugriffszeiten würden wir den 
+Stack als Speicherort präferieren, jedoch werden bei Linux-Betriebssystemen meistens nur ca. 8MB Speicherplatz für die 
+Stackallokation zur Verfügung gestellt\cite{stack}\cite{stackSize}.Dies birgt das Problem, dass es bei großen Matrizen 
+zu einem Segmentation Fault kommen kann, sofern der Stack als Speicher verwendet wird. Um trozdem die bessere 
+Performance des Stacks nutzen zu können, haben wir eine Fallunterscheidung implementiert, welche je nach Größe der Matrix 
+die Zerlegung auf dem Stack zerlegt oder den Speicherplatz auf dem Heap alloziiert. Die Maximalgröße einer Eingabematrix, 
+deren Zerlegung auf dem Stack durchgeführt werden kann, berechnen wir folgender maßen: 
+Die Größe der Eingabematrix $A$ muss 4 mal alloziert werden, da temporär $A$, $L$, $U$ 
+und $P$ abgespeichert werdem müssen. Der in der Methode übergebene Parameter $n$ gibt die Anzahl Zeilen / Spalten der 
+Matrix an, da unsere Matrizen immer quadratisch sein müssen. Dadurch ergibt sich eine Anzahl Einträge pro Matrix von $n \cdot n $. 
+Jeder dieser Einträge ist in unserem Fall ein Floating Point Wert und somit 4 Bytes groß. Daraus ergibt sich die Formel 
+\ref{size}, welche die benötigte Anzahl Bytes in Abhängigkeit unserer Eingabegröße $n$ berechnet.\\
   \begin{equation}
     \label{size}
-    bytes = 4 \cdot 4 \cdot n \cdot n
-    \end{equation}
-    Dann folgt dass unser $n$ für eine Nutzung des Stacks  $n \leq 707$  sein muss.(\ref{maxsize})
-    \begin{equation}
+    #bytes = 4 \cdot 4 \cdot n \cdot n
+  \end{equation}
+  Damit folgt, dass für eine Nutzung des Stacks $n \leq 707$ sein muss (\ref{maxsize}).
+  \begin{equation}
     \label{maxsize}
     4 \cdot 4 \cdot n \cdot n \leq 8 \cdot 10^6
   \end{equation}
  Um etwas Spielraum zu haben haben wir uns entschieden schon ab einem $n \geq 700$ auf dem Heap zu allozieren.\\
 
 \subsection{Verschiedene Implementierungen}
-Wie eben schon erwähnt ist uns aufgefallen, dass die LU Zerlegung vieler Matrizen auch noch gelöst werden kann wenn man die Pivotisierung weg lässt. In der Theorie könnte man dadurch einen Performancegewinn erzielen. 
-Um dies zu überprüfen haben wir eine Vergleichsimplementierung erstellt, welche Pivotisierungen nicht berücksichtigt. Diese kann dann natürlich nicht mehr jede Matrix zerlegen hat aber potential schneller zu sein.
-Ansonsten ist diese Implementierung analog zu obigen Ansatz.\\ 
-Den Ansatz mit Pivotisierung haben wir dann auf 4 verschiedene Arten umgesetzt. Einmal als einfaches, lineares C Programm und einmal als C Programm unter Verwendung von Intrinsics.
-Ebenso haben wir zwei verschiedene Assembler Implementierungen geschaffen. Wieder eine lineare Implementierung und eine Vektorisierte Version mit Hilfe von SIMD Operationen.
+Wie eben schon erwähnt ist uns aufgefallen, dass die LU Zerlegung vieler Matrizen auch noch gelöst werden kann wenn man 
+die Pivotisierung weg lässt. In der Theorie könnte man dadurch einen Performancegewinn erzielen. Um dies zu überprüfen, 
+haben wir eine Vergleichsimplementierung erstellt, welche Pivotisierungen nicht berücksichtigt. Diese kann dann zwar nicht 
+mehr jede Matrix zerlegen, ist aber potentiell schneller. Ansonsten ist diese Implementierung analog zu obigen Ansatz.\\ 
+Den Ansatz mit Pivotisierung haben wir auf 4 verschiedene Arten umgesetzt. Einmal als einfaches, lineares C Programm 
+und einmal als C Programm unter Verwendung von Intrinsics. Ebenso haben wir zwei verschiedene Assembler Implementierungen 
+geschaffen. Wieder eine lineare Implementierung und eine Vektorisierte Version mit Hilfe von SIMD Operationen.
 Auf die speziefischen Unterschiede wird im Abschnitt \ref{Performanzanalyse} noch genauer eingegangen.
 
 
@@ -231,7 +244,8 @@ Genauigkeit im Folgenden immer ungefähr 8 Stellen. Aber auch bei Zahlen wie
 viele Stellen benötigen würde. Beim Darstellen von Zahlen als Gleitkommazahlen im Computer 
 kommt es allgemein immer zu Störungen. So also auch in unserem Programm. z.B. beim Einlesen von A.
 Aber neben den reinen Darstellungsproblemen hat die Gleitkommadarstellung das Problem, dass beim Rechnen mit 
-Gleitkommazahlen die sogenannten Effekte Absorption und Auslöschung auftreten. Diese können noch eine viel größere Störung bewirken.
+Gleitkommazahlen die sogenannten Effekte Absorption und Auslöschung auftreten. 
+Diese können noch eine viel größere Störung bewirken.
 
 Problematisch wird dies weil in der LU-Zerlegung $\frac{n^2}{2} - \frac{n}{2} $
 Additionen und genau so viele Multiplikationen auftreten\cite{LUGenauigkeit}.
