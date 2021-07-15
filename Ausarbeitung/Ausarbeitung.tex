@@ -408,7 +408,7 @@ Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln ausgeführt.
 \subsection{Pivotisierung vs. keine Pivotisierung}
 Leider ist der Perfomace Gewinn wie man an Grafik \ref{PvsNP} unschwer erkennen kann wenn überhaut bloß maginal. Und dass obwohl wir zum Erstellen der Grafik mit Worst-case Eingaben gearbeitet haben bei denen $n-1$ mal pivotisiert werden musste.
 Dies kann man vermutlich auf zwei grundlegende Effekte zurückführen. Erstens Verändert das weglassen der Pivotisierung nicht die
-arithmethische Laufzeit welche weiterhin in $O(n^3)$ liegt. Der einzige Gewinn ligt also darin dass pro Schleifendurchlauf etwas weniger Operationen ausgeführt werden müssen. Dies kann aber maximal einen linearen Speedup erbringen. 
+asymptotische Laufzeit welche weiterhin in $O(n^3)$ liegt. Der einzige Gewinn ligt also darin dass pro Schleifendurchlauf etwas weniger Operationen ausgeführt werden müssen. Dies kann aber maximal einen linearen Speedup erbringen. 
 Dieser lineare Speedup ist aber ebenfalls nicht wirklich signifikant da, wie man mit einer Performance Analyse erkennt, die Pivotisierung so oder so nur einen sehr kleinen Prozentsatz der Laufzeit beansprucht. 
   \begin{figure}[H]
   \begin{center}
