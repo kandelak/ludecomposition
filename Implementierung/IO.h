@@ -9,18 +9,18 @@ void printHelp()
     printf("\n--help/-h : Display brief summaries of command line Options\n\n");
     printf("--bench-all : Generates and runs benchmark on the pre-defined input configuration (in bench.txt)\n\n"
            "       Example: ./main --bench-all\n\n"
-           "      Note: After this flag used you can then use the generated file for benchmarkin other implementations\n\n"
+           "       Note: After this flag is used you can then use the generated file for benchmarking other implementations\n\n"
            "       Example: ./main --input=bench.txt -v 2 --no-print -b\n\n");
     printf("--input/-f: Specify input stream\n\n"
            "       Example: ./main --input=input_file.txt\n"
            "       Example: ./main --input input_file.txt\n"
            "       Example: ./main -f=input_file.txt\n\n"
-           "       Note: Standart input stream will not be used as default or at all. Always specify input file"
+           "       Note: Standart input stream will not be used as default or at all. Always specify input file!\n\n"
            "       How input works?\n\n"
            "       Input for our program is just enter (new line) seperated numbers in the file\n\n"
            "       First number is always integer and specifies the number of the matrices to be decomposed\n"
            "       After that each and every time first comes the row/column size (Also integer) of the Matrix and then the matrix entries\n"
-           "       Note: Input validity check fails if these constraints are not kept. Extra input ,after all input are checked, will be ignored.");
+           "       Note: Input validity check fails if these constraints are not kept. For instance, if you write something before entering the enter,that is not a number\n\n");
     printf("--no-print: Deactivates user-friendly printing. For instance for testing/benchmarking purposes or during computations on larger matrices.\n\n"
            "       Example: ./main --input=input_file.txt --no-print\n\n"
            "       Note: Always use this if the matrices are too large\n\n");
@@ -53,7 +53,7 @@ void printHelp()
            "       Example: ./main --input=random_single.txt --no-print -t -v 2\n\n"
            "       Or you can also run bench using this command and write results in output file:"
            "       Example: ./main --input=random_single.txt --no-print -b -o result.txt -v 3\n\n");
-    printf("--random-tests : Generates multiple random inputs for testing purposes with specified(in file random_multiple.txt)\n\n"
+    printf("--random-tests : Generates multiple random inputs for testing purposes (in file random_multiple.txt)\n\n"
            "       Example: ./main --random-tests\n"
            "       After that you can run tests again and write results in output file using this command:\n"
            "       Example: ./main --input=random_multiple.txt --output=result.txt --no-print -t -v 2");
@@ -76,7 +76,7 @@ int check_validity(FILE *input)
     if (!fgets(buf, 50, input))
     {
         fprintf(stderr, "Reading Input Failed. (empty file)\n");
-        printf("Line: %ld\n",line_number);
+        printf("Line: %lu\n",line_number);
         return 0;
     }
 
@@ -90,25 +90,25 @@ int check_validity(FILE *input)
     if (errno == ERANGE)
     {
         perror("Integer Number read is too small or too large.\n");
-        printf("Line: %ld\n",line_number);
+        printf("Line: %lu\n",line_number);
         return 0;
     }
     else if (endptr == buf)
     {
         printf("Nothing Read (No input for the number of the matrices)\n");
-        printf("Line: %ld\n",line_number);
+        printf("Line: %lu\n",line_number);
         return 0;
     }
     else if (*endptr && *endptr != '\n')
     {
         printf("Wrong Input Format (All numbers must be enter seperated). Did you specify number of the Matrices?. Please refer to --help/-h.\n");
-        printf("Line: %ld\n",line_number);
+        printf("Line: %lu\n",line_number);
         return 0;
     }
     else if ((int)num_of_matr <= 0)
     {
         printf("Number of Matrices can not be less than or equal 0.\n");
-        printf("Line: %ld\n",line_number);
+        printf("Line: %lu\n",line_number);
         return 0;
     }
 
@@ -119,7 +119,7 @@ int check_validity(FILE *input)
         if (!fgets(buf, 50, input))
         {
             fprintf(stderr, "Reading Input Failed. (less input than specified/empty line)\n");
-            printf("Line: %ld\n",line_number);
+            printf("Line: %lu\n",line_number);
             return 0;
         }
         
@@ -128,25 +128,25 @@ int check_validity(FILE *input)
         if (errno == ERANGE)
         {
             perror("Integer number read was too small or too large.\n");
-            printf("Line: %ld\n",line_number);
+            printf("Line: %lu\n",line_number);
             return 0;
         }
         else if (endptr == buf)
         {
             printf("Nothing Read (No input for the Size of the Matrix)\n");
-            printf("Line: %ld\n",line_number);
+            printf("Line: %lu\n",line_number);
             return 0;
         }
         else if (*endptr && *endptr != '\n')
         {
             printf("Wrong Input Format (All numbers must be enter seperated). Did you specify row/column length of the Matrix?  Please refer to --help/-h.\n");
-            printf("Line: %ld\n",line_number);
+            printf("Line: %lu\n",line_number);
             return 0;
         }
         else if ((int)size_of_matr_row <= 0)
         {
             printf("Row/Column size of the Matrix can not be less than or equal zero.\n");
-            printf("Line: %ld\n",line_number);
+            printf("Line: %lu\n",line_number);
             return 0;
         }
 
@@ -157,7 +157,7 @@ int check_validity(FILE *input)
             if (!fgets(buf, 50, input))
             {
                 fprintf(stderr, "Reading Input Failed. (less input than specified/empty line)\n");
-                printf("Line: %ld\n",line_number);
+                printf("Line: %lu\n",line_number);
                 return 0;
             }
 
@@ -166,20 +166,20 @@ int check_validity(FILE *input)
             if (errno == ERANGE)
             {
                 perror("Floating-point Number read was too small or too large.\n");
-                printf("Line: %ld\n",line_number);
+                printf("Line: %lu\n",line_number);
                 return 0;
             }
             else if (endptr == buf)
             {
                 printf("Nothing Read (Not enough entries for specified size of the Matrix)\n");
-                printf("Line: %ld\n",line_number);
+                printf("Line: %lu\n",line_number);
                 return 0;
             }
             else if (*endptr && *endptr != '\n')
             {
 
                 printf("Wrong Input Format (Matrix Entry. All numbers must be enter seperated). Please refer to --help/-h.\n");
-                printf("Line: %ld\n",line_number);
+                printf("Line: %lu\n",line_number);
                 return 0;
             }
             line_number++;
@@ -208,7 +208,7 @@ void write_pretty(FILE *out, size_t n, const float *M)
 /**
  * Reads matrix entries from the stream specified with fp and writes in matrix
  */
-void read_matrix_from_stream(size_t n, FILE *fp, const float *matrix)
+void read_matrix_from_stream(size_t n, FILE *fp, float *matrix)
 {
 
     size_t index = 0;
@@ -228,10 +228,10 @@ void read_matrix_from_stream(size_t n, FILE *fp, const float *matrix)
 /**
  * Writes Decomposition matrices in the stream specified with output
  */
-void print_pretty(FILE *output, float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
+void print_pretty(FILE *output, const float *A, float *L, float *U, float *P, size_t size_of_matr_row, size_t i)
 {
 
-    fprintf(output, "\nOperation %ld: \n\n", i);
+    fprintf(output, "\nOperation %lu: \n\n", i);
     fprintf(output, " Matrix A: \n\n");
     write_pretty(output, size_of_matr_row, A);
     fprintf(output, " Matrix L: \n\n");

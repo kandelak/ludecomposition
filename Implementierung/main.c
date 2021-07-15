@@ -1,6 +1,4 @@
-#include <limits.h>
-#include "ludecomp.h"
-#include "generator.h"
+#define _POSIX_C_SOURCE 199309L
 #include <unistd.h>
 #include <sys/resource.h>
 #include <getopt.h>
@@ -9,65 +7,26 @@
 #include <string.h>
 #include <sys/random.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <float.h>
+#include <limits.h>
+#include "matr_utilities.h"
+#include "ludecomp.h"
+#include "generator.h"
 
+int ludecomp_asm_simd(size_t n, const float *, float *, float *, float *);
 
-void pivot_vs_no_pivot()
-{
-    FILE *example = fopen("pivot_example.txt", "r");
-    if (!example)
-    {
-        perror("Unable to open file for reading.\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("Decomposing with pivoting..(See read-only file pivoting_example.txt)\n\n");
-    size_t num_of_matrices;
-    fscanf(example, "%ld", &num_of_matrices);
-
-    size_t size_of_matr_row;
-
-    for (size_t i = 0; i < num_of_matrices; i++)
-    {
-        fscanf(example, "%ld", &size_of_matr_row);
-        run_on_heap("C", ludecomp, example, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
-    }
-    printf("\n        As you can see this particular input is successfully decomposed using implementation with pivoting.\n\n"
-           "        But if we use non-pivoting Implementation, this will happen:\n\n");
-    freopen("pivot_example.txt", "r", example);
-    if (!example)
-    {
-        perror("Unable to open file for reading.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    fscanf(example, "%ld", &num_of_matrices);
-    for (size_t i = 0; i < num_of_matrices; i++)
-    {
-
-        fscanf(example, "%ld", &size_of_matr_row);
-        run_on_heap("C without P", ludecomp_without_P, example, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
-    }
-
-    printf("\n        Due to limited computation resources of the floating-point numbers larger rounding errors will occur while not pivoting.\n\n");
-    fclose(example);
-}
-
-
-int ludecomp_asm_simd(size_t n, float *, float *, float *, float *);
-
-int ludecomp_asm(size_t n, float *, float *, float *, float *);
+int ludecomp_asm(size_t n, const float *, float *, float *, float *);
 
 /**
  * Runs LU-Decomposition on the Stack
  */
 
-void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
+void run_on_stack(int (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
 
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
-    float A[size_of_matr];
+    float A1[size_of_matr];
 
     float L[size_of_matr];
 
@@ -77,7 +36,9 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
 
     int decomposed = 1;
 
-    read_matrix_from_stream(size_of_matr_row, input, A);
+    read_matrix_from_stream(size_of_matr_row, input, A1);
+
+    const float *A = &A1[0];
 
     if (benchmarking && !testing)
     {
@@ -88,11 +49,11 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
     }
     else
     {
-        for (int k = 0; k < iterations; k++)
+        for (size_t k = 0; k < iterations; k++)
         {
             if (!func(size_of_matr_row, A, L, U, P))
             {
-                fprintf(output, "This Matrix can not be decomposed. (If not try using implementation with pivoting)\n");
+                fprintf(output, "This Matrix can not be decomposed. (If not, try using implementation with pivoting)\n");
                 decomposed = 0;
                 break;
             };
@@ -103,16 +64,16 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
     {
         if (!test_ludecomp(size_of_matr_row, A, L, U, P, TOLERATE_ERROR))
         {
-            fprintf(output, "Test %ld failed.\n", i);
+            fprintf(output, "Test %lu failed.\n", i);
         }
         else
         {
-            fprintf(output, "Test %ld succeeded.\n", i);
+            fprintf(output, "Test %lu succeeded.\n", i);
         }
     }
     else if (testing && !decomposed)
     {
-        fprintf(output, "Test %ld succeeded.\n", i);
+        fprintf(output, "Test %lu succeeded.\n", i);
     }
 
     if (print && decomposed)
@@ -124,18 +85,18 @@ void run_on_stack(char *name, int (*func)(size_t, const float *, float *, float 
 /**
  * Runs LU-decomposition on the heap
  */
-void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
+void run_on_heap(int (*func)(size_t, const float *, float *, float *, float *), FILE *input, FILE *output, int benchmarking, int print, size_t iterations, int testing, size_t i, size_t size_of_matr_row)
 {
     size_t size_of_matr = size_of_matr_row * size_of_matr_row;
 
-    float *A = NULL;
+    float *A1 = NULL;
     float *L = NULL;
     float *P = NULL;
     float *U = NULL;
     int decomposed = 1;
 
-    A = malloc(sizeof(float) * size_of_matr);
-    if (!A)
+    A1 = malloc(sizeof(float) * size_of_matr);
+    if (!A1)
     {
         perror("Could not allocate Memory");
         exit(EXIT_FAILURE);
@@ -144,7 +105,7 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
     if (!L)
     {
         perror("Could not allocate Memory");
-        free(A);
+        free(A1);
         exit(EXIT_FAILURE);
     }
     U = malloc(sizeof(float) * size_of_matr);
@@ -152,14 +113,14 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
     {
         perror("Could not allocate Memory");
         free(L);
-        free(A);
+        free(A1);
         exit(EXIT_FAILURE);
     }
     P = malloc(sizeof(float) * size_of_matr);
     if (!P)
     {
         perror("Could not allocate Memory");
-        free(A);
+        free(A1);
         free(L);
         free(U);
         exit(EXIT_FAILURE);
@@ -169,19 +130,21 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
      *  Read and compute next Matrix
     */
 
-    read_matrix_from_stream(size_of_matr_row, input, A);
+    read_matrix_from_stream(size_of_matr_row, input, A1);
+
+    const float *A = A1;
 
     if (benchmarking && !testing)
     {
         if (!run_bench(func, output, A, L, U, P, iterations, size_of_matr_row))
         {
-            fprintf(output, "This Matrix can not be decomposed. (If not try using implementation with pivoting)\n");
+            fprintf(output, "This Matrix can not be decomposed. (If not, try using implementation with pivoting)\n");
             decomposed = 0;
         }
     }
     else
     {
-        for (int k = 0; k < iterations; k++)
+        for (size_t k = 0; k < iterations; k++)
         {
             if (!func(size_of_matr_row, A, L, U, P))
             {
@@ -194,16 +157,16 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
     {
         if (!test_ludecomp(size_of_matr_row, A, L, U, P, TOLERATE_ERROR))
         {
-            fprintf(output, "Test %ld Failed.\n", i + 1);
+            fprintf(output, "Test %lu Failed.\n", i + 1);
         }
         else
         {
-            fprintf(output, "Test %ld succeeded.\n", i + 1);
+            fprintf(output, "Test %lu succeeded.\n", i + 1);
         }
     }
     else if (testing && !decomposed)
     {
-        fprintf(output, "Test %ld succeeded.\n", i + 1);
+        fprintf(output, "Test %lu succeeded.\n", i + 1);
     }
 
     if (print && decomposed)
@@ -211,7 +174,7 @@ void run_on_heap(char *name, int (*func)(size_t, const float *, float *, float *
         print_pretty(output, A, L, U, P, size_of_matr_row, i);
     }
     free(P);
-    free(A);
+    free((float *)A);
     free(L);
     free(U);
 }
@@ -236,6 +199,65 @@ const implementation_version implementations[] = {
     {"asm", ludecomp_asm},
     {"c_no_P", ludecomp_without_P}};
 
+/**
+ * Pivoting vs non-pivoting Example
+ */
+void pivot_vs_no_pivot()
+{
+    FILE *example = fopen("pivot_example.txt", "r");
+    if (!example)
+    {
+        perror("Unable to open file for reading.\n");
+        exit(EXIT_FAILURE);
+    }
+    printf("Decomposing with pivoting..(See read-only file pivoting_example.txt)\n\n");
+    size_t num_of_matrices;
+    if (fscanf(example, "%lu", &num_of_matrices) == EOF)
+    {
+        fclose(example);
+        exit(EXIT_FAILURE);
+    }
+
+    size_t size_of_matr_row;
+
+    for (size_t i = 0; i < num_of_matrices; i++)
+    {
+        if (fscanf(example, "%lu", &size_of_matr_row) == EOF)
+        {
+            fclose(example);
+            exit(EXIT_FAILURE);
+        }
+        run_on_heap(ludecomp, example, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
+    }
+    printf("\n        As you can see this particular input is successfully decomposed using implementation with pivoting.\n\n"
+           "        But if we use non-pivoting Implementation, this will happen:\n\n");
+    example = freopen("pivot_example.txt", "r", example);
+    if (!example)
+    {
+        perror("Unable to open file for reading.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (fscanf(example, "%lu", &num_of_matrices) == EOF)
+    {
+        fclose(example);
+        exit(EXIT_FAILURE);
+    }
+    for (size_t i = 0; i < num_of_matrices; i++)
+    {
+
+        if (fscanf(example, "%lu", &size_of_matr_row) == EOF)
+        {
+            fclose(example);
+            exit(EXIT_FAILURE);
+        }
+        run_on_heap(ludecomp_without_P, example, stdout, 0, 0, 1, 1, 1, size_of_matr_row);
+    }
+
+    printf("\n        Due to limited computation resources of the floating-point numbers larger rounding errors will occur while not pivoting.\n\n");
+    fclose(example);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -254,7 +276,6 @@ int main(int argc, char **argv)
     int version = 0;
     char *input = NULL;
     char *output = NULL;
-    char *random = NULL;
     size_t single_input_size = 0;
     int testing = 0;
 
@@ -346,8 +367,6 @@ int main(int argc, char **argv)
     }
 
     const implementation_version *impl = &implementations[version];
-
-    const char *gen_file = "gen_file.txt";
 
     /**
      * Benchmarking with predefined configuration
@@ -474,21 +493,34 @@ int main(int argc, char **argv)
     }
 
     size_t num_of_matrices;
-    fscanf(in, "%ld", &num_of_matrices);
+
+    if (fscanf(in, "%lu", &num_of_matrices) == EOF)
+    {
+        perror("Error occured while reading from the file");
+        fclose(in);
+        fclose(out);
+        exit(EXIT_FAILURE);
+    }
 
     size_t size_of_matr_row;
 
     for (size_t i = 0; i < num_of_matrices; i++)
     {
-        fscanf(in, "%ld", &size_of_matr_row);
+        if (fscanf(in, "%lu", &size_of_matr_row) == EOF)
+        {
+            perror("Error occured while reading from the file");
+            fclose(in);
+            fclose(out);
+            exit(EXIT_FAILURE);
+        }
 
         if (size_of_matr_row > STACK_LIMIT)
         {
-            run_on_heap(impl->name, impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
+            run_on_heap(impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
         }
         else
         {
-            run_on_stack(impl->name, impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
+            run_on_stack(impl->func, in, out, benchmarking, print, iterations, testing, i, size_of_matr_row);
         }
     }
 

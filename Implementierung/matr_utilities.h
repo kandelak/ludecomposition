@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200809L
+#define _POSIX_C_SOURCE 199309L
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,13 +10,14 @@
 #include <time.h>
 #include <errno.h>
 
+
 /**
  * For Benchmarking the program
  */
 static inline double curtime(void)
 {
     struct timespec t;
-    clock_gettime(1, &t);
+    clock_gettime(CLOCK_MONOTONIC, &t);
     return t.tv_sec + t.tv_nsec * 1e-9;
 }
 
@@ -42,7 +43,7 @@ void matrix_mul(size_t n, float *A, float *B, float *Res)
 /**
  * Tests if two matrices are equal based on the given error toleration
  */
-int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
+int test_matrix_eq(size_t n, const float *orgM, float *M, float tolerate)
 {
     int res = 1;
     size_t matr_size = n * n;
@@ -65,7 +66,7 @@ int test_matrix_eq(size_t n, float *orgM, float *M, float tolerate)
 /**
  *  * Runs Benchmark using given function
  */
-int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FILE *output, float *A, float *L, float *U, float *P, size_t iterations,size_t size_of_matr_row)
+int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FILE *output, const float *A, float *L, float *U, float *P, size_t iterations,size_t size_of_matr_row)
 {
     int decomposed = 1;
 
@@ -97,7 +98,7 @@ int run_bench(int (*func)(size_t, const float *, float *, float *, float *), FIL
 /**
  * Tests correctness of the decomposition
  */
-int test_ludecomp(size_t n, float *A, float *L, float *U,
+int test_ludecomp(size_t n, const float *A, float *L, float *U,
                   float *P, float tolerate)
 {
     int res = 1;

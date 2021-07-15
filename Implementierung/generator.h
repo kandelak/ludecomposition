@@ -1,8 +1,7 @@
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <stdio.h>
 #include "IO.h"
+#include <time.h>
 /**
  * Worst Case input for Pivoting
  */
@@ -124,7 +123,7 @@ void random_multiple_input(char *output)
                 }
         }
 
-        fprintf(out, "%ld\n", (long int) 65);
+        fprintf(out, "%lu\n", (long int) 65);
 
         float range = 1000.0;
 
@@ -138,7 +137,7 @@ void random_multiple_input(char *output)
                 perror("Could not allocate Memory");
                 exit(EXIT_FAILURE);
         }
-        fprintf(out, "%ld\n", (long int )MUST_ALIGN_HEAP);
+        fprintf(out, "%lu\n", (long int )MUST_ALIGN_HEAP);
         matrix_generator(MUST_ALIGN_HEAP, C, range);
         write_matrix_in_stream(out, MUST_ALIGN_HEAP, C);
 
@@ -146,20 +145,20 @@ void random_multiple_input(char *output)
 
         size_t next_size = 10;
 
-        fprintf(out, "%ld\n", next_size);
+        fprintf(out, "%lu\n", next_size);
         float B[next_size * next_size];
         not_decomposable1(next_size, B);
         write_matrix_in_stream(out, next_size, B);
 
-        fprintf(out, "%ld\n", next_size);
+        fprintf(out, "%lu\n", next_size);
         not_decomposable2(next_size, B);
         write_matrix_in_stream(out, next_size, B);
 
-        fprintf(out, "%ld\n", next_size);
+        fprintf(out, "%lu\n", next_size);
         not_decomposable3(next_size, B);
         write_matrix_in_stream(out, next_size, B);
 
-        fprintf(out, "%ld\n", next_size);
+        fprintf(out, "%lu\n", next_size);
         not_decomposable4(next_size, B);
         write_matrix_in_stream(out, next_size, B);
 
@@ -173,7 +172,7 @@ void random_multiple_input(char *output)
                         perror("Could not allocate Memory");
                         exit(EXIT_FAILURE);
                 }
-                fprintf(out, "%ld\n", k);
+                fprintf(out, "%lu\n", k);
 
                 matrix_generator2(k, D, range);
 
@@ -192,7 +191,7 @@ void random_multiple_input(char *output)
                         exit(EXIT_FAILURE);
                 }
 
-                fprintf(out, "%ld\n", k);
+                fprintf(out, "%lu\n", k);
                 matrix_generator3(k, D, range);
                 write_matrix_in_stream(out, k, D);
                 free(D);
@@ -224,8 +223,8 @@ void random_single_input(char *output, size_t n)
                 exit(EXIT_FAILURE);
         }
         float range = 10000.0;
-        fprintf(out, "%ld\n", (long int) 1);
-        fprintf(out, "%ld\n", n);
+        fprintf(out, "%lu\n", (long int) 1);
+        fprintf(out, "%lu\n", n);
         matrix_generator(n, A, range);
         write_matrix_in_stream(out, n, A);
         fclose(out);
@@ -242,7 +241,7 @@ void generate_bench(char *bench_file)
                         exit(EXIT_FAILURE);
                 }
         }
-        fprintf(bench, "%ld\n",(long int) 1000 / 25);
+        fprintf(bench, "%lu\n",(long int) 1000 / 25);
         for (size_t i = 1; i < 1000; i += 50)
         {
                 float *A;
@@ -256,10 +255,10 @@ void generate_bench(char *bench_file)
                 }
 
                 matrix_generator(i, A, 1000.0);
-                fprintf(bench, "%ld\n", i);
+                fprintf(bench, "%lu\n", i);
                 write_matrix_in_stream(bench, i, A);
 
-                fprintf(bench, "%ld\n", i);
+                fprintf(bench, "%lu\n", i);
                 must_pivotize(i, A);
                 write_matrix_in_stream(bench, i, A);
                 free(A);

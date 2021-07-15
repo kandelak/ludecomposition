@@ -4,7 +4,6 @@
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
-#include "matr_utilities.h"
 #include <immintrin.h>
 
 /**
@@ -173,6 +172,7 @@ int ludecomp(size_t n, const float *A, float *L, float *U, float *P)
 /**
  * LU-Decomposition using SIMD Intrinsics
  */
+
 int ludecomp_intrinsics(size_t n, const float *A, float *L, float *U, float *P)
 {
 
