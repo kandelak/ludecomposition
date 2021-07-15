@@ -174,7 +174,7 @@ Hier ein Beispiel für Zeilenaddition:
     0	& 3	 & 5  & 7
 
     \rowops 
-    \add[\frac{1}{3}]{0}{2}
+    \add[\frac{2}{3}]{0}{2}
     \end{gmatrix}
     \rightarrow 
     \begin{gmatrix}[b]
@@ -353,7 +353,7 @@ Die Frage ist nun, ob die LU-Zerlegung stabil ist.
 Stabil ist ein Algorithmus, wenn er bei der Störung der Eingabedaten nur einen relativen Fehler macht, 
 der in der selben Größenordnung liegt wie der unvermeidbare relative Fehler des Problems an sich. 
 Allgemein heißt ein Algorithmus stabil im Sinne der Rückwärtsanalyse, 
-falls $\hat{x}$ die exakte Lösung von $\hat{A}x = b$ ist mit 	
+falls $\hat{x}$ die exakte Lösung von $\bar{A}x = b$ ist mit 	
 %%%%%%% (19) %%%%%%%%% (Stabilität)				
   \begin{equation}
     \label{norm}
@@ -375,12 +375,12 @@ abhängt. Dies wird problematisch, da der relative Abstand von $A$ zu $\bar{A}$ 
 $C\cdot eps$ abgeschätzt werden sollte. $|\hat{L}|$ und $|\hat{U}|$ lässt sich jedoch nicht sinnvoll 
 beschränken, weshalb $C$ hier auch sehr groß werden kann.
 Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil. Es lässt sich jedoch durch die Spaltenpivotisierung 
-der Faktor $|\hat{L}|$  begrenzen. Dies liegt daran, dass nun für alle $i,j = 0,...,n |I_{i,j}| \leq 1$ gilt. 
+der Faktor $|\hat{L}|$  begrenzen. Dies liegt daran, dass nun für alle $i,j = 0,...,n\; |I_{i,j}| \leq 1$ gilt. 
 Bei $|\hat{U}|$ lässt sich weiterhin keine gute Abschätzung finden und so gilt nun folgende Ungleichung:  
 %%%%%%% (21) %%%%%%%%%
   \begin{equation}
     \label{eg3}
-    \frac{||A - \bar{A}||\infty}{||A||\infty} \leq 2n^3 \; eps \;\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} + O(eps^2)
+    \frac{||A - \bar{A}||_\infty}{||A||_\infty} \leq 2n^3 \; eps \;\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} + O(eps^2)
   \end{equation}
 
 Hier ist nun der Quotient das Problem bzw. entscheidet über die Stabilität der LU-
@@ -391,18 +391,20 @@ besser abschätzen lässt, gilt die LU-Zerlegung mit Pivotsuche als stabil.
 
 
 
-%%%%%%%%%%%%%%% Performanzanalyse %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%% Performanzanalyse %%%%%%%%%%%%%%%%%% 
 
 \section{Performanzanalyse}
 \label{Performanzanalyse}
-Die Laufzeit berechnet sich über  $ \frac{1}{3}n^3 -\frac{1}{3} n $ und befindet sich somit in $O(n^3)$ \cite{LULaufzeit}
+Die Laufzeit berechnet sich über  $ \frac{1}{3}n^3 -\frac{1}{3} n $ und befindet sich somit in $O(n^3)$. \cite{LULaufzeit}
 In unserer Performanceanalyse vergleichen wir folgende Implementierungen:\\
 \begin{itemize}
 \item Lineare C Implementierung ohne Compileroptimierung und mit Pivotisierung vs. Lineare C implementierung ohne Compileroptimierung und ohne Pivotisierung. 
 \item Lineare C Implementierung ohne Compileroptimierung vs. C Implementierung mit Vektorisierung durch Intrinsics. 
 \item Lineare C Implementierung mit Compileroptimierung -O3 vs. Assembler Implementierung mit SIMD Vektorisierung.
 \end{itemize}
-Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln ausgeführt. \\
+Alle Performance Tests wurden mit einem HP Spectre x360 Convertible mit einem i7-1165G7 @ 2.80GHz und dualchannel LPDDR4 4267MHz RAM durchgeführt. 
+
+Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln analysiert. \\
 
 
 \subsection{Pivotisierung vs. keine Pivotisierung}
@@ -454,11 +456,18 @@ es manchmal tatsächlich noch sinnvoll sein kann Assembler Code per Hand zu schr
 %%%%%%%%%%%%%%% Zusammenfassung %%%%%%%%%%%%%%%%%%
 
 \section{Zusammenfassung und Ausblick}
-Im laufe diser Ausarbeitung haben wir Verschiedee Implementiuerungen der LU Zerlegung Erstellt und miteinander verglichen. Es hat sich herrausgestellt dass Implementierungen ohne Pivotisierungen nicht zu Empfehlen sind,
-die sie aufgrund von Floating-point arithmethischen Gegebenheitenheiten sehr ungenau sind und auch keinen sonderlichen Performance Gewinn erbringen. Performance techicht haben wir herrausgefunden dass eine per Hand vektorisierte ASM Implementierung am 
-schnellsten läuft. Dies war für uns ein überraschendes ergebnis ,da wir davon ausgegangen sind, dass Compileroptimierter Code effizienter laufen würde.   
-Welche Performance war jetzt am besten?\\
-Rückblickend hätte man ohne pivotisierung weglassen können\\
+In dieser Projektarbeit hatten wir die Aufgabe ein Programm zu entwickeln dass eine reguläre Matrix A in 2 dreiecksmatrizen L, U und
+ eine Pivotmatrix P aufteilen kann. Wir entschieden uns dazu unser Programm auf Basis des Gaußalgorithmus zu Implementieren, welcher
+  eine Matrix mit Hilfe von Elemantaren Zeilenoperationen wie Zeilenvertauschungen und Zeilenadditionen manipuliert. Einen alternativen
+   Ansatz hätte der Dolittle Algorithmus geboten. 
+Im laufe diser Ausarbeitung haben wir verschiedene Implementiuerungen der LU ZErlegung
+Erstellt und miteinander verglichen. In der Erwartung eines Performancegewinns implementierten wir auch eine Version mit vereinfachtem
+ Gaußalgorithmus welcher keine Zeilen vertauscht. Es stellte sich aber herraus dass, dann die Genauigkeit der Berechnung aufgrund von 
+ floatingpoint arithmethischen Gegebenheiten massiv abnimmt. Ausserdem ist der Performancegewinn dieser Implementierung nur maginal und
+  somit hat eine nicht-pivotisierende Implementierung keinen Vorteil gegenüber einer Pivotisierenden Implementierung. Performance technisch liegt
+   der Algorithmus is O(n^3). Wir haben die Interressante Erfahrung gemacht dass unsere händisch vectorisierte ASM Implementierung am effizientesten 
+   lief, sogar besser als eine mit -O3 Compillierte C Version, was uns gezeigt hat dass handgeschriebener ASM Code immer noch Anwendung finden kann. 
+
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hi
 % Referenzieren Sie diese dann mit \cite{
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
