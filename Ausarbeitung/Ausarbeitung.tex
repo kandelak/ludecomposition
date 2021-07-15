@@ -226,7 +226,7 @@ Auf die speziefischen Unterschiede wird im Abschnitt \ref{Performanzanalyse} noc
 %%%%%%%%%%%%%%% Genauigkeit %%%%%%%%%%%%%%%%%%
 
 \section{Genauigkeit}
-In diesen Abschnitt wird die Genauigkeit unserer LU-Zerlegung analysiert und anhand 
+In diesen Abschnitt wird die Genauigkeit unserer Implementierung der LU-Zerlegung analysiert und anhand 
 passender Beispiele demonstriert und getestet. Wir haben uns für die 
 Genauigkeitsanalyse entschieden, da diese ein großes Problem bei der LU-Zerlegung 
 darstellt, besonders wenn der Algorithmus ohne Pivotisierung arbeitet. In diesen Fall 
@@ -234,27 +234,27 @@ handelt es sich um einen instabilen Algorithmus und es kann zu komplett
 falschen Ergebnissen kommen. Das Problem der Genauigkeit ist auf die Kondition der 
 Matrix A und auf die endliche Rechengenauigkeit von Computern zurückzuführen. \\
 
-Im folgenden arbeiten wir mit Floats. Floats sind Gleitkommazahlen mit der Größe 
-bzw. Genauigkeit von 32 Bit und können neben einen sehr großen Wertebereich auch 
+Im folgenden arbeiten wir mit Floats. Floats sind Gleitkommazahlen mit einer Größe 
+bzw. Genauigkeit von 32 Bit und können neben einem sehr großen Wertebereich auch 
 sehr genau Zahlen darstellen. Dies wird durch eine flexible Position des Kommas erreicht. 
 Dennoch ist die Genauigkeit der Gleitkommazahlen allein durch die Endlichkeit an 
 Rechenleistung und Speicher begrenzt. Somit beträgt die 
 Genauigkeit im Folgenden immer ungefähr 8 Stellen. Aber auch bei Zahlen wie 
-0,2 kommt es schon zu Rundungsfehlern, da diese in Gleitkommadarstellung unendlich 
+0,2 kommt es schon zu Rundungsfehlern, da diese in Gleitkommadarstellung im Binärsystem unendlich 
 viele Stellen benötigen würde. Beim Darstellen von Zahlen als Gleitkommazahlen im Computer 
-kommt es allgemein immer zu Störungen. So also auch in unserem Programm. z.B. beim Einlesen von A.
-Aber neben den reinen Darstellungsproblemen hat die Gleitkommadarstellung das Problem, dass beim Rechnen mit 
-Gleitkommazahlen die sogenannten Effekte Absorption und Auslöschung auftreten. 
-Diese können noch eine viel größere Störung bewirken.
+kommt es allgemein immer zu Störungen. So also auch in unserem Programm. z.B. beim Einlesen von A.\\
+Neben den Darstellungsproblemen treten beim Rechnen mit Zahlen in Gleitkommadarstellung aber auch 
+die Probleme der Absorption und Auslöschung auf, welche noch sehr viel größere Störungen bewirken können.
 
-Problematisch wird dies weil in der LU-Zerlegung $\frac{n^2}{2} - \frac{n}{2} $
+Problematisch wird dies, weil in der LU-Zerlegung $\frac{n^2}{2} - \frac{n}{2} $
 Additionen und genau so viele Multiplikationen auftreten\cite{LUGenauigkeit}.
 Durch die Gleitkommadarstellung kommt es nun also bei der LU-Zerlegung immer und 
 unvermeidlich zu einer Vielzahl an Rundungsfehlern. Diese führen zu Störungen im Gleichungssystem $Ax=b$. 
-In wie fern diese Störungen der Eingabedatein auch die Lösung des Problems stören nennt man Kondition. 
-Die Frage ist nun ob das Gleichungssystems gut oder schlecht konditioniert ist?
+In wie fern diese Störungen der Eingabedateien auch die Lösung des Problems stören, nennt man Kondition. 
+Die Frage ist nun ob das Gleichungssystem gut oder schlecht konditioniert ist?
 
 Hierzu ein Beispiel:
+%%%%%%% (13) %%%%%%%%%
   \begin{equation}
     \label{absBeis}
     \begin{bmatrix}
@@ -275,6 +275,7 @@ Hierzu ein Beispiel:
   \end{equation}
 
 Störung der rechten Seite mit $ 0 < \epsilon \ll 1$:
+%%%%%%% (14) %%%%%%%%%
   \begin{equation}
     \label{absBeis2}
     \bar{b} = b + 
@@ -294,37 +295,38 @@ Störung der rechten Seite mit $ 0 < \epsilon \ll 1$:
     \end{bmatrix}
   \end{equation}
 
-Hier lässt sich sehen, dass die zusätzliche sehr kleine Störung in $b$ dazu führt, 
-dass nun $\bar{x} = ( 1+e 3)$ eine komplett andere Lösung des linearen Gleichungssystems darstellt.
-Ein lineares Gleichungssystem ist also schlecht konditioniert. In der LU-Zerlegung stellt dies nun ein großes 
-Problem dar, da hier einige Störungen in Matrix $A$ auftreten.
+Hier lässt sich sehen, dass eine kleine Störung in $b$ dazu führen kann, 
+dass das Gleichungssystem eine stark abweichende Lösung hat.
+Dieses lineares Gleichungssystem ist also schlecht konditioniert. In der LU-Zerlegung stellt dies nun ein großes 
+Problem dar, da hier durch die Rundungsfehler einige Störungen in Matrix $A$ auftreten.
 
-Um zu verstehen wie und ob die LU-Zerlegung verbessert werden kann muss man 
-zuerst das Problem weiter Analysieren und verstehen wie die Lösung des linearen 
+Um zu verstehen, wie und ob die LU-Zerlegung verbessert werden kann, muss man 
+zuerst das Problem weiter analysieren und verstehen, wie die Lösung des linearen 
 Gleichungssystem von Störungen der Eingabe abhängt. 
 Um die Größe einer Störung und die Abhängigkeit der Lösung von der Störung messen zu 
-können braucht man ein Maß. Hier für bietet sich das Konzept der Normen an. Es wird aber 
+können, braucht man ein Maß. Hierfür bietet sich das Konzept der Normen an. Es wird aber 
 auch die Norm für Matrizen benötigt, diese nennt man die zugehörige Matrizen Norm, 
 welche wie folgt definiert ist: \\
-es sein $||.||$ eine beliebige Norm auf $R^n$ dann ist  
+es sei $||.||$ eine beliebige Norm auf $R^n$ dann ist  
+%%%%%%% (15) %%%%%%%%% (Matrix-Norm)
   \begin{equation}
     \label{norm}
     ||A|| := sup_{x\neq 0}\;\frac{||Ax||}{||x||}\; \forall\; A \;\epsilon \;\mathbb{R}^{n \times n}
   \end{equation}
 
-wodurch dann die Norm von $||Ax||$ wie folgt abgeschätzt werden kann
+wodurch dann $||Ax||$ wie folgt abgeschätzt werden kann
   \begin{equation}
     \label{norm}
     ||Ax|| \leq ||A|| \cdot ||x||\;  \forall\; x \;\epsilon \;\mathbb{R}^n 
   \end{equation}
 
-Mit dieser Definition von Norm lässt sich nun die Kondition eines linearen 
-Gleichungssystems genauer untersuchen. Sei $Ax=b$ unser lineares Gleichungssystem 
-welches wir ganz leicht in $b$ stören, sodass nun $A \bar{x}=\bar{b}$ gilt da sich natürlich auch $x $
-ändert wenn $b$ leicht gestört wurde. 
-Der rellative Fehler zur Größe von $x$ entspricht also 
-$\frac{||x-\bar{x}|}{||x||}$ und die relative Störung durch 
+Mit dieser Definition einer Norm lässt sich nun die Kondition eines linearen 
+Gleichungssystems genauer untersuchen. Sei $Ax=b$ unser lineares Gleichungssystem, 
+welches leicht in b gestört wird, sodass nun $A \bar{x}=\bar{b}$ gilt.
+Der rellative Fehler zur Größe $x$ entspricht also 
+$\frac{||x-\bar{x}|}{||x||}$ und die relative Störung 
 $\frac{||(b-\bar{b})||}{||b||}$. Dadurch ergibt sich nun 
+%%%%%%% (17) %%%%%%%%% (relativer Fehler)
   \begin{equation}
     \label{norm}
     \frac{||x- \bar{x}||}{||x||}   \leq    \frac{||b||} {||x||} \cdot ||A^{-1}|| \cdot \frac{||b-\bar{b}||}{||b||} \leq ||A|| \cdot ||A^{-1}|| \cdot \frac{||(b-\bar{b})||} {||b||}
@@ -333,57 +335,59 @@ $\frac{||(b-\bar{b})||}{||b||}$. Dadurch ergibt sich nun
 Hier definiert man nun $||A|| \cdot ||A^{-1}||$ als Kondition von $A$. Anders gesagt wird 
 der relative Fehler durch die Kondition von $A$ mal der relativen Störung 
 von oben beschränkt. Daraus lässt sich schließen, dass wenn die relative Störung klein 
-ist der relative Fehler nicht auch zwingend klein ist, sondern nur dann wenn die 
+ist, der relative Fehler nicht auch zwingend klein ist, sondern nur dann, wenn die 
 Kondition von $A$ auch klein ist.
 Jetzt haben wir aber nur $b$ gestört, wenn man nun auch die Matrix $A$ stört, dann ist 
-unser gestörtes System nun $\bar{A} \bar{x} = \bar{b}$ wofür dann folgender Satz gilt, wenn $ea \cdot cond(A) < 1$ 
-und $\frac{||A - \bar{A}||} {||A||} \leq ea $	und 	$\frac{||b - \bar{b}||} {||b||} \leq eb $ ist:\\
+unser gestörtes System nun $\bar{A} \bar{x} = \bar{b}$. Für dieses gilt nun folgender Satz, 
+wenn $ea \cdot cond(A) < 1$ und $\frac{||A - \bar{A}||} {||A||} \leq ea $	und 	$\frac{||b - \bar{b}||} {||b||} \leq eb $, wobei 
+$ea$ und $eb$ hier den Störungen in $A$ und $b$ entsprechen, ist:\\
+%%%%%%% (18) %%%%%%%%%
   \begin{equation}
     \frac{||x-\bar{x}||} {||x||} \leq \frac{cond(A)} {1- ea \cdot cond(A)} \cdot (ea + eb)   
   \end{equation}
 Es ist nun also sicher zu sagen, dass bei einer kleinen relativen Störung des linearen 
-Gleichungssystems auch die Kondition von A klein sein muss damit der relative Fehler 
+Gleichungssystems, auch die Kondition von $A$ klein sein muss, damit der relative Fehler 
 klein bleibt, aber auch dass ein gewisser relativer Fehler unvermeidbar ist.
 
 Die Frage ist nun, ob die LU-Zerlegung stabil ist.
 Stabil ist ein Algorithmus, wenn er bei der Störung der Eingabedaten nur einen relativen Fehler macht, 
 der in der selben Größenordnung liegt wie der unvermeidbare relative Fehler des Problems an sich. 
 Allgemein heißt ein Algorithmus stabil im Sinne der Rückwärtsanalyse, 
-falls $\hat{x}$ die exakte Lösung von $\hat{A}x = b$ ist mit 							
+falls $\hat{x}$ die exakte Lösung von $\hat{A}x = b$ ist mit 	
+%%%%%%% (19) %%%%%%%%% (Stabilität)				
   \begin{equation}
     \label{norm}
     \frac{|| A - \bar{A}||}{||A||} \leq C \; eps \;\; \;\;\;\;\;\;\;\;  \frac{|| b - \bar{b}||}{||b||} \leq C \; eps
   \end{equation}
 
 mit einem nicht all zu großem $C$, wobei $eps$ für die Maschinengenauigkeit steht.
-Die LU-Zerlegung ermittelt nun selbst wenn die Eingabe ohne 
-Rundungsfehler erfolgt, heißt $A$ und $b$ bestehen aus Gleitkommazahlen, $\hat{L}$ und $\hat{U}$ mit 
-$\hat{x}$ als Ergebnis, da Rundungsfehler bei dem Verfahren auftreten. Für $\hat{x}$ gilt 
-dann, dass dies die korrekte Lösung für ein System mit Störung in A ist $\bar{A}x=b$ bei der 
-folgende Ungleichung gilt:
+Die LU-Zerlegung ermittelt nun, selbst wenn die Eingabe ohne Rundungsfehler erfolgt, $\hat{L}$ und $\hat{U}$ mit 
+$\hat{x}$ als Ergebnis, da Rundungsfehler bei dem Verfahren auftreten. $\hat{x}$ ist dann die 
+korrekte Lösung des linearen Gleichungssystems $\bar{A}x=b$ mit Störung in $\bar{A}$ bei der folgende Ungleichung gilt:
   \begin{equation}
     \label{eg3}
     |A - \bar{A}| \leq 2n \; eps \; |\bar{L}||\bar{R}| + O(eps^2)
   \end{equation}
 
-Hier ist jeder Betrag immer Komponentenweise zu verstehen als auch das Kleinergleichzeichen.										% was willst du damit sagen? 
+Hierbei sind die Beträge und das $\leq$ komponentenweise zu verstehen.								
 Nun wird ersichtlich, dass der Abstand zwischen $A$ und $\bar{A}$ auch von $|\hat{L}| \cdot |\hat{U}|$
 abhängt. Dies wird problematisch, da der relative Abstand von $A$ zu $\bar{A}$ eigentlich durch 
 $C\cdot eps$ abgeschätzt werden sollte. $|\hat{L}|$ und $|\hat{U}|$ lässt sich jedoch nicht sinnvoll 
-beschränken weshalb $C$ hier auch sehr groß werden kann.
+beschränken, weshalb $C$ hier auch sehr groß werden kann.
 Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil. Es lässt sich jedoch durch die Spaltenpivotisierung 
 der Faktor $|\hat{L}|$  begrenzen. Dies liegt daran, dass nun für alle $i,j = 0,...,n |I_{i,j}| \leq 1$ gilt. 
 Bei $|\hat{U}|$ lässt sich weiterhin keine gute Abschätzung finden und so gilt nun folgende Ungleichung:  
+%%%%%%% (21) %%%%%%%%%
   \begin{equation}
     \label{eg3}
     \frac{||A - \bar{A}||\infty}{||A||\infty} \leq 2n^3 \; eps \;\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} + O(eps^2)
   \end{equation}
 
 Hier ist nun der Quotient das Problem bzw. entscheidet über die Stabilität der LU-
-Zerlegung. Für diesen kann jetzt jedoch nur: $\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} \leq 2^{n-1}$ angenommen 
+Zerlegung. Für diesen kann jedoch nur: $\frac{max_{i,j}| \hat{u}_{ij}|}{max_{i,j}|a_{ij}|} \leq 2^{n-1}$ angenommen 
 werden, folglich ist der Algorithmus auch durch die Spaltenpivotwahl über die Menge 
-aller invertierbaren Matrizen nicht stabil. Aber in der Realität mit zufälligen Matrizen wird 
-sich der Quotient deutlich besser abschätzen lassen und so gilt die LU-Zerlegung mit Pivotsuche als stabil.
+aller invertierbaren Matrizen nicht stabil. Da sich der Quotient in der Realität mit zufälligen Matrizen deutlich 
+besser abschätzen lässt, gilt die LU-Zerlegung mit Pivotsuche als stabil.
 
 
 
