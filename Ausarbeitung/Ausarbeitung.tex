@@ -20,7 +20,7 @@ benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokument
 
 Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt,
 bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen. 
-Dies Findet z.B. Anwendung bei der Berechnung des Stromflusses in Schaltkreisen. Mit der LU-Zerlegung kann man, 
+Dies findet z.B. Anwendung bei der Berechnung des Stromflusses in Schaltkreisen. Mit der LU-Zerlegung kann man, 
 wenn man die Wiederstände einzelner Leitungen gegeben hat, den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
 Dazu liefert die LU-Zerlegung für jedes eindeutig lösbare Gleichungssystem $A \cdot x = b$, also wenn $A$ regulär ist,
 zwei Dreiecksmatrizen $L$ und $U$ und eine Pivot-Matrix $P$,
@@ -53,7 +53,7 @@ Die Matrix $P$ ist eine Einheitsmatrix mit ggf. vertauschten Zeilen.\\\\
   \end{equation}
   \\
 
-Ein anschauliches Beispiel hierzu wäre das lineare Gleichungssystem:
+Ein anschauliches Beispiel hierzu ist das lineare Gleichungssystem:
 %%%%%%% (3-6) %%%%%%%%%
   \begin{eqnarray}
     0x_1 + 3x_2 + 5x_3 + 7x_4 = 0 \\
@@ -123,22 +123,22 @@ Jede Zeilenvertauschung wird auf die selbe Art in $P$ festgehalten.  Um nun sich
 welche oberhalb der Diagonalen nur die 0 als Einträge hat und somit die gesuchte untere Dreiecksmatrix bildet, 
 folgt der Algorithmus strikt der Vorgehensweise des Gauß Algorithmus.\\
 
-Gehen wir davon aus, dass wir für jede der Matrizen $L$, $U$ und $P$ einen Speicherplatz vorhanden ist.
+Gehen wir davon aus, dass für jede der Matrizen $L$, $U$ und $P$ ein Speicherplatz vorhanden ist.
 Dann müssen zu Beginn die für den Algorithmus notwendigen Startwerte dort abgelegt werden. Für $L$ und $P$ sind das 
 reguläre Einheitsmatrizen, während in $U$ zu Beginn die Eingabematrix $A$ gespeichert wird. Nun werden die Einträge unterhalb 
 der Diagonalen in $U$ spaltenweise von links nach rechts auf 0 gesetzt indem man immer ein genau passendes vielfaches 
 einer oberen Zeile von allen darunterliegenden Zeilen abzieht. Die Wahl der Zeile hängt davon ab, welche Spalte gerade 
 auf 0 gesetzt werden soll. Bei Spalte 1 ist es Zeile 1 bei Spalte 2 Zeile 2 und so weiter. Da man sich hierbei von oben 
-nach unten bwz. von links nach rechts vorarbeitet generiert man schrittweise die gewünschten $L$ und $U$ Matrizen. 
+nach unten bzw. von links nach rechts vorarbeitet, generiert man schrittweise die gewünschten $L$ und $U$ Matrizen. 
 Nun kann es aber vorkommen, dass in der Zeile welche von den anderen Zeilen subtrahiert werden soll an dem Index 
 der zu bearbeitenden Spalte eine 0 steht. Dies birgt das Problem, dass nun kein vielfaches dieser Zeile jemals 
 die anderen Einträge der Spalte durch Subtraktion auf 0 bringen kann, da $ 0 \times x = 0$. Um dieses Problem zu vermeiden 
-haben wir uns entschieden unabhängig von der Eingabe, bevor wir mit der Nullung einer Zeile beginnen, immer die Zeile mit dem betragsmäßig größsten Eintrag
+haben wir uns entschieden, unabhängig von der Eingabe, bevor wir mit der Nullung einer Zeile beginnen, immer die Zeile mit dem betragsmäßig größsten Eintrag
 am entsprechenden Index nach oben zu tauschen (siehe Grafik). Dadurch wird garantiert, dass der Algorithmus bei einer 
 regulären, quadratischen Matrix erfolgreich durchläuft. Im Abschnitt zur Genauigkeit wird noch genau darauf 
-eingegeangen, warum wir immer die Zeile mit dem größten Eintrag nach oben tauschen und nicht bloß irgendeine Zeile 
+eingegeangen, warum wir immer die Zeile mit dem größten Eintrag nach oben tauschen und nicht nur irgendeine Zeile 
 mit Eintrag ungleich 0. Zusätzlich sei gesagt, dass nicht jede Matrixzerlegung den Schritt der Zeilenvertauschung 
-benötigt und, dass der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was potential für 
+benötigt und, dass der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was Potential für 
 Optimierungen bieten könnte.\\
  
 Hier ein Beispiel für Zeilenvertauschungen:
@@ -193,8 +193,8 @@ Stack als Speicherort präferieren, jedoch werden bei Linux-Betriebssystemen mei
 Stackallokation zur Verfügung gestellt\cite{stack}\cite{stackSize}.Dies birgt das Problem, dass es bei großen Matrizen 
 zu einem Segmentation Fault kommen kann, sofern der Stack als Speicher verwendet wird. Um trozdem die bessere 
 Performance des Stacks nutzen zu können, haben wir eine Fallunterscheidung implementiert, welche je nach Größe der Matrix 
-die Zerlegung auf dem Stack zerlegt oder den Speicherplatz auf dem Heap alloziiert. Die Maximalgröße einer Eingabematrix, 
-deren Zerlegung auf dem Stack durchgeführt werden kann, berechnen wir folgender maßen: 
+die Zerlegung auf dem Stack zerlegt oder den Speicherplatz auf dem Heap allozieren. Die Maximalgröße einer Eingabematrix, 
+deren Zerlegung auf dem Stack durchgeführt werden kann, berechnen wir folgendermaßen: 
 Die Größe der Eingabematrix $A$ muss 4 mal alloziert werden, da temporär $A$, $L$, $U$ 
 und $P$ abgespeichert werdem müssen. Der in der Methode übergebene Parameter $n$ gibt die Anzahl Zeilen / Spalten der 
 Matrix an, da unsere Matrizen immer quadratisch sein müssen. Dadurch ergibt sich eine Anzahl Einträge pro Matrix von $n \cdot n $. 
@@ -212,13 +212,13 @@ Jeder dieser Einträge ist in unserem Fall ein Floating Point Wert und somit 4 B
  Um etwas Spielraum zu haben haben wir uns entschieden schon ab einem $n \geq 700$ auf dem Heap zu allozieren.\\
 
 \subsection{Verschiedene Implementierungen}
-Wie eben schon erwähnt ist uns aufgefallen, dass die LU Zerlegung vieler Matrizen auch noch gelöst werden kann wenn man 
+Wie eben schon erwähnt ist uns aufgefallen, dass die LU Zerlegung vieler Matrizen auch noch gelöst werden kann, wenn man 
 die Pivotisierung weg lässt. In der Theorie könnte man dadurch einen Performancegewinn erzielen. Um dies zu überprüfen, 
 haben wir eine Vergleichsimplementierung erstellt, welche Pivotisierungen nicht berücksichtigt. Diese kann dann zwar nicht 
 mehr jede Matrix zerlegen, ist aber potentiell schneller. Ansonsten ist diese Implementierung analog zu obigen Ansatz.\\ 
 Den Ansatz mit Pivotisierung haben wir auf 4 verschiedene Arten umgesetzt. Einmal als einfaches, lineares C Programm 
 und einmal als C Programm unter Verwendung von Intrinsics. Ebenso haben wir zwei verschiedene Assembler Implementierungen 
-geschaffen. Wieder eine lineare Implementierung und eine Vektorisierte Version mit Hilfe von SIMD Operationen.
+geschaffen. Wieder eine lineare Implementierung und eine vektorisierte Version mit Hilfe von SIMD Operationen.
 Auf die speziefischen Unterschiede wird im Abschnitt \ref{Performanzanalyse} noch genauer eingegangen.
 
 
@@ -244,10 +244,10 @@ Genauigkeit im Folgenden immer ungefähr 8 Stellen. Aber auch bei Zahlen wie
 viele Stellen benötigen würde. Beim Darstellen von Zahlen als Gleitkommazahlen im Computer 
 kommt es allgemein immer zu Störungen. So also auch in unserem Programm. z.B. beim Einlesen von A.\\
 Neben den Darstellungsproblemen treten beim Rechnen mit Zahlen in Gleitkommadarstellung aber auch 
-die Probleme der Absorption und Auslöschung auf, welche noch sehr viel größere Störungen bewirken können.
-
+die Probleme der Absorption und Auslöschung auf, welche noch sehr viel größere Störungen bewirken können. 
 Problematisch wird dies, weil in der LU-Zerlegung $\frac{n^2}{2} - \frac{n}{2} $
-Additionen und genau so viele Multiplikationen auftreten\cite{LUGenauigkeit}.
+Additionen und genau so viele Multiplikationen auftreten\cite{LUGenauigkeit}. 
+
 Durch die Gleitkommadarstellung kommt es nun also bei der LU-Zerlegung immer und 
 unvermeidlich zu einer Vielzahl an Rundungsfehlern. Diese führen zu Störungen im Gleichungssystem $Ax=b$. 
 In wie fern diese Störungen der Eingabedateien auch die Lösung des Problems stören, nennt man Kondition. 
@@ -323,7 +323,7 @@ wodurch dann $||Ax||$ wie folgt abgeschätzt werden kann
 Mit dieser Definition einer Norm lässt sich nun die Kondition eines linearen 
 Gleichungssystems genauer untersuchen. Sei $Ax=b$ unser lineares Gleichungssystem, 
 welches leicht in b gestört wird, sodass nun $A \bar{x}=\bar{b}$ gilt.
-Der rellative Fehler zur Größe $x$ entspricht also 
+Der relative Fehler zur Größe $x$ entspricht also 
 $\frac{||x-\bar{x}|}{||x||}$ und die relative Störung 
 $\frac{||(b-\bar{b})||}{||b||}$. Dadurch ergibt sich nun 
 %%%%%%% (17) %%%%%%%%% (relativer Fehler)
@@ -396,7 +396,7 @@ besser abschätzen lässt, gilt die LU-Zerlegung mit Pivotsuche als stabil.
 \section{Performanzanalyse}
 \label{Performanzanalyse}
 Die Laufzeit berechnet sich über  $ \frac{1}{3}n^3 -\frac{1}{3} n $ und befindet sich somit in $O(n^3)$. \cite{LULaufzeit}
-In unserer Performanceanalyse vergleichen wir folgende Implementierungen:\\
+In unserer Performanzanalyse vergleichen wir folgende Implementierungen:\\
 \begin{itemize}
 \item Lineare C Implementierung ohne Compileroptimierung und mit Pivotisierung vs. Lineare C implementierung ohne Compileroptimierung und ohne Pivotisierung. 
 \item Lineare C Implementierung ohne Compileroptimierung vs. C Implementierung mit Vektorisierung durch Intrinsics. 
@@ -408,10 +408,13 @@ Die Ergebnisse der Vergleiche werden in den folgenden Unterkapiteln analysiert. 
 
 
 \subsection{Pivotisierung vs. keine Pivotisierung}
-Leider ist der Perfomace Gewinn wie man an Grafik \ref{PvsNP} unschwer erkennen kann wenn überhaut bloß maginal. Und dass obwohl wir zum Erstellen der Grafik mit Worst-case Eingaben gearbeitet haben bei denen $n-1$ mal pivotisiert werden musste.
-Dies kann man vermutlich auf zwei grundlegende Effekte zurückführen. Erstens Verändert das weglassen der Pivotisierung nicht die
-asymptotische Laufzeit welche weiterhin in $O(n^3)$ liegt. Der einzige Gewinn ligt also darin dass pro Schleifendurchlauf etwas weniger Operationen ausgeführt werden müssen. Dies kann aber maximal einen linearen Speedup erbringen. 
-Dieser lineare Speedup ist aber ebenfalls nicht wirklich signifikant da, wie man mit einer Performance Analyse erkennt, die Pivotisierung so oder so nur einen sehr kleinen Prozentsatz der Laufzeit beansprucht. 
+Leider ist der Performanzgewinn wie man an Grafik \ref{PvsNP} erkennen kann wenn höchstens marginal, obwohl bei den 
+Testläufen aus der Grafik Worst-Case Eingaben verwendet wurden, bei denen $n-1$ mal pivotisiert werden musste.
+Dies kann man vermutlich auf zwei grundlegende Effekte zurückführen. Erstens verändert das Weglassen der Pivotisierung 
+nicht die asymptotische Laufzeit welche weiterhin bei $O(n^3)$ liegt. Der einzige Gewinn ligt also darin, dass pro 
+Schleifendurchlauf etwas weniger Operationen ausgeführt werden müssen. Dies kann aber maximal einen linearen Speedup 
+erbringen. Dies kann aber maximal zu einem linearen Speedup führen, welcher aber, wie an der Performance-Analyse 
+erkennbar, nicht wirklich signifikant ist, da die Pivotisierung nur einen kleinen Prozentsatz der Laufzeit ausmacht. 
   \begin{figure}[H]
   \begin{center}
   \caption{Pivotisierend vs. Nicht-Pivotisierend} 
@@ -419,17 +422,21 @@ Dieser lineare Speedup ist aber ebenfalls nicht wirklich signifikant da, wie man
   \includegraphics[width = 0.8\linewidth]{PvsNP.pdf}
   \end{center}
   \end{figure}
-Unter Betrachtung dieser Erkenntnis zusätzlich zu den Ergebnissen der Genauigkeitsanalyse sind wir zu dem Schluss gekommen das eine Implementierung ohne Pivotisierung keinen Vorteil und Signifikante Nachteile bringt und dieser
+Unter Betrachtung dieser Erkenntnis zusätzlich zu den Ergebnissen der Genauigkeitsanalyse sind wir zu dem Schluss gekommen, dass eine Implementierung ohne Pivotisierung keinen Vorteil und signifikante Nachteile bringt und dieser
 Ansatz somit nicht weiter Verfolgt werden muss.
 
 \subsection{Linear vs. Parallel durch Intrinsics}
-Eine Performanzanalyse unserer Linearen C Implementierung mit perf tool hat ergeben, dass ein Großteil der Rechenzeit in einer bestimmten Schleife verbracht wird. Ausserdem zeigt perf tool uns, dass innerhalb der
-Schleife die meiste Zeit für \textbf{mov} Befehle aufgewandt wird dicht gefolgt von arithmetischen Operationen. Diese Befehle sind in unserem Kontext Teil von Zeilenoperationen auf eine Matrix. Dies bedeutet,dass diese Operationen zu 
-großen Teilen Unabhänig voneinander sind. Also können wir diese Operationen relativ einfach, unter Zuhilfenahme von C Intrinsics, parallelisieren.
-Die Laufzeit der Implementierung in der wir diese teuren Operationen vektorisiert haben wird In Abbildung \ref{CvsIntrins} mit der Laufzeit der unvektorisierten Implementierung verglichen. \\
-Durch den zusätzlichen Overhead der Vektorisieung sieht man bei kleineren Eingabegrößen keinen signifikanten Unterschied. Aber um so größer die Eingabe wird desto deutlicher sieht man, an den sich von einander entfernenden 
-Graphen, dass die Vektorisierung einen guten Speedup generiert. 
-Wir haben den Speedup Punktuell bei einer Eingabegröße von $n = 1000$ berechnet wo dieser bei $\approx 1.5$  liegt.\\
+Eine Performanzanalyse unserer linearen C Implementierung mit perf tool hat ergeben, dass ein Großteil der Rechenzeit in 
+einer bestimmten Schleife verbracht wird. Außerdem zeigt perf tool uns, dass innerhalb der Schleife die meiste Zeit 
+für \textbf{mov} Befehle aufgewandt wird, dicht gefolgt von arithmetischen Operationen. Diese Befehle sind in unserem 
+Kontext Teil von Zeilenoperationen auf eine Matrix, was bedeutet, dass diese Operationen zu großen Teilen unabhänig 
+voneinander sind. Also können wir diese Operationen relativ einfach, unter Zuhilfenahme von C Intrinsics, parallelisieren.
+Die Laufzeit der Implementierung, in der wir diese teuren Operationen vektorisiert haben, wird in Abbildung \ref{CvsIntrins} 
+mit der Laufzeit der unvektorisierten Implementierung verglichen. \\
+Durch den zusätzlichen Overhead der Vektorisieung sieht man bei kleineren Eingabegrößen keinen signifikanten Unterschied. 
+Je größer aber die Eingabe wird, desto deutlicher sieht man an den sich von einander entfernenden Graphen, dass 
+die Vektorisierung einen signifikanten Speedup generiert. Wir haben den Speedup punktuell bei einer Eingabegröße von 
+$n = 1000$ berechnet, wo dieser bei $\approx 1.5$  liegt.\\
   \begin{figure}[H]
   \begin{center}
   \caption{C-linear vs. C-vektorisiert}
@@ -439,10 +446,13 @@ Wir haben den Speedup Punktuell bei einer Eingabegröße von $n = 1000$ berechne
   \end{figure}
 
 \subsection{Compiler optimierter Code vs. ASM mit SIMD}
-Als letztes haben wir um optimale Performance zu erreichen eine reine ASM Implementierung entwickelt. In dieser Implementierung haben wir möglichst viel Optimiert und vor allem die im vorherigen Kapitel als Laufzeit aufwendig
-intendefizierten Stellen direkt mit xmm Instruktionen Vektorisiert. Zum Vergleich haben wir unsere einfache C Implementierung mit -O3 kompilliert um zu analysieren ob unsere Implementierung besser, schlechter oder ähnlich gut wie der Compiler ist.
-Wie man an Abbildung \ref{CvsASM} erkennen kann bringt unsere händische Implementierung eine deutlich bessere Performance als die compileroptimierte Version. Dies Ist ein für uns überraschendes Ergebnis was uns aber zeigt das 
-es manchmal tatsächlich noch sinnvoll sein kann Assembler Code per Hand zu schreiben.
+Als letztes haben wir, um optimale Performanz zu erreichen eine reine ASM Implementierung entwickelt. In dieser 
+Implementierung haben wir möglichst viel optimiert und vor allem die im vorherigen Kapitel als Laufzeit aufwendig
+identifizierten Stellen direkt mit xmm Instruktionen Vektorisiert. Zum Vergleich haben wir unsere einfache C 
+Implementierung mit -O3 kompilliert um zu analysieren, ob unsere Implementierung besser, schlechter oder ähnlich gut wie 
+der Compiler ist. Wie man an Abbildung \ref{CvsASM} erkennen kann, bringt unsere händische Implementierung eine deutlich 
+bessere Performance als die compileroptimierte Version. Dies ist ein für uns überraschendes Ergebnis, was uns aber zeigt, 
+dass es manchmal tatsächlich noch sinnvoll sein kann, Assembler Code von Hand zu schreiben.
   \begin{figure}[H]
   \begin{center}
   \caption{Compileroptimiert vs. ASM-vektorisiert} 
@@ -456,17 +466,18 @@ es manchmal tatsächlich noch sinnvoll sein kann Assembler Code per Hand zu schr
 %%%%%%%%%%%%%%% Zusammenfassung %%%%%%%%%%%%%%%%%%
 
 \section{Zusammenfassung und Ausblick}
-In dieser Projektarbeit hatten wir die Aufgabe ein Programm zu entwickeln dass eine reguläre Matrix A in 2 dreiecksmatrizen L, U und
- eine Pivotmatrix P aufteilen kann. Wir entschieden uns dazu unser Programm auf Basis des Gaußalgorithmus zu Implementieren, welcher
-  eine Matrix mit Hilfe von Elemantaren Zeilenoperationen wie Zeilenvertauschungen und Zeilenadditionen manipuliert. Einen alternativen
-   Ansatz hätte der Dolittle Algorithmus geboten. 
-Im laufe diser Ausarbeitung haben wir verschiedene Implementiuerungen der LU ZErlegung
-Erstellt und miteinander verglichen. In der Erwartung eines Performancegewinns implementierten wir auch eine Version mit vereinfachtem
- Gaußalgorithmus welcher keine Zeilen vertauscht. Es stellte sich aber herraus dass, dann die Genauigkeit der Berechnung aufgrund von 
- floatingpoint arithmethischen Gegebenheiten massiv abnimmt. Ausserdem ist der Performancegewinn dieser Implementierung nur maginal und
-  somit hat eine nicht-pivotisierende Implementierung keinen Vorteil gegenüber einer Pivotisierenden Implementierung. Performance technisch liegt
-   der Algorithmus is O(n^3). Wir haben die Interressante Erfahrung gemacht dass unsere händisch vectorisierte ASM Implementierung am effizientesten 
-   lief, sogar besser als eine mit -O3 Compillierte C Version, was uns gezeigt hat dass handgeschriebener ASM Code immer noch Anwendung finden kann. 
+In dieser Projektarbeit hatten wir die Aufgabe ein Programm zu entwickeln, dass eine reguläre Matrix $A$ in 2 Dreiecksmatrizen
+$L$, $U$ und eine Pivotmatrix $P$ aufteilen kann. Wir entschieden uns dazu unser Programm auf Basis des Gaußalgorithmus 
+zu implementieren, welcher eine Matrix mit Hilfe von elemantaren Zeilenoperationen wie Zeilenvertauschungen und 
+Zeilenadditionen manipuliert. Einen alternativen Ansatz hätte der Dolittle Algorithmus geboten. Im Laufe dieser Ausarbeitung 
+haben wir verschiedene Implementierungen der LU-Zerlegung erstellt und miteinander verglichen. In der Erwartung eines 
+Performanzgewinns implementierten wir auch eine Version mit vereinfachtem Gaußalgorithmus, welcher keine Zeilen vertauscht. 
+Es stellte sich aber heraus, dass dann der Algorithmus, aufgrund von floatingpoint arithmethischen Gegebenheiten, nicht 
+mehr stabil ist und es so zu komplett falschen Ergebnissen kommen kann. Außerdem ist der Performanzgewinn dieser Implementierung nur marginal und somit hat eine 
+nicht-pivotisierende Implementierung keinen Vorteil gegenüber einer pivotisierenden Implementierung. Performance technisch 
+liegt der Algorithmus is $O(n^3)$. Wir haben die Interressante Erfahrung gemacht dass unsere händisch vektorisierte ASM 
+Implementierung am effizientesten lief, sogar besser als eine mit -O3 kompilierte C Version, was uns gezeigt hat, 
+dass handgeschriebener ASM Code immer noch Anwendung finden kann. 
 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hi
 % Referenzieren Sie diese dann mit \cite{
