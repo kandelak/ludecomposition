@@ -21,7 +21,7 @@ benutztes Verfahren genauer beschrieben, implementiert und enstprechend dokument
 Das Verfahren LU-Zerlegung, auch LR-Zerlegung genannt,
 bietet eine Möglichkeit per Algorithmus lineare Gleichungssysteme zu lösen und Matrixinverse zu bestimmen. 
 Dies findet z.B. Anwendung bei der Berechnung des Stromflusses in Schaltkreisen. Mit der LU-Zerlegung kann man, 
-wenn man die Wiederstände einzelner Leitungen gegeben hat, den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
+wenn man die Wiederstände einzelner Leitungen gegeben hat, den Stromfluss an jedem Wiederstand berechnen \cite{LUAnwendung}.
 Dazu liefert die LU-Zerlegung für jedes eindeutig lösbare Gleichungssystem $A \cdot x = b$, also wenn $A$ regulär ist,
 zwei Dreiecksmatrizen $L$ und $U$ und eine Pivot-Matrix $P$,
 wobei $P \cdot L \cdot U = A$ ergibt\cite[37]{M2009}. Hierbei haben die Matrizen besondere 
@@ -194,7 +194,7 @@ Hier ein Beispiel für Zeilenaddition:
 Bei der Wahl des Speicherortes muss noch eine weitere Gegebenheit beachtet werden
 und zwar haben wir hier die Wahl zwischen dem Heap und dem Stack. Aufgrund der besseren Zugriffszeiten würden wir den 
 Stack als Speicherort präferieren, jedoch werden bei Linux-Betriebssystemen meistens nur ca. 8MB Speicherplatz für die 
-Stackallokation zur Verfügung gestellt\cite{stack}\cite{stackSize}.Dies birgt das Problem, dass es bei großen Matrizen 
+Stackallokation zur Verfügung gestellt. Dies birgt das Problem, dass es bei großen Matrizen 
 zu einem Segmentation Fault kommen kann, sofern der Stack als Speicher verwendet wird. Um trozdem die bessere 
 Performance des Stacks nutzen zu können, haben wir eine Fallunterscheidung implementiert, welche je nach Größe der Matrix 
 die Zerlegung auf dem Stack zerlegt oder den Speicherplatz auf dem Heap allozieren. Die Maximalgröße einer Eingabematrix, 
