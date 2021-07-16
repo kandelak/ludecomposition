@@ -505,7 +505,7 @@ Performanzgewinns implementierten wir auch eine Version mit vereinfachtem Gaußa
 Es stellte sich aber heraus, dass dann der Algorithmus, aufgrund von floatingpoint arithmethischen Gegebenheiten, nicht 
 mehr stabil ist und es so zu komplett falschen Ergebnissen kommen kann. Außerdem ist der Performanzgewinn dieser Implementierung nur marginal und somit hat eine 
 nicht-pivotisierende Implementierung keinen Vorteil gegenüber einer pivotisierenden Implementierung. Performance technisch 
-liegt der Algorithmus is $O(n^3)$. Wir haben die Interressante Erfahrung gemacht dass unsere händisch vektorisierte ASM 
+liegt der Algorithmus in $O(n^3)$. Wir haben die Interressante Erfahrung gemacht, dass unsere händisch vektorisierte ASM 
 Implementierung am effizientesten lief, sogar besser als eine mit -O3 kompilierte C Version, was uns gezeigt hat, 
 dass handgeschriebener ASM Code immer noch Anwendung finden kann. 
 
