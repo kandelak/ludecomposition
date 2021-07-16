@@ -392,7 +392,7 @@ Hierbei sind die Beträge und das $\leq$ komponentenweise zu verstehen.
 Nun wird ersichtlich, dass der Abstand zwischen $A$ und $\bar{A}$ auch von $|\hat{L}| \cdot |\hat{U}|$
 abhängt. Dies wird problematisch, da der relative Abstand von $A$ zu $\bar{A}$ eigentlich durch 
 $C\cdot eps$ abgeschätzt werden sollte. $|\hat{L}|$ und $|\hat{U}|$ lässt sich jedoch nicht sinnvoll 
-beschränken, weshalb $C$ hier auch sehr groß werden kann.Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil.
+beschränken, weshalb $C$ hier auch sehr groß werden kann.Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil\cite[75-79]{M2008}.
 Zu sehen ist dies auch am Beispiel mit einer Matrix $A$ in der Datei stabil.txt die auch wieder eine kleine Kondition hat. 
 Heißt also, wenn die LU-Zerlegung ohne Pivotisierung stabil wäre, müsste hier das errechnete $x$ durch $U$ auch sehr nahe 
 an der korrekten Lösung liegen. Jedoch wenn man nun für $b = (1;\; 2;\; 3)$ diese Matrix mit der LU-Zerlegung ohne Pivotisierung (-v 4) 
