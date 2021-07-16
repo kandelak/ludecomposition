@@ -236,7 +236,7 @@ Genauigkeitsanalyse entschieden, da diese ein großes Problem bei der LU-Zerlegu
 darstellt, besonders wenn der Algorithmus ohne Pivotisierung arbeitet. In diesen Fall 
 handelt es sich um einen instabilen Algorithmus und es kann zu komplett 
 falschen Ergebnissen kommen. Das Problem der Genauigkeit ist auf die Kondition der 
-Matrix A und auf die endliche Rechengenauigkeit von Computern zurückzuführen. \\
+Matrix $A$ und auf die endliche Rechengenauigkeit von Computern zurückzuführen. \\
 
 Im folgenden arbeiten wir mit Floats. Floats sind Gleitkommazahlen mit einer Größe 
 bzw. Genauigkeit von 32 Bit und können neben einem sehr großen Wertebereich auch 
@@ -246,7 +246,7 @@ Rechenleistung und Speicher begrenzt. Somit beträgt die
 Genauigkeit im Folgenden immer ungefähr 8 Stellen. Aber auch bei Zahlen wie 
 0,2 kommt es schon zu Rundungsfehlern, da diese in Gleitkommadarstellung im Binärsystem unendlich 
 viele Stellen benötigen würde. Beim Darstellen von Zahlen als Gleitkommazahlen im Computer 
-kommt es allgemein immer zu Störungen. So also auch in unserem Programm. z.B. beim Einlesen von A.\\
+kommt es allgemein immer zu Störungen. So also auch in unserem Programm. z.B. beim Einlesen von $A$.\\
 Neben den Darstellungsproblemen treten beim Rechnen mit Zahlen in Gleitkommadarstellung aber auch 
 die Probleme der Absorption und Auslöschung auf, welche noch sehr viel größere Störungen bewirken können. 
 Problematisch wird dies, weil in der LU-Zerlegung $\frac{n^2}{2} - \frac{n}{2} $
