@@ -76,33 +76,37 @@ Welches auch durch folgende Koeffizientenmatrix dargestellt werden kann:
 Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
 %%%%%%% (8) %%%%%%%%%
   \begin{equation}
-    A = \begin{bmatrix}
+  A = L \cdot U \cdot P
+  
+  \centering
+  \begin{bmatrix}
     0	& 3	 & 5  & 7 \\
     2	& 6	 & 10 & 14 \\
     -4	& 12 & 15 & -21\\
     6	& 9  & -5 & -7\\
     \end{bmatrix}
-    L =
+     =
     \begin{bmatrix}
     1	& 0	 & 0  & 0 \\
     0	& 1	 & 0 & 0 \\
     -2	& 8 & 1 & 0\\
     3	& -3  & 4 & 1\\
     \end{bmatrix}
-    U =
+   \cdot
     \begin{bmatrix}
     2	& 6	 & 10 & 14 \\
     0	& 3	 & 5 &  7 \\
     0	& 0  & -5 & -49\\
     0	& 0  & 0 &  168\\
     \end{bmatrix}
-    P =
+    \cdot
     \begin{bmatrix}
     0	& 1	 & 0 & 0 \\
     1	& 0	 & 0 & 0 \\
     0	& 0  & 1 & 0\\
     0	& 0  & 0 & 1\\
     \end{bmatrix}
+ 
   \end{equation}
  
  
@@ -112,14 +116,14 @@ Nach Anwendung der LU-Zerlegung ergeben sich folgende Matrizen:
 Zur Durchführung dieser Zerlegung haben wir uns entschieden ein Programm auf Basis des gaußschen Eliminationsverfahren zu enwickeln.
 Das gaußsche Eliminationsverfahren ändert die Einträge einer Matrix unter Verwendung elementarer Zeilenoperationen.
 Die verwendeten elementaren Zeilenoperationen sind das Tauschen zweier Zeilen (siehe Gleichung \ref{swap}) und 
-das Addieren von Vielfachen einer Zeile auf eine Andere (Siehe Gleichung \ref{add}). 
+das Addieren von Vielfachen einer Zeile auf eine Andere (siehe Gleichung \ref{add}). 
 Dabei wird das Gleichungssystem $A \cdot x = b$ verändert, die Lösung bleibt aber erhalten.\\
 
 Mit diesem Verfahren wird die bereits genannte obere Dreiecksmatrix U generiert. So erhalten wir unsere $U$ Matrix. 
 Um nun auch die Matrizen $L$ und $P$ zu erhalten, müssen wir nur alle Schritte die zur Generierung 
 der $U$ Matrix beigetragen haben dokumentieren. Jedes mal, wenn wir eine Zeile auf eine Andere addieren,
-wird dies in der $L$ Matrix festgehalten, indem genau dieselbe Operation auf dieser $L$ Matrix durchgeführt wird. 
-Jede Zeilenvertauschung wird auf die selbe Art in $P$ festgehalten.  Um nun sicher eine gültige $L$ Matrix zu erhalten, 
+wird dies in der $L$ Matrix festgehalten, indem dieselbe Operation mit invertiertem Vorzeichen auf dieser $L$ Matrix durchgeführt wird. 
+Die Zeilenvertauschung werden auf ähnliche Art in $P$ festgehalten. Um nun sicher eine gültige $L$ Matrix zu erhalten, 
 welche oberhalb der Diagonalen nur die 0 als Einträge hat und somit die gesuchte untere Dreiecksmatrix bildet, 
 folgt der Algorithmus strikt der Vorgehensweise des Gauß Algorithmus.\\
 
@@ -132,7 +136,7 @@ auf 0 gesetzt werden soll. Bei Spalte 1 ist es Zeile 1 bei Spalte 2 Zeile 2 und 
 nach unten bzw. von links nach rechts vorarbeitet, generiert man schrittweise die gewünschten $L$ und $U$ Matrizen. 
 Nun kann es aber vorkommen, dass in der Zeile welche von den anderen Zeilen subtrahiert werden soll an dem Index 
 der zu bearbeitenden Spalte eine 0 steht. Dies birgt das Problem, dass nun kein vielfaches dieser Zeile jemals 
-die anderen Einträge der Spalte durch Subtraktion auf 0 bringen kann, da $ 0 \times x = 0$. Um dieses Problem zu vermeiden 
+die anderen Einträge der Spalte durch Subtraktion auf 0 bringen kann, da $ 0 \cdot x = 0$. Um dieses Problem zu vermeiden 
 haben wir uns entschieden, unabhängig von der Eingabe, bevor wir mit der Nullung einer Zeile beginnen, immer die Zeile mit dem betragsmäßig größsten Eintrag
 am entsprechenden Index nach oben zu tauschen (siehe Grafik). Dadurch wird garantiert, dass der Algorithmus bei einer 
 regulären, quadratischen Matrix erfolgreich durchläuft. Im Abschnitt zur Genauigkeit wird noch genau darauf 
@@ -350,16 +354,16 @@ Es ist nun also sicher zu sagen, dass bei einer kleinen relativen Störung des l
 Gleichungssystems, auch die Kondition von $A$ klein sein muss, damit der relative Fehler 
 klein bleibt, aber auch dass ein gewisser relativer Fehler unvermeidbar ist.
 Um dies zu veranschaulichen haben wir auch zwei Test-Matrizen erstellt. Eine hat eine 
-sehr hohe Kondition und ist in der Datei big_cond.txt gespeichert. Führt man nun mit dem 
-Befehl „./main --input=big_cond.txt -v 4“ die LU-Zerlegung aus, und setzt dann die 
-Matrix $U$ in einen programmierbaren Taschenrechner ein, ergibt sich  für $b = (1 2 3 4)$ 
-das Ergebnis $(2756,2307 −58671,9527 275884,6061 −443340,9728 227272,7273)$. Eigentlich 
-sollte aber $x = (156,1544 −3459,1659 16979,0842 −28390,1576 15061,3944)$ heraus kommen. 
+sehr hohe Kondition und ist in der Datei big\_cond.txt gespeichert. Führt man nun mit dem 
+Befehl ``./main --input=big\_cond.txt -v 4'' die LU-Zerlegung aus, und setzt dann die 
+Matrix $U$ in einen programmierbaren Taschenrechner ein, ergibt sich  für $b = (1;\; 2;\; 3;\; 4)$ 
+das Ergebnis $ (2756,2307;\;  −58671,9527;\;  275884,6061;\;  −443340,9728;\; 227272,7273) $. Eigentlich 
+sollte aber $x = (156,1544;\; −3459,1659;\; 16979,0842;\; −28390,1576;\; 15061,3944)$ heraus kommen. 
 Hier ist gut zu sehen das die Rundungsfehler in der LU-Zerlegung, auch wenn sie relativ 
 klein sind, zu sehr großen Fehlern in $x$ geführt haben, da die Kondition der Matrix $A$ 
-so groß ist. Nimmt man nun aber als Beispiel die Matrix aus der Datei low_cond.txt so 
-erhält man als Lösung für $b = (1 2 3) (0,00012746 0,00043313 0,00008111)$, wobei die 
-Lösung auch $(0,00018580 0,00005654 −0,00002588)$ seien sollte. Hier weicht das Ergebnis 
+so groß ist. Nimmt man nun aber als Beispiel die Matrix aus der Datei low\_cond.txt so 
+erhält man als Lösung für $b = (1;\; 2;\; 3) (0,00012746;\; 0,00043313;\; 0,00008111)$, wobei die 
+Lösung auch $(0,00018580;\; 0,00005654;\; −0,00002588)$ seien sollte. Hier weicht das Ergebnis
 nun nur sehr gering ab, obwohl Störungen in derselben Größenordnung aufgetreten sind, 
 hier ist aber die Kondition der Matrix $A$ klein gewesen.
 
@@ -391,9 +395,9 @@ $C\cdot eps$ abgeschätzt werden sollte. $|\hat{L}|$ und $|\hat{U}|$ lässt sich
 beschränken, weshalb $C$ hier auch sehr groß werden kann.Folglich ist die LU-Zerlegung ohne Spaltenpivotwahl instabil.
 Zu sehen ist dies auch am Beispiel mit einer Matrix $A$ in der Datei stabil.txt die auch wieder eine kleine Kondition hat. 
 Heißt also, wenn die LU-Zerlegung ohne Pivotisierung stabil wäre, müsste hier das errechnete $x$ durch $U$ auch sehr nahe 
-an der korrekten Lösung liegen. Jedoch wenn man nun für $b = (1 2 3)$ diese Matrix mit der LU-Zerlegung ohne Pivotisierung (-v 4) 
-durchführt, erhält man für $x = (100000,00027239 0,00005655 -0,00000503)$ obwohl die korrekte Lösung 
-$(0,00018303 0,00005651 0,00042160)$ ist. \\
+an der korrekten Lösung liegen. Jedoch wenn man nun für $b = (1;\; 2;\; 3)$ diese Matrix mit der LU-Zerlegung ohne Pivotisierung (-v 4) 
+durchführt, erhält man für $x = (100000,00027239;\; 0,00005655;\; -0,00000503)$ obwohl die korrekte Lösung 
+$(0,00018303;\; 0,00005651;\; 0,00042160)$ ist. \\
 
 Es lässt sich jedoch durch die Spaltenpivotisierung der Faktor $|\hat{L}|$  begrenzen. 
 Dies liegt daran, dass nun für alle $i,j = 0,...,n\; |I_{i,j}| \leq 1$ gilt. 
@@ -409,7 +413,7 @@ werden, folglich ist der Algorithmus auch durch die Spaltenpivotwahl über die M
 aller invertierbaren Matrizen nicht stabil. Da sich der Quotient in der Realität mit zufälligen Matrizen deutlich 
 besser abschätzen lässt, gilt die LU-Zerlegung mit Pivotsuche als stabil.
 Beispielsweise wenn man nun obiges Beispiel stabil.txt mit der LU-Zerlegung mit Pivotisierung ausführt, 
-erhält man für dasselbe $b$ wie oben $x = (0,00007903 0,00003762 0,00127988)$ was sehr nahe an der korrekten Lösung liegt.
+erhält man für dasselbe $b$ wie oben $x = (0,00007903;\; 0,00003762;\; 0,00127988)$ was sehr nahe an der korrekten Lösung liegt.
 Dennoch kann es wie erwähnt auch mit Pivotisierung bei ungünstigen Eingaben zu großen Fehlern kommen, 
 die zum Beispiel mit anderen Algorithmen, wie der QR-Zerlegung, minimiert werden können aber auch mehr Rechenaufwand benötigen.
 
