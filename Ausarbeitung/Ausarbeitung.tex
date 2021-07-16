@@ -24,10 +24,10 @@ Dies findet z.B. Anwendung bei der Berechnung des Stromflusses in Schaltkreisen.
 wenn man die Wiederstände einzelner Leitungen gegeben hat, den Stromfluss an jedem Wiederstand berechnen. \cite{LUAnwendung}
 Dazu liefert die LU-Zerlegung für jedes eindeutig lösbare Gleichungssystem $A \cdot x = b$, also wenn $A$ regulär ist,
 zwei Dreiecksmatrizen $L$ und $U$ und eine Pivot-Matrix $P$,
-wobei $P \cdot L \cdot U = A$ ergibt. Hierbei haben die Matrizen besondere 
+wobei $P \cdot L \cdot U = A$ ergibt\cite[37]{M2009}. Hierbei haben die Matrizen besondere 
 Eigenschaften. $L$ hat in allen Einträgen oberhalb der Diagonalen die Werte 0 (siehe Matrix \ref{unteremx}). 
-$U$ hingegen hat in allen Einträgen unterhalb der Diagonalen die Werte 0 (siehe Matrix \ref{oberemx}). 
-Die Matrix $P$ ist eine Einheitsmatrix mit ggf. vertauschten Zeilen.\\\\
+$U$ hingegen hat in allen Einträgen unterhalb der Diagonalen die Werte 0 (siehe Matrix \ref{oberemx})\cite[5]{M1977}. 
+Die Matrix $P$ ist eine Einheitsmatrix mit ggf. vertauschten Zeilen\cite[59]{M2006}.\\\\
 %%%%%%% (1) %%%%%%%%%
   \begin{equation}
     Untere \, Dreiecksmatrix : \begin{bmatrix}
@@ -143,7 +143,7 @@ regulären, quadratischen Matrix erfolgreich durchläuft. Im Abschnitt zur Genau
 eingegeangen, warum wir immer die Zeile mit dem größten Eintrag nach oben tauschen und nicht nur irgendeine Zeile 
 mit Eintrag ungleich 0. Zusätzlich sei gesagt, dass nicht jede Matrixzerlegung den Schritt der Zeilenvertauschung 
 benötigt und, dass der Algorithmus auf diese Art oft unnötige Vertauschungen durchführt was Potential für 
-Optimierungen bieten könnte.\\
+Optimierungen bieten könnte\cite[10-13]{M1977}.\\
  
 Hier ein Beispiel für Zeilenvertauschungen:
   \begin{equation}
@@ -236,7 +236,7 @@ Genauigkeitsanalyse entschieden, da diese ein großes Problem bei der LU-Zerlegu
 darstellt, besonders wenn der Algorithmus ohne Pivotisierung arbeitet. In diesen Fall 
 handelt es sich um einen instabilen Algorithmus und es kann zu komplett 
 falschen Ergebnissen kommen. Das Problem der Genauigkeit ist auf die Kondition der 
-Matrix A und auf die endliche Rechengenauigkeit von Computern zurückzuführen. \\
+Matrix A und auf die endliche Rechengenauigkeit von Computern zurückzuführen\cite[62, 63]{M2017}. \\
 
 Im folgenden arbeiten wir mit Floats. Floats sind Gleitkommazahlen mit einer Größe 
 bzw. Genauigkeit von 32 Bit und können neben einem sehr großen Wertebereich auch 
@@ -250,12 +250,12 @@ kommt es allgemein immer zu Störungen. So also auch in unserem Programm. z.B. b
 Neben den Darstellungsproblemen treten beim Rechnen mit Zahlen in Gleitkommadarstellung aber auch 
 die Probleme der Absorption und Auslöschung auf, welche noch sehr viel größere Störungen bewirken können. 
 Problematisch wird dies, weil in der LU-Zerlegung $\frac{n^2}{2} - \frac{n}{2} $
-Additionen und genau so viele Multiplikationen auftreten\cite{LUGenauigkeit}. 
+Additionen und genau so viele Multiplikationen auftreten\cite[51]{M2017}. 
 
 \subsection{Kondition linearer Gleichungssysteme}
 Durch die Gleitkommadarstellung kommt es nun also bei der LU-Zerlegung immer und 
 unvermeidlich zu einer Vielzahl an Rundungsfehlern. Diese führen zu Störungen im Gleichungssystem $Ax=b$. 
-In wie fern diese Störungen der Eingabedateien auch die Lösung des Problems stören, nennt man Kondition. 
+In wie fern diese Störungen der Eingabedateien auch die Lösung des Problems stören, nennt man Kondition\cite[46]{M2017}. 
 Die Frage ist nun ob das Gleichungssystem gut oder schlecht konditioniert ist?
 
 Hierzu ein Beispiel:
@@ -326,7 +326,7 @@ wodurch dann $||Ax||$ wie folgt abgeschätzt werden kann
   \end{equation}
 
 Mit dieser Definition einer Norm lässt sich nun die Kondition eines linearen 
-Gleichungssystems genauer untersuchen. Sei $Ax=b$ unser lineares Gleichungssystem, 
+Gleichungssystems genauer untersuchen\cite[47, 48]{M2017}. Sei $Ax=b$ unser lineares Gleichungssystem, 
 welches leicht in b gestört wird, sodass nun $A \bar{x}=\bar{b}$ gilt.
 Der relative Fehler zur Größe $x$ entspricht also 
 $\frac{||x-\bar{x}|}{||x||}$ und die relative Störung 
@@ -341,7 +341,7 @@ Hier definiert man nun $||A|| \cdot ||A^{-1}||$ als Kondition von $A$. Anders ge
 der relative Fehler durch die Kondition von $A$ mal der relativen Störung 
 von oben beschränkt. Daraus lässt sich schließen, dass wenn die relative Störung klein 
 ist, der relative Fehler nicht auch zwingend klein ist, sondern nur dann, wenn die 
-Kondition von $A$ auch klein ist.
+Kondition von $A$ auch klein ist\cite[47]{M2017}.
 Jetzt haben wir aber nur $b$ gestört, wenn man nun auch die Matrix $A$ stört, dann ist 
 unser gestörtes System nun $\bar{A} \bar{x} = \bar{b}$. Für dieses gilt nun folgender Satz, 
 wenn $ea \cdot cond(A) < 1$ und $\frac{||A - \bar{A}||} {||A||} \leq ea $	und 	$\frac{||b - \bar{b}||} {||b||} \leq eb $, wobei 
@@ -352,7 +352,7 @@ $ea$ und $eb$ hier den Störungen in $A$ und $b$ entsprechen, ist:\\
   \end{equation}
 Es ist nun also sicher zu sagen, dass bei einer kleinen relativen Störung des linearen 
 Gleichungssystems, auch die Kondition von $A$ klein sein muss, damit der relative Fehler 
-klein bleibt, aber auch dass ein gewisser relativer Fehler unvermeidbar ist.
+klein bleibt, aber auch dass ein gewisser relativer Fehler unvermeidbar ist\cite[48, 49]{M2017}.
 Um dies zu veranschaulichen haben wir auch zwei Test-Matrizen erstellt. Eine hat eine 
 sehr hohe Kondition und ist in der Datei big\_cond.txt gespeichert. Führt man nun mit dem 
 Befehl ``./main --input=big\_cond.txt -v 4'' die LU-Zerlegung aus, und setzt dann die 
@@ -424,7 +424,7 @@ die zum Beispiel mit anderen Algorithmen, wie der QR-Zerlegung, minimiert werden
 
 \section{Performanzanalyse}
 \label{Performanzanalyse}
-Die Laufzeit berechnet sich über  $ \frac{1}{3}n^3 -\frac{1}{3} n $ und befindet sich somit in $O(n^3)$. \cite{LULaufzeit}
+Die Laufzeit berechnet sich über  $ \frac{1}{3}n^3 -\frac{1}{3} n $ und befindet sich somit in $O(n^3)$\cite[37, 38]{M2009}. 
 In unserer Performanzanalyse vergleichen wir folgende Implementierungen:\\
 \begin{itemize}
 \item Lineare C Implementierung ohne Compileroptimierung und mit Pivotisierung vs. Lineare C implementierung ohne Compileroptimierung und ohne Pivotisierung. 
